@@ -1,12 +1,423 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>My First Website</title>
-</head>
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learning Apps Catalogue</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #0a0a0f;
+      --surface-color: #16161d;
+      --text-color: #f4f4f5;
+      --primary-color: #6366f1;
+      --secondary-color: #a855f7;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    
+    .grid-bg {
+      background-image: 
+        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    
+    .card-hover {
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-hover:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+    }
+    
+    .thumbnail {
+      position: relative;
+      overflow: hidden;
+    }
+    .thumbnail::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 100%);
+      pointer-events: none;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    .float-anim { animation: float 6s ease-in-out infinite; }
+    
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: fadeInUp 0.6s ease-out forwards;
+      opacity: 0;
+    }
+    
+    .btn-glow {
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-glow::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+      border-radius: inherit;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .btn-glow:hover::before { opacity: 1; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto">
+  <div class="min-h-full w-full grid-bg relative"><!-- Ambient Glow Orbs -->
+   <div class="glow-orb" style="width: 400px; height: 400px; background: var(--primary-color); top: -100px; left: -100px;"></div>
+   <div class="glow-orb" style="width: 300px; height: 300px; background: var(--secondary-color); top: 50%; right: -50px;"></div>
+   <div class="glow-orb" style="width: 250px; height: 250px; background: #ec4899; bottom: 10%; left: 20%;"></div><!-- Header -->
+   <header class="relative z-10 px-6 py-8">
+    <nav class="max-w-7xl mx-auto flex items-center justify-between">
+     <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+       <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+       </svg>
+      </div><span id="nav-title" class="font-display font-bold text-xl">LearnHub</span>
+     </div>
+     <div class="hidden md:flex items-center gap-8"><a href="#apps" class="text-zinc-400 hover:text-white transition-colors">Apps</a> <a href="#categories" class="text-zinc-400 hover:text-white transition-colors">Categories</a> <a href="#about" class="text-zinc-400 hover:text-white transition-colors">About</a>
+     </div><button class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-sm font-medium transition-all border border-white/10"> Sign In </button>
+    </nav>
+   </header><!-- Hero Section -->
+   <section class="relative z-10 px-6 py-16 md:py-24">
+    <div class="max-w-7xl mx-auto text-center">
+     <div class="animate-in" style="animation-delay: 0.1s;"><span class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-6"> <span class="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span> 50+ Interactive Learning Apps </span>
+     </div>
+     <h1 id="hero-title" class="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-in" style="animation-delay: 0.2s;">Master Any Skill with<br><span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Interactive Learning</span></h1>
+     <p id="hero-tagline" class="text-xl text-zinc-400 max-w-2xl mx-auto mb-10 animate-in" style="animation-delay: 0.3s;">Discover our collection of beautifully crafted learning applications designed to make education engaging and effective.</p>
+     <div class="flex flex-col sm:flex-row gap-4 justify-center animate-in" style="animation-delay: 0.4s;"><a href="#apps" id="cta-button" class="btn-glow px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 font-semibold text-lg hover:shadow-lg hover:shadow-indigo-500/25 transition-all"> Explore All Apps </a> <button class="px-8 py-4 rounded-full border border-white/20 hover:bg-white/5 font-semibold text-lg transition-all flex items-center justify-center gap-2">
+       <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+        <path d="M8 5v14l11-7z" />
+       </svg> Watch Demo </button>
+     </div>
+    </div>
+   </section><!-- Stats -->
+   <section class="relative z-10 px-6 py-12">
+    <div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+     <div class="text-center animate-in" style="animation-delay: 0.5s;">
+      <div class="font-display text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+       50+
+      </div>
+      <div class="text-zinc-500 mt-1">
+       Learning Apps
+      </div>
+     </div>
+     <div class="text-center animate-in" style="animation-delay: 0.6s;">
+      <div class="font-display text-4xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+       10K+
+      </div>
+      <div class="text-zinc-500 mt-1">
+       Active Learners
+      </div>
+     </div>
+     <div class="text-center animate-in" style="animation-delay: 0.7s;">
+      <div class="font-display text-4xl font-bold bg-gradient-to-r from-pink-400 to-orange-400 bg-clip-text text-transparent">
+       15
+      </div>
+      <div class="text-zinc-500 mt-1">
+       Categories
+      </div>
+     </div>
+     <div class="text-center animate-in" style="animation-delay: 0.8s;">
+      <div class="font-display text-4xl font-bold bg-gradient-to-r from-orange-400 to-yellow-400 bg-clip-text text-transparent">
+       4.9
+      </div>
+      <div class="text-zinc-500 mt-1">
+       User Rating
+      </div>
+     </div>
+    </div>
+   </section><!-- Categories Filter -->
+   <section id="categories" class="relative z-10 px-6 py-8">
+    <div class="max-w-7xl mx-auto">
+     <div class="flex flex-wrap gap-3 justify-center" id="category-filters"><!-- Categories injected by JS -->
+     </div>
+    </div>
+   </section><!-- Apps Grid -->
+   <section id="apps" class="relative z-10 px-6 py-12">
+    <div class="max-w-7xl mx-auto">
+     <h2 class="font-display text-3xl md:text-4xl font-bold text-center mb-12">Featured Learning Apps</h2>
+     <div id="apps-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"><!-- Apps injected by JS -->
+     </div>
+    </div>
+   </section><!-- Footer -->
+   <footer class="relative z-10 px-6 py-12 border-t border-white/10 mt-12">
+    <div class="max-w-7xl mx-auto text-center text-zinc-500">
+     <p>© 2024 LearnHub. All rights reserved.</p>
+    </div>
+   </footer>
+  </div>
+  <script>
+    // App Data with auto-generated thumbnails
+    const learningApps = [
+      { id: 1, name: "Math Master", category: "Mathematics", desc: "Practice arithmetic, algebra & geometry", icon: "📐", colors: ["#6366f1", "#8b5cf6"], pattern: "circles" },
+      { id: 2, name: "Word Wizard", category: "Language", desc: "Build vocabulary & spelling skills", icon: "📝", colors: ["#ec4899", "#f43f5e"], pattern: "waves" },
+      { id: 3, name: "Science Lab", category: "Science", desc: "Interactive experiments & simulations", icon: "🔬", colors: ["#10b981", "#14b8a6"], pattern: "dots" },
+      { id: 4, name: "History Quest", category: "History", desc: "Journey through time & civilizations", icon: "🏛️", colors: ["#f59e0b", "#f97316"], pattern: "lines" },
+      { id: 5, name: "Code Academy", category: "Technology", desc: "Learn programming fundamentals", icon: "💻", colors: ["#06b6d4", "#0ea5e9"], pattern: "grid" },
+      { id: 6, name: "Music Theory", category: "Arts", desc: "Master notes, scales & composition", icon: "🎵", colors: ["#a855f7", "#d946ef"], pattern: "waves" },
+      { id: 7, name: "Geography Explorer", category: "Geography", desc: "Discover countries & landmarks", icon: "🌍", colors: ["#22c55e", "#84cc16"], pattern: "circles" },
+      { id: 8, name: "Chemistry Lab", category: "Science", desc: "Elements, reactions & formulas", icon: "⚗️", colors: ["#3b82f6", "#6366f1"], pattern: "dots" },
+      { id: 9, name: "Art Studio", category: "Arts", desc: "Drawing, painting & design basics", icon: "🎨", colors: ["#f43f5e", "#fb7185"], pattern: "lines" },
+      { id: 10, name: "Physics Playground", category: "Science", desc: "Forces, motion & energy concepts", icon: "⚡", colors: ["#eab308", "#facc15"], pattern: "grid" },
+      { id: 11, name: "Language Lab", category: "Language", desc: "Learn new languages interactively", icon: "🗣️", colors: ["#8b5cf6", "#a78bfa"], pattern: "waves" },
+      { id: 12, name: "Financial Literacy", category: "Life Skills", desc: "Money management & budgeting", icon: "💰", colors: ["#059669", "#10b981"], pattern: "circles" },
+    ];
 
-<body>
-  <h1>Hello World</h1>
-  <p>This is my first GitHub website.</p>
-</body>
+    const categories = ["All", ...new Set(learningApps.map(app => app.category))];
+    let activeCategory = "All";
 
+    // Generate SVG thumbnail pattern
+    function generateThumbnail(app) {
+      const [color1, color2] = app.colors;
+      let patternSvg = '';
+      
+      switch(app.pattern) {
+        case 'circles':
+          patternSvg = `
+            <circle cx="20" cy="20" r="15" fill="${color2}" opacity="0.3"/>
+            <circle cx="80" cy="30" r="25" fill="${color2}" opacity="0.2"/>
+            <circle cx="50" cy="70" r="20" fill="${color2}" opacity="0.25"/>
+            <circle cx="90" cy="80" r="12" fill="${color2}" opacity="0.3"/>
+          `;
+          break;
+        case 'waves':
+          patternSvg = `
+            <path d="M0 50 Q25 30 50 50 T100 50" stroke="${color2}" stroke-width="3" fill="none" opacity="0.3"/>
+            <path d="M0 65 Q25 45 50 65 T100 65" stroke="${color2}" stroke-width="2" fill="none" opacity="0.25"/>
+            <path d="M0 80 Q25 60 50 80 T100 80" stroke="${color2}" stroke-width="2" fill="none" opacity="0.2"/>
+          `;
+          break;
+        case 'dots':
+          patternSvg = `
+            <circle cx="15" cy="15" r="3" fill="${color2}" opacity="0.4"/>
+            <circle cx="35" cy="25" r="4" fill="${color2}" opacity="0.3"/>
+            <circle cx="55" cy="15" r="3" fill="${color2}" opacity="0.35"/>
+            <circle cx="75" cy="30" r="5" fill="${color2}" opacity="0.25"/>
+            <circle cx="25" cy="50" r="4" fill="${color2}" opacity="0.3"/>
+            <circle cx="65" cy="55" r="3" fill="${color2}" opacity="0.4"/>
+            <circle cx="85" cy="65" r="4" fill="${color2}" opacity="0.3"/>
+            <circle cx="45" cy="75" r="5" fill="${color2}" opacity="0.25"/>
+          `;
+          break;
+        case 'lines':
+          patternSvg = `
+            <line x1="0" y1="30" x2="100" y2="20" stroke="${color2}" stroke-width="2" opacity="0.3"/>
+            <line x1="0" y1="50" x2="100" y2="45" stroke="${color2}" stroke-width="3" opacity="0.25"/>
+            <line x1="0" y1="70" x2="100" y2="75" stroke="${color2}" stroke-width="2" opacity="0.2"/>
+          `;
+          break;
+        case 'grid':
+          patternSvg = `
+            <rect x="10" y="10" width="25" height="25" rx="4" fill="${color2}" opacity="0.2"/>
+            <rect x="45" y="15" width="20" height="20" rx="3" fill="${color2}" opacity="0.25"/>
+            <rect x="75" y="8" width="18" height="18" rx="3" fill="${color2}" opacity="0.2"/>
+            <rect x="20" y="50" width="22" height="22" rx="4" fill="${color2}" opacity="0.25"/>
+            <rect x="55" y="55" width="30" height="30" rx="5" fill="${color2}" opacity="0.15"/>
+          `;
+          break;
+      }
+
+      return `
+        <svg viewBox="0 0 100 100" class="w-full h-full" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="grad-${app.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
+              <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" fill="url(#grad-${app.id})"/>
+          ${patternSvg}
+        </svg>
+      `;
+    }
+
+    // Render category filters
+    function renderCategories() {
+      const container = document.getElementById('category-filters');
+      container.innerHTML = categories.map(cat => `
+        <button 
+          onclick="filterByCategory('${cat}')"
+          class="px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
+            activeCategory === cat 
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
+              : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10'
+          }"
+        >
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    // Filter apps by category
+    function filterByCategory(category) {
+      activeCategory = category;
+      renderCategories();
+      renderApps();
+    }
+
+    // Render apps grid
+    function renderApps() {
+      const container = document.getElementById('apps-grid');
+      const filteredApps = activeCategory === "All" 
+        ? learningApps 
+        : learningApps.filter(app => app.category === activeCategory);
+
+      container.innerHTML = filteredApps.map((app, index) => `
+        <article class="card-hover bg-zinc-900/50 rounded-2xl overflow-hidden border border-white/5 backdrop-blur-sm animate-in" style="animation-delay: ${index * 0.05}s;">
+          <div class="thumbnail aspect-[4/3] relative">
+            ${generateThumbnail(app)}
+            <div class="absolute inset-0 flex items-center justify-center">
+              <span class="text-5xl drop-shadow-lg float-anim" style="animation-delay: ${index * 0.2}s;">${app.icon}</span>
+            </div>
+            <div class="absolute top-3 right-3">
+              <span class="px-3 py-1 rounded-full bg-black/40 backdrop-blur-sm text-xs font-medium text-white/80">
+                ${app.category}
+              </span>
+            </div>
+          </div>
+          <div class="p-5">
+            <h3 class="font-display font-semibold text-lg mb-2">${app.name}</h3>
+            <p class="text-zinc-400 text-sm mb-4">${app.desc}</p>
+            <button class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-all flex items-center justify-center gap-2 group">
+              Launch App
+              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    // Config management
+    const defaultConfig = {
+      site_title: "LearnHub",
+      tagline: "Discover our collection of beautifully crafted learning applications designed to make education engaging and effective.",
+      cta_text: "Explore All Apps",
+      background_color: "#0a0a0f",
+      surface_color: "#16161d",
+      text_color: "#f4f4f5",
+      primary_color: "#6366f1",
+      secondary_color: "#a855f7",
+      font_family: "DM Sans",
+      font_size: 16
+    };
+
+    async function onConfigChange(config) {
+      document.getElementById('nav-title').textContent = config.site_title || defaultConfig.site_title;
+      document.getElementById('hero-tagline').textContent = config.tagline || defaultConfig.tagline;
+      document.getElementById('cta-button').textContent = config.cta_text || defaultConfig.cta_text;
+
+      // Apply colors
+      const root = document.documentElement;
+      root.style.setProperty('--bg-color', config.background_color || defaultConfig.background_color);
+      root.style.setProperty('--surface-color', config.surface_color || defaultConfig.surface_color);
+      root.style.setProperty('--text-color', config.text_color || defaultConfig.text_color);
+      root.style.setProperty('--primary-color', config.primary_color || defaultConfig.primary_color);
+      root.style.setProperty('--secondary-color', config.secondary_color || defaultConfig.secondary_color);
+
+      document.body.style.background = config.background_color || defaultConfig.background_color;
+      document.body.style.color = config.text_color || defaultConfig.text_color;
+
+      // Apply font
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.body.style.fontFamily = `${fontFamily}, sans-serif`;
+
+      // Apply font size
+      const baseSize = config.font_size || defaultConfig.font_size;
+      document.body.style.fontSize = `${baseSize}px`;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+          },
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
+          },
+          {
+            get: () => config.secondary_color || defaultConfig.secondary_color,
+            set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
+          }
+        ],
+        borderables: [],
+        fontEditable: {
+          get: () => config.font_family || defaultConfig.font_family,
+          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+        },
+        fontSizeable: {
+          get: () => config.font_size || defaultConfig.font_size,
+          set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+        }
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ["site_title", config.site_title || defaultConfig.site_title],
+        ["tagline", config.tagline || defaultConfig.tagline],
+        ["cta_text", config.cta_text || defaultConfig.cta_text]
+      ]);
+    }
+
+    // Initialize
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    renderCategories();
+    renderApps();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db729ec80906bb2',t:'MTc3MzM2NDI3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
