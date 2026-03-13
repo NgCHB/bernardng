@@ -5,377 +5,489 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Learning Apps Catalogue</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
   <script src="/_sdk/element_sdk.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg-color: #0a0a0f;
-      --surface-color: #16161d;
-      --text-color: #f4f4f5;
-      --primary-color: #6366f1;
-      --secondary-color: #a855f7;
-    }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg-color);
-      color: var(--text-color);
-    }
-    .font-display { font-family: 'Space Grotesk', sans-serif; }
+    * { font-family: 'Sora', sans-serif; }
     
-    .grid-bg {
-      background-image: 
-        linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
-    
-    .glow-orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.4;
-      pointer-events: none;
-    }
-    
-    .card-hover {
+    .app-card {
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .card-hover:hover {
+    
+    .app-card:hover {
       transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.25);
+    }
+    
+    .app-card:hover .thumbnail-overlay {
+      opacity: 1;
+    }
+    
+    .app-card:hover .app-icon {
+      transform: scale(1.1);
     }
     
     .thumbnail {
       position: relative;
       overflow: hidden;
     }
-    .thumbnail::before {
-      content: '';
+    
+    .thumbnail-pattern {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 100%);
-      pointer-events: none;
+      opacity: 0.15;
+    }
+    
+    .thumbnail-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .app-icon {
+      transition: transform 0.3s ease;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero-bg {
+      background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+    }
+    
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.5;
+      animation: float 8s ease-in-out infinite;
     }
     
     @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
     }
-    .float-anim { animation: float 6s ease-in-out infinite; }
     
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-in {
-      animation: fadeInUp 0.6s ease-out forwards;
-      opacity: 0;
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
-    .btn-glow {
-      position: relative;
-      overflow: hidden;
+    .animate-fade-in {
+      animation: fadeInUp 0.6s ease forwards;
     }
-    .btn-glow::before {
-      content: '';
-      position: absolute;
-      inset: -2px;
-      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
-      border-radius: inherit;
-      z-index: -1;
-      opacity: 0;
-      transition: opacity 0.3s;
+    
+    .category-pill {
+      transition: all 0.3s ease;
     }
-    .btn-glow:hover::before { opacity: 1; }
+    
+    .category-pill:hover {
+      transform: scale(1.05);
+    }
+    
+    .category-pill.active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
   </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
- <body class="h-full overflow-auto">
-  <div class="min-h-full w-full grid-bg relative"><!-- Ambient Glow Orbs -->
-   <div class="glow-orb" style="width: 400px; height: 400px; background: var(--primary-color); top: -100px; left: -100px;"></div>
-   <div class="glow-orb" style="width: 300px; height: 300px; background: var(--secondary-color); top: 50%; right: -50px;"></div>
-   <div class="glow-orb" style="width: 250px; height: 250px; background: #ec4899; bottom: 10%; left: 20%;"></div><!-- Header -->
-   <header class="relative z-10 px-6 py-8">
-    <nav class="max-w-7xl mx-auto flex items-center justify-between">
-     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-       <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-       </svg>
-      </div><span id="nav-title" class="font-display font-bold text-xl">BernardNg</span>
+ <body class="h-full bg-slate-950 text-white overflow-auto">
+  <div class="min-h-full"><!-- Hero Section -->
+   <header class="hero-bg relative overflow-hidden py-16 px-6"><!-- Floating Shapes -->
+    <div class="floating-shape w-64 h-64 bg-purple-500 -top-20 -left-20" style="animation-delay: 0s;"></div>
+    <div class="floating-shape w-48 h-48 bg-indigo-500 top-10 right-10" style="animation-delay: 2s;"></div>
+    <div class="floating-shape w-32 h-32 bg-pink-500 bottom-0 left-1/3" style="animation-delay: 4s;"></div>
+    <div class="max-w-6xl mx-auto relative z-10">
+     <nav class="flex items-center justify-between mb-12">
+      <div class="flex items-center gap-3">
+       <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-6 h-6"></i>
+       </div><span class="text-xl font-semibold">LearnHub</span>
+      </div>
+      <div class="flex items-center gap-6"><a href="#apps" class="text-slate-300 hover:text-white transition-colors">Browse Apps</a> <a href="#categories" class="text-slate-300 hover:text-white transition-colors">Categories</a> <button class="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"> <i data-lucide="search" class="w-5 h-5"></i> </button>
+      </div>
+     </nav>
+     <div class="text-center max-w-3xl mx-auto">
+      <h1 id="page-title" class="text-5xl md:text-6xl font-bold mb-6 leading-tight">Discover <span class="gradient-text">Learning Apps</span> That Inspire</h1>
+      <p id="page-subtitle" class="text-xl text-slate-300 mb-8">Explore our curated collection of interactive educational tools designed to make learning engaging and effective.</p>
+      <div class="flex items-center justify-center gap-4"><a href="#apps" class="px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl font-medium hover:shadow-lg hover:shadow-purple-500/30 transition-all"> Explore Apps </a> <button class="px-6 py-3 bg-white/10 rounded-xl font-medium hover:bg-white/20 transition-all flex items-center gap-2"> <i data-lucide="play-circle" class="w-5 h-5"></i> Watch Demo </button>
+      </div>
      </div>
-     <div class="hidden md:flex items-center gap-8"><a href="#apps" class="text-zinc-400 hover:text-white transition-colors">Apps</a> <a href="#categories" class="text-zinc-400 hover:text-white transition-colors">Categories</a> <a href="#about" class="text-zinc-400 hover:text-white transition-colors">About</a>
-     </div><button class="px-5 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-sm font-medium transition-all border border-white/10"> Sign In </button>
-    </nav>
-   </header><!-- Hero Section -->
-   <section class="relative z-10 px-6 py-16 md:py-24">
-    <div class="max-w-7xl mx-auto text-center">
-   
-     <h1 id="hero-title" class="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-in" style="animation-delay: 0.2s;">Interactive<br><span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Learning Apps</span></h1>
- </div>
-   </section><!-- Stats -->
-   <!-- Categories Filter -->
-   <section id="categories" class="relative z-10 px-6 py-8">
-    <div class="max-w-7xl mx-auto">
-     <div class="flex flex-wrap gap-3 justify-center" id="category-filters"><!-- Categories injected by JS -->
+    </div>
+   </header><!-- Categories Section -->
+   <section id="categories" class="py-12 px-6 bg-slate-900/50">
+    <div class="max-w-6xl mx-auto">
+     <div class="flex flex-wrap items-center justify-center gap-3" id="category-filters"><button class="category-pill active px-5 py-2 rounded-full bg-white/10 font-medium text-sm" data-category="all"> All Apps </button> <button class="category-pill px-5 py-2 rounded-full bg-white/10 font-medium text-sm" data-category="math"> <i data-lucide="calculator" class="w-4 h-4 inline mr-1"></i> Mathematics </button> <button class="category-pill px-5 py-2 rounded-full bg-white/10 font-medium text-sm" data-category="science"> <i data-lucide="flask-conical" class="w-4 h-4 inline mr-1"></i> Science </button> <button class="category-pill px-5 py-2 rounded-full bg-white/10 font-medium text-sm" data-category="language"> <i data-lucide="languages" class="w-4 h-4 inline mr-1"></i> Languages </button> <button class="category-pill px-5 py-2 rounded-full bg-white/10 font-medium text-sm" data-category="coding"> <i data-lucide="code-2" class="w-4 h-4 inline mr-1"></i> Coding </button> <button class="category-pill px-5 py-2 rounded-full bg-white/10 font-medium text-sm" data-category="music"> <i data-lucide="music" class="w-4 h-4 inline mr-1"></i> Music </button>
      </div>
     </div>
    </section><!-- Apps Grid -->
-   <section id="apps" class="relative z-10 px-6 py-12">
-    <div class="max-w-7xl mx-auto">
-     <h2 class="font-display text-3xl md:text-4xl font-bold text-center mb-12">Learning Apps</h2>
-     <div id="apps-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"><!-- Apps injected by JS -->
+   <main id="apps" class="py-16 px-6">
+    <div class="max-w-6xl mx-auto">
+     <div id="apps-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"><!-- Apps will be dynamically generated -->
      </div>
     </div>
-   </section><!-- Footer -->
-   <footer class="relative z-10 px-6 py-12 border-t border-white/10 mt-12">
-    <div class="max-w-7xl mx-auto text-center text-zinc-500">
-     <p>© 2024 LearnHub. All rights reserved.</p>
+   </main><!-- Footer -->
+   <footer class="py-12 px-6 bg-slate-900/80 border-t border-white/5">
+    <div class="max-w-6xl mx-auto text-center">
+     <div class="flex items-center justify-center gap-3 mb-4">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center"><i data-lucide="graduation-cap" class="w-5 h-5"></i>
+      </div><span class="text-lg font-semibold">LearnHub</span>
+     </div>
+     <p class="text-slate-400 text-sm">© 2024 LearnHub. Empowering learners worldwide.</p>
     </div>
    </footer>
   </div>
   <script>
-    // App Data with auto-generated thumbnails
+    // Learning Apps Data
     const learningApps = [
-      { id: 1, name: "Metal Displacement", category: "Reactivity Series", desc: "Metal Reactivity", icon: "📐", colors: ["#6366f1", "#8b5cf6"], pattern: "circles" },
-      { id: 2, name: "Word Wizard", category: "Language", desc: "Build vocabulary & spelling skills", icon: "📝", colors: ["#ec4899", "#f43f5e"], pattern: "waves" },
-      { id: 3, name: "Science Lab", category: "Science", desc: "Interactive experiments & simulations", icon: "🔬", colors: ["#10b981", "#14b8a6"], pattern: "dots" },
-      { id: 4, name: "History Quest", category: "History", desc: "Journey through time & civilizations", icon: "🏛️", colors: ["#f59e0b", "#f97316"], pattern: "lines" },
-      { id: 5, name: "Code Academy", category: "Technology", desc: "Learn programming fundamentals", icon: "💻", colors: ["#06b6d4", "#0ea5e9"], pattern: "grid" },
-      { id: 6, name: "Music Theory", category: "Arts", desc: "Master notes, scales & composition", icon: "🎵", colors: ["#a855f7", "#d946ef"], pattern: "waves" },
-      { id: 7, name: "Geography Explorer", category: "Geography", desc: "Discover countries & landmarks", icon: "🌍", colors: ["#22c55e", "#84cc16"], pattern: "circles" },
-      { id: 8, name: "Chemistry Lab", category: "Science", desc: "Elements, reactions & formulas", icon: "⚗️", colors: ["#3b82f6", "#6366f1"], pattern: "dots" },
-      { id: 9, name: "Art Studio", category: "Arts", desc: "Drawing, painting & design basics", icon: "🎨", colors: ["#f43f5e", "#fb7185"], pattern: "lines" },
-      { id: 10, name: "Physics Playground", category: "Science", desc: "Forces, motion & energy concepts", icon: "⚡", colors: ["#eab308", "#facc15"], pattern: "grid" },
-      { id: 11, name: "Language Lab", category: "Language", desc: "Learn new languages interactively", icon: "🗣️", colors: ["#8b5cf6", "#a78bfa"], pattern: "waves" },
-      { id: 12, name: "Financial Literacy", category: "Life Skills", desc: "Money management & budgeting", icon: "💰", colors: ["#059669", "#10b981"], pattern: "circles" },
+      {
+        id: 1,
+        name: "Math Quest",
+        description: "Interactive math challenges and puzzles",
+        category: "math",
+        icon: "calculator",
+        colors: ["#6366f1", "#8b5cf6"],
+        pattern: "circles",
+        link: "/apps/math-quest"
+      },
+      {
+        id: 2,
+        name: "Science Lab",
+        description: "Virtual experiments and simulations",
+        category: "science",
+        icon: "flask-conical",
+        colors: ["#10b981", "#14b8a6"],
+        pattern: "molecules",
+        link: "/apps/science-lab"
+      },
+      {
+        id: 3,
+        name: "Word Wizard",
+        description: "Vocabulary building and spelling games",
+        category: "language",
+        icon: "book-open",
+        colors: ["#f59e0b", "#f97316"],
+        pattern: "letters",
+        link: "/apps/word-wizard"
+      },
+      {
+        id: 4,
+        name: "Code Explorer",
+        description: "Learn programming through play",
+        category: "coding",
+        icon: "code-2",
+        colors: ["#3b82f6", "#0ea5e9"],
+        pattern: "brackets",
+        link: "/apps/code-explorer"
+      },
+      {
+        id: 5,
+        name: "Rhythm Master",
+        description: "Music theory and beat creation",
+        category: "music",
+        icon: "music",
+        colors: ["#ec4899", "#f43f5e"],
+        pattern: "notes",
+        link: "/apps/rhythm-master"
+      },
+      {
+        id: 6,
+        name: "Geometry World",
+        description: "Explore shapes and spatial reasoning",
+        category: "math",
+        icon: "hexagon",
+        colors: ["#8b5cf6", "#a855f7"],
+        pattern: "shapes",
+        link: "/apps/geometry-world"
+      },
+      {
+        id: 7,
+        name: "Chemistry Lab",
+        description: "Molecular structures and reactions",
+        category: "science",
+        icon: "atom",
+        colors: ["#06b6d4", "#22d3ee"],
+        pattern: "atoms",
+        link: "/apps/chemistry-lab"
+      },
+      {
+        id: 8,
+        name: "Language Bridge",
+        description: "Learn new languages interactively",
+        category: "language",
+        icon: "languages",
+        colors: ["#84cc16", "#a3e635"],
+        pattern: "flags",
+        link: "/apps/language-bridge"
+      },
+      {
+        id: 9,
+        name: "Algorithm Arena",
+        description: "Master coding algorithms step by step",
+        category: "coding",
+        icon: "terminal",
+        colors: ["#475569", "#64748b"],
+        pattern: "binary",
+        link: "/apps/algorithm-arena"
+      },
+      {
+        id: 10,
+        name: "Piano Keys",
+        description: "Learn piano with visual guides",
+        category: "music",
+        icon: "piano",
+        colors: ["#7c3aed", "#9333ea"],
+        pattern: "keys",
+        link: "/apps/piano-keys"
+      },
+      {
+        id: 11,
+        name: "Fraction Fun",
+        description: "Visual fraction learning tools",
+        category: "math",
+        icon: "divide",
+        colors: ["#0891b2", "#06b6d4"],
+        pattern: "fractions",
+        link: "/apps/fraction-fun"
+      },
+      {
+        id: 12,
+        name: "Space Explorer",
+        description: "Journey through the solar system",
+        category: "science",
+        icon: "rocket",
+        colors: ["#1e3a5f", "#3b5998"],
+        pattern: "stars",
+        link: "/apps/space-explorer"
+      }
     ];
 
-    const categories = ["All", ...new Set(learningApps.map(app => app.category))];
-    let activeCategory = "All";
+    // Generate SVG pattern for thumbnail
+    function generatePattern(pattern, colors) {
+      const patterns = {
+        circles: `
+          <circle cx="20" cy="20" r="15" fill="${colors[1]}" opacity="0.3"/>
+          <circle cx="60" cy="60" r="20" fill="${colors[0]}" opacity="0.4"/>
+          <circle cx="100" cy="30" r="12" fill="${colors[1]}" opacity="0.3"/>
+          <circle cx="40" cy="90" r="18" fill="${colors[0]}" opacity="0.25"/>
+        `,
+        molecules: `
+          <circle cx="30" cy="30" r="8" fill="${colors[1]}" opacity="0.4"/>
+          <circle cx="70" cy="50" r="10" fill="${colors[0]}" opacity="0.5"/>
+          <circle cx="50" cy="80" r="6" fill="${colors[1]}" opacity="0.3"/>
+          <line x1="30" y1="30" x2="70" y2="50" stroke="${colors[0]}" stroke-width="2" opacity="0.3"/>
+          <line x1="70" y1="50" x2="50" y2="80" stroke="${colors[1]}" stroke-width="2" opacity="0.3"/>
+        `,
+        letters: `
+          <text x="20" y="40" font-size="30" fill="${colors[1]}" opacity="0.3" font-weight="bold">A</text>
+          <text x="60" y="70" font-size="24" fill="${colors[0]}" opacity="0.4" font-weight="bold">B</text>
+          <text x="90" y="45" font-size="20" fill="${colors[1]}" opacity="0.25" font-weight="bold">C</text>
+        `,
+        brackets: `
+          <text x="15" y="50" font-size="40" fill="${colors[1]}" opacity="0.3" font-family="monospace">{</text>
+          <text x="55" y="60" font-size="30" fill="${colors[0]}" opacity="0.4" font-family="monospace">/</text>
+          <text x="85" y="50" font-size="40" fill="${colors[1]}" opacity="0.3" font-family="monospace">}</text>
+        `,
+        notes: `
+          <text x="20" y="45" font-size="35" fill="${colors[1]}" opacity="0.4">♪</text>
+          <text x="55" y="65" font-size="28" fill="${colors[0]}" opacity="0.5">♫</text>
+          <text x="85" y="40" font-size="22" fill="${colors[1]}" opacity="0.3">♬</text>
+        `,
+        shapes: `
+          <polygon points="30,10 50,40 10,40" fill="${colors[1]}" opacity="0.3"/>
+          <rect x="60" y="50" width="30" height="30" fill="${colors[0]}" opacity="0.4"/>
+          <circle cx="90" cy="25" r="15" fill="${colors[1]}" opacity="0.25"/>
+        `,
+        atoms: `
+          <circle cx="60" cy="50" r="8" fill="${colors[0]}" opacity="0.5"/>
+          <ellipse cx="60" cy="50" rx="35" ry="15" fill="none" stroke="${colors[1]}" stroke-width="2" opacity="0.3" transform="rotate(0 60 50)"/>
+          <ellipse cx="60" cy="50" rx="35" ry="15" fill="none" stroke="${colors[0]}" stroke-width="2" opacity="0.3" transform="rotate(60 60 50)"/>
+          <ellipse cx="60" cy="50" rx="35" ry="15" fill="none" stroke="${colors[1]}" stroke-width="2" opacity="0.3" transform="rotate(120 60 50)"/>
+        `,
+        flags: `
+          <rect x="20" y="20" width="25" height="15" fill="${colors[1]}" opacity="0.4" rx="2"/>
+          <rect x="55" y="45" width="30" height="18" fill="${colors[0]}" opacity="0.5" rx="2"/>
+          <rect x="80" y="70" width="22" height="13" fill="${colors[1]}" opacity="0.3" rx="2"/>
+        `,
+        binary: `
+          <text x="10" y="30" font-size="14" fill="${colors[1]}" opacity="0.3" font-family="monospace">101</text>
+          <text x="50" y="55" font-size="16" fill="${colors[0]}" opacity="0.4" font-family="monospace">010</text>
+          <text x="25" y="80" font-size="12" fill="${colors[1]}" opacity="0.25" font-family="monospace">110</text>
+        `,
+        keys: `
+          <rect x="20" y="30" width="12" height="50" fill="${colors[1]}" opacity="0.3" rx="2"/>
+          <rect x="40" y="30" width="12" height="50" fill="${colors[0]}" opacity="0.4" rx="2"/>
+          <rect x="60" y="30" width="12" height="50" fill="${colors[1]}" opacity="0.35" rx="2"/>
+          <rect x="80" y="30" width="12" height="50" fill="${colors[0]}" opacity="0.3" rx="2"/>
+        `,
+        fractions: `
+          <text x="30" y="45" font-size="20" fill="${colors[1]}" opacity="0.4">½</text>
+          <text x="60" y="65" font-size="24" fill="${colors[0]}" opacity="0.5">¼</text>
+          <text x="85" y="40" font-size="18" fill="${colors[1]}" opacity="0.3">¾</text>
+        `,
+        stars: `
+          <text x="20" y="35" font-size="20" fill="${colors[1]}" opacity="0.4">★</text>
+          <text x="55" y="60" font-size="28" fill="${colors[0]}" opacity="0.5">✦</text>
+          <text x="85" y="40" font-size="16" fill="${colors[1]}" opacity="0.3">★</text>
+          <circle cx="40" cy="75" r="3" fill="${colors[0]}" opacity="0.4"/>
+          <circle cx="95" cy="70" r="2" fill="${colors[1]}" opacity="0.3"/>
+        `
+      };
+      return patterns[pattern] || patterns.circles;
+    }
 
-    // Generate SVG thumbnail pattern
-    function generateThumbnail(app) {
-      const [color1, color2] = app.colors;
-      let patternSvg = '';
+    // Create app card
+    function createAppCard(app, index) {
+      const card = document.createElement('a');
+      card.href = app.link;
+      card.target = "_blank";
+      card.rel = "noopener noreferrer";
+      card.className = 'app-card block rounded-2xl overflow-hidden bg-slate-800/50 border border-white/5 cursor-pointer animate-fade-in';
+      card.style.animationDelay = `${index * 0.1}s`;
+      card.style.opacity = '0';
+      card.dataset.category = app.category;
       
-      switch(app.pattern) {
-        case 'circles':
-          patternSvg = `
-            <circle cx="20" cy="20" r="15" fill="${color2}" opacity="0.3"/>
-            <circle cx="80" cy="30" r="25" fill="${color2}" opacity="0.2"/>
-            <circle cx="50" cy="70" r="20" fill="${color2}" opacity="0.25"/>
-            <circle cx="90" cy="80" r="12" fill="${color2}" opacity="0.3"/>
-          `;
-          break;
-        case 'waves':
-          patternSvg = `
-            <path d="M0 50 Q25 30 50 50 T100 50" stroke="${color2}" stroke-width="3" fill="none" opacity="0.3"/>
-            <path d="M0 65 Q25 45 50 65 T100 65" stroke="${color2}" stroke-width="2" fill="none" opacity="0.25"/>
-            <path d="M0 80 Q25 60 50 80 T100 80" stroke="${color2}" stroke-width="2" fill="none" opacity="0.2"/>
-          `;
-          break;
-        case 'dots':
-          patternSvg = `
-            <circle cx="15" cy="15" r="3" fill="${color2}" opacity="0.4"/>
-            <circle cx="35" cy="25" r="4" fill="${color2}" opacity="0.3"/>
-            <circle cx="55" cy="15" r="3" fill="${color2}" opacity="0.35"/>
-            <circle cx="75" cy="30" r="5" fill="${color2}" opacity="0.25"/>
-            <circle cx="25" cy="50" r="4" fill="${color2}" opacity="0.3"/>
-            <circle cx="65" cy="55" r="3" fill="${color2}" opacity="0.4"/>
-            <circle cx="85" cy="65" r="4" fill="${color2}" opacity="0.3"/>
-            <circle cx="45" cy="75" r="5" fill="${color2}" opacity="0.25"/>
-          `;
-          break;
-        case 'lines':
-          patternSvg = `
-            <line x1="0" y1="30" x2="100" y2="20" stroke="${color2}" stroke-width="2" opacity="0.3"/>
-            <line x1="0" y1="50" x2="100" y2="45" stroke="${color2}" stroke-width="3" opacity="0.25"/>
-            <line x1="0" y1="70" x2="100" y2="75" stroke="${color2}" stroke-width="2" opacity="0.2"/>
-          `;
-          break;
-        case 'grid':
-          patternSvg = `
-            <rect x="10" y="10" width="25" height="25" rx="4" fill="${color2}" opacity="0.2"/>
-            <rect x="45" y="15" width="20" height="20" rx="3" fill="${color2}" opacity="0.25"/>
-            <rect x="75" y="8" width="18" height="18" rx="3" fill="${color2}" opacity="0.2"/>
-            <rect x="20" y="50" width="22" height="22" rx="4" fill="${color2}" opacity="0.25"/>
-            <rect x="55" y="55" width="30" height="30" rx="5" fill="${color2}" opacity="0.15"/>
-          `;
-          break;
-      }
-
-      return `
-        <svg viewBox="0 0 100 100" class="w-full h-full" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="grad-${app.id}" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:${color1};stop-opacity:1" />
-              <stop offset="100%" style="stop-color:${color2};stop-opacity:1" />
-            </linearGradient>
-          </defs>
-          <rect width="100" height="100" fill="url(#grad-${app.id})"/>
-          ${patternSvg}
-        </svg>
+      card.innerHTML = `
+        <div class="thumbnail h-40 relative" style="background: linear-gradient(135deg, ${app.colors[0]} 0%, ${app.colors[1]} 100%);">
+          <svg class="thumbnail-pattern w-full h-full" viewBox="0 0 120 100" preserveAspectRatio="xMidYMid slice">
+            ${generatePattern(app.pattern, app.colors)}
+          </svg>
+          <div class="thumbnail-overlay"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <div class="app-icon w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <i data-lucide="${app.icon}" class="w-8 h-8 text-white"></i>
+            </div>
+          </div>
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-lg mb-1">${app.name}</h3>
+          <p class="text-slate-400 text-sm mb-3">${app.description}</p>
+          <div class="flex items-center justify-between">
+            <span class="text-xs px-3 py-1 rounded-full bg-white/10 capitalize">${app.category}</span>
+            <span class="text-indigo-400 text-sm flex items-center gap-1">
+              Open <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </span>
+          </div>
+        </div>
       `;
+      
+      return card;
     }
 
-    // Render category filters
-    function renderCategories() {
-      const container = document.getElementById('category-filters');
-      container.innerHTML = categories.map(cat => `
-        <button 
-          onclick="filterByCategory('${cat}')"
-          class="px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
-            activeCategory === cat 
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' 
-              : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white border border-white/10'
-          }"
-        >
-          ${cat}
-        </button>
-      `).join('');
-    }
-
-    // Filter apps by category
-    function filterByCategory(category) {
-      activeCategory = category;
-      renderCategories();
-      renderApps();
-    }
-
-    // Render apps grid
-    function renderApps() {
-      const container = document.getElementById('apps-grid');
-      const filteredApps = activeCategory === "All" 
+    // Render apps
+    function renderApps(category = 'all') {
+      const grid = document.getElementById('apps-grid');
+      grid.innerHTML = '';
+      
+      const filteredApps = category === 'all' 
         ? learningApps 
-        : learningApps.filter(app => app.category === activeCategory);
-
-      container.innerHTML = filteredApps.map((app, index) => `
-        <article class="card-hover bg-zinc-900/50 rounded-2xl overflow-hidden border border-white/5 backdrop-blur-sm animate-in" style="animation-delay: ${index * 0.05}s;">
-          <div class="thumbnail aspect-[4/3] relative">
-            ${generateThumbnail(app)}
-            <div class="absolute inset-0 flex items-center justify-center">
-              <span class="text-5xl drop-shadow-lg float-anim" style="animation-delay: ${index * 0.2}s;">${app.icon}</span>
-            </div>
-            <div class="absolute top-3 right-3">
-              <span class="px-3 py-1 rounded-full bg-black/40 backdrop-blur-sm text-xs font-medium text-white/80">
-                ${app.category}
-              </span>
-            </div>
-          </div>
-          <div class="p-5">
-            <h3 class="font-display font-semibold text-lg mb-2">${app.name}</h3>
-            <p class="text-zinc-400 text-sm mb-4">${app.desc}</p>
-            <button class="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-medium transition-all flex items-center justify-center gap-2 group">
-              Launch App
-              <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-              </svg>
-            </button>
-          </div>
-        </article>
-      `).join('');
+        : learningApps.filter(app => app.category === category);
+      
+      filteredApps.forEach((app, index) => {
+        grid.appendChild(createAppCard(app, index));
+      });
+      
+      lucide.createIcons();
     }
 
-    // Config management
+    // Category filter handling
+    document.getElementById('category-filters').addEventListener('click', (e) => {
+      const pill = e.target.closest('.category-pill');
+      if (!pill) return;
+      
+      document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      
+      renderApps(pill.dataset.category);
+    });
+
+    // Default config
     const defaultConfig = {
-      site_title: "LearnHub",
-      tagline: "Discover our collection of beautifully crafted learning applications designed to make education engaging and effective.",
-      cta_text: "Explore All Apps",
-      background_color: "#0a0a0f",
-      surface_color: "#16161d",
-      text_color: "#f4f4f5",
+      page_title: "Discover Learning Apps That Inspire",
+      page_subtitle: "Explore our curated collection of interactive educational tools designed to make learning engaging and effective.",
+      background_color: "#0f172a",
+      card_color: "#1e293b",
+      text_color: "#f8fafc",
       primary_color: "#6366f1",
-      secondary_color: "#a855f7",
-      font_family: "DM Sans",
-      font_size: 16
+      accent_color: "#a855f7"
     };
 
-    async function onConfigChange(config) {
-      document.getElementById('nav-title').textContent = config.site_title || defaultConfig.site_title;
-      document.getElementById('hero-tagline').textContent = config.tagline || defaultConfig.tagline;
-      document.getElementById('cta-button').textContent = config.cta_text || defaultConfig.cta_text;
-
-      // Apply colors
-      const root = document.documentElement;
-      root.style.setProperty('--bg-color', config.background_color || defaultConfig.background_color);
-      root.style.setProperty('--surface-color', config.surface_color || defaultConfig.surface_color);
-      root.style.setProperty('--text-color', config.text_color || defaultConfig.text_color);
-      root.style.setProperty('--primary-color', config.primary_color || defaultConfig.primary_color);
-      root.style.setProperty('--secondary-color', config.secondary_color || defaultConfig.secondary_color);
-
-      document.body.style.background = config.background_color || defaultConfig.background_color;
-      document.body.style.color = config.text_color || defaultConfig.text_color;
-
-      // Apply font
-      const fontFamily = config.font_family || defaultConfig.font_family;
-      document.body.style.fontFamily = `${fontFamily}, sans-serif`;
-
-      // Apply font size
-      const baseSize = config.font_size || defaultConfig.font_size;
-      document.body.style.fontSize = `${baseSize}px`;
-    }
-
-    function mapToCapabilities(config) {
-      return {
-        recolorables: [
-          {
-            get: () => config.background_color || defaultConfig.background_color,
-            set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
-          },
-          {
-            get: () => config.surface_color || defaultConfig.surface_color,
-            set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }
-          },
-          {
-            get: () => config.text_color || defaultConfig.text_color,
-            set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
-          },
-          {
-            get: () => config.primary_color || defaultConfig.primary_color,
-            set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); }
-          },
-          {
-            get: () => config.secondary_color || defaultConfig.secondary_color,
-            set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); }
-          }
-        ],
-        borderables: [],
-        fontEditable: {
-          get: () => config.font_family || defaultConfig.font_family,
-          set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
-        },
-        fontSizeable: {
-          get: () => config.font_size || defaultConfig.font_size,
-          set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
-        }
-      };
-    }
-
-    function mapToEditPanelValues(config) {
-      return new Map([
-        ["site_title", config.site_title || defaultConfig.site_title],
-        ["tagline", config.tagline || defaultConfig.tagline],
-        ["cta_text", config.cta_text || defaultConfig.cta_text]
-      ]);
-    }
-
-    // Initialize
+    // Initialize Element SDK
     if (window.elementSdk) {
       window.elementSdk.init({
         defaultConfig,
-        onConfigChange,
-        mapToCapabilities,
-        mapToEditPanelValues
+        onConfigChange: async (config) => {
+          const title = config.page_title || defaultConfig.page_title;
+          const subtitle = config.page_subtitle || defaultConfig.page_subtitle;
+          const bgColor = config.background_color || defaultConfig.background_color;
+          const cardColor = config.card_color || defaultConfig.card_color;
+          const textColor = config.text_color || defaultConfig.text_color;
+          const primaryColor = config.primary_color || defaultConfig.primary_color;
+          const accentColor = config.accent_color || defaultConfig.accent_color;
+          
+          document.getElementById('page-title').innerHTML = title.includes('Learning Apps') 
+            ? title.replace('Learning Apps', '<span class="gradient-text">Learning Apps</span>')
+            : title;
+          document.getElementById('page-subtitle').textContent = subtitle;
+          
+          document.body.style.backgroundColor = bgColor;
+          document.querySelectorAll('.app-card').forEach(card => {
+            card.style.backgroundColor = cardColor;
+          });
+          document.body.style.color = textColor;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => { config.background_color = value; window.elementSdk.setConfig({ background_color: value }); }
+            },
+            {
+              get: () => config.card_color || defaultConfig.card_color,
+              set: (value) => { config.card_color = value; window.elementSdk.setConfig({ card_color: value }); }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => { config.primary_color = value; window.elementSdk.setConfig({ primary_color: value }); }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => { config.accent_color = value; window.elementSdk.setConfig({ accent_color: value }); }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["page_title", config.page_title || defaultConfig.page_title],
+          ["page_subtitle", config.page_subtitle || defaultConfig.page_subtitle]
+        ])
       });
     }
 
-    renderCategories();
+    // Initial render
     renderApps();
+    lucide.createIcons();
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db729ec80906bb2',t:'MTc3MzM2NDI3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9db7982dd07d37b5',t:'MTc3MzM2ODc5My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
