@@ -150,248 +150,113 @@
     // Oxidation and Reduction Questions Bank - Singapore O Level Chemistry
     const questionsBank = [
       // Definitions - Oxygen Transfer
-      {
-        question: "In the reaction: C + 2H₂SO₄ → CO₂ + 2SO₂ + 2H₂O, carbon is:",
-        options: ["Oxidised", "Reduced", "Neither oxidised nor reduced", "Both oxidised and reduced"],
-        correct: 0,
-        explanation: "Carbon gains oxygen atoms (oxidation), going from C to CO₂."
-      },
-      {
-        question: "In the reaction: 2CuO + C → 2Cu + CO₂, what is reduced?",
-        options: ["Carbon", "Copper oxide", "Copper", "Carbon dioxide"],
-        correct: 2,
-        explanation: "Copper oxide loses oxygen (reduction), and copper is formed."
-      },
-      {
-        question: "According to the electron transfer definition, which element is oxidised in the reaction: Mg + Cl₂ → MgCl₂?",
-        options: ["Magnesium", "Chlorine", "Both equally", "Neither"],
-        correct: 0,
-        explanation: "Mg loses 2 electrons to form Mg²⁺, so magnesium is oxidised."
-      },
-      {
-        question: "Which element is reduced in the reaction: Fe + CuSO₄ → FeSO₄ + Cu?",
-        options: ["Iron", "Copper", "Sulfur", "Oxygen"],
-        correct: 1,
-        explanation: "Cu²⁺ gains 2 electrons to form Cu, so copper is reduced."
-      },
-      {
-        question: "In the reaction: 2Fe + 3Cl₂ → 2FeCl₃, iron is:",
-        options: ["Oxidised, losing 3 electrons per Fe", "Reduced, gaining 3 electrons per Fe", "Oxidised, losing 2 electrons per Fe", "Neither oxidised nor reduced"],
-        correct: 0,
-        explanation: "Iron is oxidised from 0 to +3 oxidation state, losing 3 electrons per Fe atom."
-      },
-      {
-        question: "In the reaction: Cu + 2AgNO₃ → Cu(NO₃)₂ + 2Ag, which species is the reducing agent?",
-        options: ["Cu", "Ag⁺", "NO₃⁻", "Cu²⁺"],
-        correct: 0,
-        explanation: "Copper loses electrons and is oxidised, making it the reducing agent."
-      },
-      {
-        question: "In the reaction: Zn + Cu²⁺ → Zn²⁺ + Cu, which is the oxidising agent?",
-        options: ["Zn", "Cu²⁺", "Zn²⁺", "Cu"],
-        correct: 1,
-        explanation: "Cu²⁺ is reduced to Cu, making it the oxidising agent."
-      },
-      // Oxidation State
-      {
-        question: "What is the oxidation state of sulfur in SO₃?",
-        options: ["+2", "+4", "+6", "+8"],
-        correct: 2,
-        explanation: "In SO₃, oxygen has oxidation state -2. Total: S + 3(-2) = 0, so S = +6."
-      },
-      {
-        question: "What is the oxidation state of nitrogen in NO₃⁻?",
-        options: ["+3", "+5", "+4", "-5"],
-        correct: 1,
-        explanation: "In NO₃⁻, each oxygen is -2, so N + 3(-2) = -1, therefore N = +5."
-      },
-      {
-        question: "What is the oxidation state of chromium in K₂Cr₂O₇?",
-        options: ["+2", "+3", "+6", "-2"],
-        correct: 2,
-        explanation: "In K₂Cr₂O₇, K is +1 and O is -2. So 2(+1) + 2(Cr) + 7(-2) = 0, therefore Cr = +6."
-      },
-      {
-        question: "What is the oxidation state of manganese in MnO₄⁻?",
-        options: ["+2", "+4", "+7", "+5"],
-        correct: 2,
-        explanation: "In MnO₄⁻, oxygen is -2. So Mn + 4(-2) = -1, therefore Mn = +7."
-      },
-      {
-        question: "In the reaction: N₂ + 3H₂ ⇌ 2NH₃, what is the change in oxidation state for nitrogen?",
-        options: ["0 to -3", "0 to +3", "-3 to 0", "+3 to 0"],
-        correct: 0,
-        explanation: "Nitrogen changes from 0 in N₂ to -3 in NH₃, a reduction (gain of electrons)."
-      },
-      {
-        question: "What is the oxidation state of oxygen in H₂O₂?",
-        options: ["-2", "-1", "+1", "+2"],
-        correct: 1,
-        explanation: "In hydrogen peroxide, oxygen has the unusual oxidation state of -1 (not the usual -2)."
-      },
-      {
-        question: "In which compound does sulfur have an oxidation state of +4?",
-        options: ["H₂S", "SO₂", "H₂SO₄", "S₈"],
-        correct: 1,
-        explanation: "In SO₂, S + 2(-2) = 0, so S = +4."
-      },
-      {
-        question: "What is the oxidation state of phosphorus in H₃PO₄?",
-        options: ["+3", "+5", "-3", "+7"],
-        correct: 1,
-        explanation: "In H₃PO₄, 3(+1) + P + 4(-2) = 0, so P = +5."
-      },
-      // Identifying Oxidising and Reducing Agents
-      {
-        question: "In the reaction: 2KMnO₄ + 5H₂O₂ + 3H₂SO₄ → K₂SO₄ + 2MnSO₄ + 5O₂ + 8H₂O, what is the oxidising agent?",
-        options: ["H₂O₂", "KMnO₄", "H₂SO₄", "H₂O"],
-        correct: 1,
-        explanation: "KMnO₄ (Mn goes from +7 to +2) is reduced, making it the oxidising agent."
-      },
-      {
-        question: "In the reaction: Cl₂ + 2Fe²⁺ → 2Cl⁻ + 2Fe³⁺, which is the oxidising agent?",
-        options: ["Fe²⁺", "Fe³⁺", "Cl₂", "Cl⁻"],
-        correct: 2,
-        explanation: "Cl₂ is reduced from 0 to -1, so chlorine is the oxidising agent."
-      },
-      {
-        question: "In the reaction: SO₂ + 2H₂S → 3S + 2H₂O, what is the reducing agent?",
-        options: ["SO₂", "H₂S", "H₂O", "S"],
-        correct: 1,
-        explanation: "H₂S is oxidised (S goes from -2 to 0), making it the reducing agent."
-      },
-      {
-        question: "In the reaction: 2Fe + 3Cl₂ → 2FeCl₃, identify the reducing agent:",
-        options: ["Fe", "Cl₂", "FeCl₃", "Both Fe and Cl₂"],
-        correct: 0,
-        explanation: "Fe is oxidised from 0 to +3, so iron is the reducing agent."
-      },
-      {
-        question: "In the reaction: 2Cr³⁺ + 3Cl₂ + 8H₂O → 2CrO₄²⁻ + 6Cl⁻ + 16H⁺, the oxidising agent is:",
-        options: ["Cr³⁺", "Cl₂", "H₂O", "CrO₄²⁻"],
-        correct: 1,
-        explanation: "Cl₂ is reduced from 0 to -1, so chlorine is the oxidising agent."
-      },
-      // Colour Changes in Redox Reactions
-      {
-        question: "When potassium permanganate solution is added to acidified iron(II) chloride, what colour change is observed?",
-        options: ["Purple to brown", "Purple to colourless", "Colourless to purple", "Brown to colourless"],
-        correct: 1,
-        explanation: "Purple MnO₄⁻ (Mn⁷⁺) is reduced to colourless Mn²⁺ by Fe²⁺."
-      },
-      {
-        question: "When sulfur dioxide gas is bubbled through potassium permanganate solution, the purple colour disappears. This shows that SO₂ is:",
-        options: ["An oxidising agent", "A reducing agent", "Neither", "Both an oxidising and reducing agent"],
-        correct: 1,
-        explanation: "SO₂ reduces MnO₄⁻ (Mn⁷⁺) to Mn²⁺, so SO₂ is a reducing agent."
-      },
-{
+     {
 question: "What is oxidation?",
 options: ["Loss of electrons", "Loss of oxygen", "Gain of hydrogen", "Decrease in oxidation state"],
-correct: 1,
-explanation: "Oxidation is defined as the addition of oxygen to a substance or removal of hydrogen from a substance."
+correct: 0, // FIXED (was 1)
+explanation: "Oxidation is defined as loss of electrons (also gain of oxygen or loss of hydrogen)."
 },
 {
 question: "Which process describes reduction?",
 options: ["Loss of oxygen", "Gain of oxygen", "Loss of electrons", "Increase in oxidation state"],
-correct: 1,
-explanation: "Reduction is defined as the removal of oxygen from a substance."
+correct: 0, // FIXED (was 1)
+explanation: "Reduction is defined as the removal of oxygen (or gain of electrons)."
 },
 {
 question: "Which statement describes oxidation in terms of electron transfer?",
 options: ["Gain of electrons", "Loss of electrons", "Sharing of electrons", "No electron transfer"],
-correct: 2,
+correct: 1, // FIXED (was 2)
 explanation: "Oxidation involves the loss of electrons."
 },
 {
 question: "Which statement describes reduction in terms of electron transfer?",
 options: ["Loss of electrons", "Gain of electrons", "Sharing of electrons", "Formation of protons"],
-correct: 2,
+correct: 1, // FIXED (was 2)
 explanation: "Reduction involves the gain of electrons."
 },
 {
 question: "Which substance is oxidised in the reaction Zn + Cu²⁺ → Zn²⁺ + Cu?",
 options: ["Zn", "Cu²⁺", "Cu", "Both Zn and Cu²⁺"],
-correct: 1,
+correct: 0, // FIXED (was 1)
 explanation: "Zinc loses electrons to form Zn²⁺, so it is oxidised."
 },
 {
 question: "Which substance is reduced in the reaction Zn + Cu²⁺ → Zn²⁺ + Cu?",
 options: ["Zn", "Zn²⁺", "Cu²⁺", "Cu"],
-correct: 3,
+correct: 2, // FIXED (was 3)
 explanation: "Cu²⁺ gains electrons to form Cu, so it is reduced."
 },
 {
 question: "Which of the following acts as a reducing agent?",
 options: ["A substance that gains electrons", "A substance that loses electrons", "A substance that gains oxygen", "A substance that increases oxidation state"],
-correct: 2,
-explanation: "A reducing agent loses electrons and causes another substance to be reduced."
+correct: 1, // FIXED (was 2)
+explanation: "A reducing agent loses electrons."
 },
 {
 question: "Which of the following acts as an oxidising agent?",
 options: ["A substance that gains electrons", "A substance that loses electrons", "A substance that loses oxygen", "A substance that decreases oxidation state"],
-correct: 1,
-explanation: "An oxidising agent gains electrons and causes another substance to be oxidised."
+correct: 0, // FIXED (was 1)
+explanation: "An oxidising agent gains electrons."
 },
 {
 question: "What happens to the oxidation state of a substance during oxidation?",
 options: ["It decreases", "It increases", "It stays the same", "It becomes zero"],
-correct: 2,
+correct: 1, // FIXED (was 2)
 explanation: "During oxidation, the oxidation state increases."
 },
 {
 question: "What happens to the oxidation state of a substance during reduction?",
 options: ["It increases", "It stays the same", "It decreases", "It becomes positive"],
-correct: 3,
+correct: 2, // FIXED (was 3)
 explanation: "During reduction, the oxidation state decreases."
 },
 {
 question: "In the reaction 2Mg + O₂ → 2MgO, what happens to magnesium?",
 options: ["It is reduced", "It gains electrons", "It is oxidised", "It loses oxygen"],
-correct: 3,
-explanation: "Magnesium gains oxygen to form magnesium oxide, so it is oxidised."
+correct: 2, // FIXED (was 3)
+explanation: "Magnesium gains oxygen, so it is oxidised."
 },
 {
 question: "In the reaction CuO + H₂ → Cu + H₂O, which substance is reduced?",
 options: ["H₂", "CuO", "Cu", "H₂O"],
-correct: 2,
+correct: 1, // FIXED (was 2)
 explanation: "CuO loses oxygen to form Cu, so it is reduced."
 },
 {
 question: "Which of the following involves reduction?",
 options: ["Addition of oxygen", "Loss of hydrogen", "Gain of electrons", "Increase in oxidation state"],
-correct: 3,
+correct: 2, // FIXED (was 3)
 explanation: "Reduction involves gain of electrons."
 },
 {
 question: "Which of the following involves oxidation?",
 options: ["Gain of hydrogen", "Loss of oxygen", "Loss of electrons", "Decrease in oxidation state"],
-correct: 3,
-explanation: "Oxidation involves the loss of electrons."
+correct: 2, // FIXED (was 3)
+explanation: "Oxidation involves loss of electrons."
 },
 {
 question: "In the reaction Fe²⁺ → Fe³⁺ + e⁻, what process occurs?",
 options: ["Reduction", "Oxidation", "Neutralisation", "Precipitation"],
-correct: 2,
-explanation: "Fe²⁺ loses an electron to become Fe³⁺, so oxidation occurs."
+correct: 1, // FIXED (was 2)
+explanation: "Loss of electron = oxidation."
 },
 {
 question: "In the reaction Cl₂ + 2e⁻ → 2Cl⁻, what process occurs?",
 options: ["Oxidation", "Reduction", "Neutralisation", "Hydrolysis"],
-correct: 2,
-explanation: "Chlorine gains electrons to form chloride ions, so reduction occurs."
+correct: 1, // FIXED (was 2)
+explanation: "Gain of electrons = reduction."
 },
 {
 question: "Which substance is the oxidising agent in the reaction CuO + H₂ → Cu + H₂O?",
 options: ["H₂", "Cu", "CuO", "H₂O"],
-correct: 3,
-explanation: "CuO causes hydrogen to be oxidised and itself gets reduced, so it is the oxidising agent."
+correct: 2, // FIXED (was 3)
+explanation: "CuO is reduced and acts as oxidising agent."
 },
 {
 question: "Which substance is the reducing agent in the reaction CuO + H₂ → Cu + H₂O?",
 options: ["H₂", "CuO", "Cu", "O₂"],
-correct: 1,
-explanation: "Hydrogen removes oxygen from CuO and is oxidised to H₂O, so it acts as the reducing agent."
+correct: 0, // FIXED (was 1)
+explanation: "H₂ is oxidised, so it is the reducing agent."
 },
     ];
 
