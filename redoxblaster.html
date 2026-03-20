@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxidation State Blaster</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;family=Exo+2:wght@300;400;600&amp;display=swap" rel="stylesheet">
+  <style>
+    body { box-sizing: border-box; }
+    
+    .font-orbitron { font-family: 'Orbitron', monospace; }
+    .font-exo { font-family: 'Exo 2', sans-serif; }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px currentColor; }
+      50% { box-shadow: 0 0 40px currentColor, 0 0 60px currentColor; }
+    }
+    
+    @keyframes explode {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); }
+      100% { transform: scale(2); opacity: 0; }
+    }
+    
+    @keyframes smash {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    
+    .star {
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s infinite;
+    }
+    
+    .spaceship {
+      transition: left 0.15s ease-out;
+    }
+    
+    .asteroid {
+      animation: float 2s ease-in-out infinite;
+    }
+    
+    .exploding {
+      animation: explode 0.5s forwards;
+    }
+    
+    .smashing {
+      animation: smash 0.3s forwards;
+    }
+    
+    .game-btn {
+      animation: pulse-glow 2s infinite;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full m-0 p-0 overflow-hidden">
+  <div id="app" class="h-full w-full relative overflow-hidden" style="background: linear-gradient(180deg, #0a0a1a 0%, #1a1a3a 50%, #0d0d2a 100%);"><!-- Stars Background -->
+   <div id="stars" class="absolute inset-0 pointer-events-none"></div><!-- Menu Screen -->
+   <div id="menu-screen" class="absolute inset-0 flex flex-col items-center justify-center z-10 p-4">
+    <div class="text-center">
+     <h1 id="game-title" class="font-orbitron text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 mb-4 drop-shadow-lg">OXIDATION BLASTER</h1>
+     <p id="instructions" class="font-exo text-cyan-300 text-lg mb-8 max-w-md mx-auto">← → Arrow keys to move. Blast the correct oxidation state!</p><!-- High Score Display -->
+     <div class="mb-8 p-4 rounded-xl bg-black/40 backdrop-blur border border-cyan-500/30">
+      <p class="font-orbitron text-yellow-400 text-sm mb-2">🏆 HIGH SCORES</p>
+      <div id="high-scores" class="font-exo text-white/80 text-sm space-y-1">
+       <p>Easy: <span id="hs-easy" class="text-green-400">0</span></p>
+       <p>Medium: <span id="hs-medium" class="text-yellow-400">0</span></p>
+       <p>Hard: <span id="hs-hard" class="text-red-400">0</span></p>
+      </div>
+     </div>
+     <p class="font-exo text-purple-300 text-sm mb-4">Select Difficulty</p>
+     <div class="flex flex-col sm:flex-row gap-4 justify-center"><button onclick="startGame('easy')" class="game-btn font-orbitron px-8 py-3 rounded-full bg-gradient-to-r from-green-600 to-emerald-500 text-white font-bold text-lg hover:scale-105 transition-transform border-2 border-green-400" style="color: #22c55e;"> EASY </button> <button onclick="startGame('medium')" class="game-btn font-orbitron px-8 py-3 rounded-full bg-gradient-to-r from-yellow-600 to-orange-500 text-white font-bold text-lg hover:scale-105 transition-transform border-2 border-yellow-400" style="color: #eab308;"> MEDIUM </button> <button onclick="startGame('hard')" class="game-btn font-orbitron px-8 py-3 rounded-full bg-gradient-to-r from-red-600 to-pink-500 text-white font-bold text-lg hover:scale-105 transition-transform border-2 border-red-400" style="color: #ef4444;"> HARD </button>
+     </div>
+    </div>
+   </div><!-- Game Screen -->
+   <div id="game-screen" class="absolute inset-0 hidden z-10"><!-- Home Button --> <button onclick="showMenu()" class="absolute top-4 left-4 z-30 font-orbitron px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-sm border border-red-400 transition-colors"> 🏠 HOME </button> <!-- HUD -->
+    <div class="absolute top-4 left-0 right-0 flex justify-center gap-4 z-20 px-4">
+     <div class="bg-black/60 backdrop-blur px-4 py-2 rounded-lg border border-cyan-500/50">
+      <p class="font-orbitron text-cyan-400 text-xs">SCORE</p>
+      <p id="score" class="font-orbitron text-white text-2xl">0</p>
+     </div>
+     <div class="bg-black/60 backdrop-blur px-4 py-2 rounded-lg border border-purple-500/50 text-center max-w-xs">
+      <p class="font-orbitron text-purple-400 text-xs">FIND OXIDATION STATE OF</p>
+      <p id="question" class="font-exo text-white text-lg font-bold"></p>
+     </div>
+     <div class="bg-black/60 backdrop-blur px-4 py-2 rounded-lg border border-yellow-500/50">
+      <p class="font-orbitron text-yellow-400 text-xs">HIGH</p>
+      <p id="current-high" class="font-orbitron text-white text-2xl">0</p>
+     </div>
+    </div><!-- Game Area -->
+    <div id="game-area" class="absolute inset-0 overflow-hidden"><!-- Asteroids Container -->
+     <div id="asteroids" class="absolute top-0 left-0 right-0 h-full"></div><!-- Spaceship -->
+     <div id="spaceship" class="spaceship absolute bottom-8 w-16 h-20" style="left: calc(50% - 32px);">
+      <svg viewbox="0 0 64 80" class="w-full h-full drop-shadow-lg" style="filter: drop-shadow(0 0 10px #00ffff);"><!-- Main body --> <path d="M32 0 L48 50 L44 70 L20 70 L16 50 Z" fill="url(#shipGradient)" stroke="#00ffff" stroke-width="2" /> <!-- Cockpit --> <ellipse cx="32" cy="30" rx="8" ry="12" fill="#0ea5e9" stroke="#00ffff" stroke-width="1" /> <ellipse cx="32" cy="28" rx="5" ry="8" fill="#38bdf8" /> <!-- Wings --> <path d="M16 50 L0 70 L10 65 L20 70 Z" fill="url(#wingGradient)" stroke="#8b5cf6" stroke-width="1" /> <path d="M48 50 L64 70 L54 65 L44 70 Z" fill="url(#wingGradient)" stroke="#8b5cf6" stroke-width="1" /> <!-- Engine glow --> <ellipse cx="32" cy="75" rx="10" ry="5" fill="#f97316" opacity="0.8" /> <ellipse cx="32" cy="75" rx="6" ry="3" fill="#fbbf24" /> <defs>
+        <lineargradient id="shipGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+         <stop offset="0%" style="stop-color:#1e3a5f" />
+         <stop offset="50%" style="stop-color:#0f172a" />
+         <stop offset="100%" style="stop-color:#1e3a5f" />
+        </lineargradient>
+        <lineargradient id="wingGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+         <stop offset="0%" style="stop-color:#4c1d95" />
+         <stop offset="100%" style="stop-color:#7c3aed" />
+        </lineargradient>
+       </defs>
+      </svg>
+     </div>
+    </div>
+   </div><!-- Game Over Screen -->
+   <div id="gameover-screen" class="absolute inset-0 hidden flex-col items-center justify-center z-20 bg-black/80 backdrop-blur">
+    <div class="text-center p-8">
+     <h2 class="font-orbitron text-5xl font-black text-red-500 mb-4 animate-pulse">GAME OVER</h2>
+     <p class="font-exo text-white/80 text-lg mb-2">The correct answer was:</p>
+     <p id="correct-answer" class="font-orbitron text-cyan-400 text-3xl mb-6"></p>
+     <p class="font-exo text-white/60 mb-2">Your Score</p>
+     <p id="final-score" class="font-orbitron text-yellow-400 text-5xl mb-2">0</p>
+     <p id="new-high" class="font-orbitron text-green-400 text-xl mb-8 hidden">🎉 NEW HIGH SCORE!</p><button onclick="showMenu()" class="game-btn font-orbitron px-8 py-3 rounded-full bg-gradient-to-r from-cyan-600 to-blue-500 text-white font-bold text-lg hover:scale-105 transition-transform border-2 border-cyan-400" style="color: #06b6d4;"> PLAY AGAIN </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Config
+    const defaultConfig = {
+      game_title: 'OXIDATION BLASTER',
+      instructions_text: '← → Arrow keys to move. Blast the correct oxidation state!',
+      background_color: '#0a0a1a',
+      text_color: '#ffffff',
+      accent_color: '#06b6d4',
+      button_color: '#8b5cf6',
+      highlight_color: '#f59e0b',
+      font_family: 'Orbitron',
+      font_size: 16
+    };
+
+    let config = { ...defaultConfig };
+    let highScores = { easy: 0, medium: 0, hard: 0 };
+    let allScores = [];
+
+    // Game state
+    let gameState = 'menu';
+    let score = 0;
+    let difficulty = 'easy';
+    let shipPosition = 50;
+    let currentQuestion = null;
+    let asteroids = [];
+    let gameLoop = null;
+    let fallSpeed = 1;
+
+    // Oxidation state questions database
+    const questions = {
+      easy: [
+        { species: 'Ca', element: 'Ca', answer: 0, explanation: 'Free element' },
+        { species: 'Fe', element: 'Fe', answer: 0, explanation: 'Free element' },
+        { species: 'O₂', element: 'O', answer: 0, explanation: 'Free element' },
+        { species: 'H₂', element: 'H', answer: 0, explanation: 'Free element' },
+        { species: 'Cu', element: 'Cu', answer: 0, explanation: 'Free element' },
+        { species: 'Na⁺', element: 'Na', answer: 1, explanation: 'Monovalent cation' },
+        { species: 'Cl⁻', element: 'Cl', answer: -1, explanation: 'Monovalent anion' },
+        { species: 'Ca²⁺', element: 'Ca', answer: 2, explanation: 'Divalent cation' },
+        { species: 'O²⁻', element: 'O', answer: -2, explanation: 'Oxide anion' },
+        { species: 'Mg²⁺', element: 'Mg', answer: 2, explanation: 'Divalent cation' },
+        { species: 'Al³⁺', element: 'Al', answer: 3, explanation: 'Trivalent cation' },
+        { species: 'K⁺', element: 'K', answer: 1, explanation: 'Monovalent cation' },
+        { species: 'Br⁻', element: 'Br', answer: -1, explanation: 'Monovalent anion' },
+        { species: 'S²⁻', element: 'S', answer: -2, explanation: 'Sulfide anion' },
+        { species: 'Zn²⁺', element: 'Zn', answer: 2, explanation: 'Divalent cation' },
+      ],
+      medium: [
+        { species: 'H₂O', element: 'H', answer: 1, explanation: 'H is +1 in water' },
+        { species: 'H₂O', element: 'O', answer: -2, explanation: 'O is -2 in water' },
+        { species: 'NaCl', element: 'Na', answer: 1, explanation: 'Na is +1 in NaCl' },
+        { species: 'NaCl', element: 'Cl', answer: -1, explanation: 'Cl is -1 in NaCl' },
+        { species: 'CO₂', element: 'C', answer: 4, explanation: 'C is +4 in CO₂' },
+        { species: 'CO₂', element: 'O', answer: -2, explanation: 'O is -2 in CO₂' },
+        { species: 'MgO', element: 'Mg', answer: 2, explanation: 'Mg is +2 in MgO' },
+        { species: 'NH₃', element: 'N', answer: -3, explanation: 'N is -3 in NH₃' },
+        { species: 'NH₃', element: 'H', answer: 1, explanation: 'H is +1 in NH₃' },
+        { species: 'SO₂', element: 'S', answer: 4, explanation: 'S is +4 in SO₂' },
+        { species: 'HCl', element: 'H', answer: 1, explanation: 'H is +1 in HCl' },
+        { species: 'HCl', element: 'Cl', answer: -1, explanation: 'Cl is -1 in HCl' },
+        { species: 'CaO', element: 'Ca', answer: 2, explanation: 'Ca is +2 in CaO' },
+        { species: 'NO', element: 'N', answer: 2, explanation: 'N is +2 in NO' },
+        { species: 'Fe₂O₃', element: 'Fe', answer: 3, explanation: 'Fe is +3 in Fe₂O₃' },
+        { species: 'P₂O₅', element: 'P', answer: 5, explanation: 'P is +5 in P₂O₅' },
+        { species: 'Cl₂', element: 'Cl', answer: 0, explanation: 'Free element' },
+        { species: 'I₂', element: 'I', answer: 0, explanation: 'Free element' },
+      ],
+      hard: [
+        { species: 'H₂SO₄', element: 'S', answer: 6, explanation: 'S is +6 in sulfuric acid' },
+        { species: 'H₂SO₃', element: 'S', answer: 4, explanation: 'S is +4 in sulfurous acid' },
+        { species: 'HNO₃', element: 'N', answer: 5, explanation: 'N is +5 in nitric acid' },
+        { species: 'HNO₂', element: 'N', answer: 3, explanation: 'N is +3 in nitrous acid' },
+        { species: 'KMnO₄', element: 'Mn', answer: 7, explanation: 'Mn is +7 in permanganate' },
+        { species: 'K₂Cr₂O₇', element: 'Cr', answer: 6, explanation: 'Cr is +6 in dichromate' },
+        { species: 'H₂O₂', element: 'O', answer: -1, explanation: 'O is -1 in peroxide' },
+        { species: 'Na₂S₂O₃', element: 'S', answer: 2, explanation: 'Average S is +2 in thiosulfate' },
+        { species: 'ClO₄⁻', element: 'Cl', answer: 7, explanation: 'Cl is +7 in perchlorate' },
+        { species: 'MnO₂', element: 'Mn', answer: 4, explanation: 'Mn is +4 in MnO₂' },
+        { species: 'Cr₂O₃', element: 'Cr', answer: 3, explanation: 'Cr is +3 in Cr₂O₃' },
+        { species: 'NO₃⁻', element: 'N', answer: 5, explanation: 'N is +5 in nitrate' },
+        { species: 'NO₂⁻', element: 'N', answer: 3, explanation: 'N is +3 in nitrite' },
+        { species: 'SO₄²⁻', element: 'S', answer: 6, explanation: 'S is +6 in sulfate' },
+        { species: 'SO₃²⁻', element: 'S', answer: 4, explanation: 'S is +4 in sulfite' },
+        { species: 'PO₄³⁻', element: 'P', answer: 5, explanation: 'P is +5 in phosphate' },
+        { species: 'ClO₃��', element: 'Cl', answer: 5, explanation: 'Cl is +5 in chlorate' },
+        { species: 'ClO⁻', element: 'Cl', answer: 1, explanation: 'Cl is +1 in hypochlorite' },
+        { species: 'FeO', element: 'Fe', answer: 2, explanation: 'Fe is +2 in FeO' },
+        { species: 'Cu₂O', element: 'Cu', answer: 1, explanation: 'Cu is +1 in Cu₂O' },
+        { species: 'CuO', element: 'Cu', answer: 2, explanation: 'Cu is +2 in CuO' },
+        { species: 'N₂O₅', element: 'N', answer: 5, explanation: 'N is +5 in N₂O₅' },
+        { species: 'N₂O₃', element: 'N', answer: 3, explanation: 'N is +3 in N₂O₃' },
+        { species: 'N₂O₄', element: 'N', answer: 4, explanation: 'N is +4 in N₂O₄' },
+      ]
+    };
+
+    // Initialize stars
+    function createStars() {
+      const starsContainer = document.getElementById('stars');
+      starsContainer.innerHTML = '';
+      for (let i = 0; i < 100; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = (Math.random() * 3 + 1) + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+      }
+    }
+
+    // Generate wrong answers
+    function generateOptions(correctAnswer) {
+      const options = [correctAnswer];
+      const possibleAnswers = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7];
+      
+      while (options.length < 5) {
+        const wrongAnswer = possibleAnswers[Math.floor(Math.random() * possibleAnswers.length)];
+        if (!options.includes(wrongAnswer)) {
+          options.push(wrongAnswer);
+        }
+      }
+      
+      // Shuffle
+      for (let i = options.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [options[i], options[j]] = [options[j], options[i]];
+      }
+      
+      return options;
+    }
+
+    // Create asteroid element
+    function createAsteroid(value, position, isCorrect) {
+      const asteroid = document.createElement('div');
+      asteroid.className = 'asteroid absolute flex items-center justify-center cursor-default';
+      asteroid.style.width = '60px';
+      asteroid.style.height = '60px';
+      asteroid.style.left = position + '%';
+      asteroid.style.top = '-80px';
+      asteroid.style.transform = 'translateX(-50%)';
+      asteroid.dataset.value = value;
+      asteroid.dataset.correct = isCorrect;
+      
+      const displayValue = value > 0 ? `+${value}` : value.toString();
+      
+      asteroid.innerHTML = `
+        <svg viewBox="0 0 60 60" class="w-full h-full">
+          <polygon points="30,2 55,20 50,55 10,55 5,20" fill="#4a4a5a" stroke="#6b7280" stroke-width="2"/>
+          <polygon points="30,8 48,22 44,48 16,48 12,22" fill="#374151"/>
+          <circle cx="20" cy="30" r="5" fill="#1f2937"/>
+          <circle cx="40" cy="40" r="4" fill="#1f2937"/>
+          <circle cx="35" cy="25" r="3" fill="#1f2937"/>
+        </svg>
+        <span class="absolute font-orbitron font-bold text-lg text-white drop-shadow-lg" style="text-shadow: 0 0 10px #fff;">${displayValue}</span>
+      `;
+      
+      return asteroid;
+    }
+
+    // Spawn asteroids for new question
+    function spawnAsteroids() {
+      const asteroidsContainer = document.getElementById('asteroids');
+      asteroidsContainer.innerHTML = '';
+      asteroids = [];
+      
+      // Get all questions from all difficulty levels
+      const allQuestions = [...questions.easy, ...questions.medium, ...questions.hard];
+      currentQuestion = allQuestions[Math.floor(Math.random() * allQuestions.length)];
+      
+      document.getElementById('question').innerHTML = `<span class="text-cyan-300">${currentQuestion.element}</span> in <span class="text-yellow-300">${currentQuestion.species}</span>`;
+      
+      const options = generateOptions(currentQuestion.answer);
+      const positions = [10, 30, 50, 70, 90];
+      
+      options.forEach((value, index) => {
+        const asteroid = createAsteroid(value, positions[index], value === currentQuestion.answer);
+        asteroid.dataset.position = positions[index];
+        asteroidsContainer.appendChild(asteroid);
+        asteroids.push({
+          element: asteroid,
+          y: -80,
+          position: positions[index],
+          value: value,
+          isCorrect: value === currentQuestion.answer
+        });
+      });
+    }
+
+    // Update game
+    function update() {
+      if (gameState !== 'playing') return;
+      
+      const gameArea = document.getElementById('game-area');
+      const gameHeight = gameArea.offsetHeight;
+      const shipY = gameHeight - 100;
+      
+      asteroids.forEach(asteroid => {
+        asteroid.y += fallSpeed;
+        asteroid.element.style.top = asteroid.y + 'px';
+        
+        // Check collision with ship
+        if (asteroid.y >= shipY - 30 && asteroid.y <= shipY + 20) {
+          const asteroidCenter = asteroid.position;
+          const shipCenter = shipPosition;
+          
+          if (Math.abs(asteroidCenter - shipCenter) < 12) {
+            if (asteroid.isCorrect) {
+              // Correct answer!
+              asteroid.element.classList.add('smashing');
+              score++;
+              document.getElementById('score').textContent = score;
+              
+              setTimeout(() => {
+                spawnAsteroids();
+              }, 300);
+            } else {
+              // Wrong answer - game over
+              gameOver();
+            }
+            return;
+          }
+        }
+        
+        // Check if correct asteroid passed
+        if (asteroid.y > gameHeight && asteroid.isCorrect) {
+          gameOver();
+        }
+      });
+    }
+
+    // Game over
+    function gameOver() {
+      gameState = 'gameover';
+      clearInterval(gameLoop);
+      
+      const ship = document.getElementById('spaceship');
+      ship.classList.add('exploding');
+      
+      setTimeout(() => {
+        document.getElementById('game-screen').classList.add('hidden');
+        document.getElementById('gameover-screen').classList.remove('hidden');
+        document.getElementById('gameover-screen').classList.add('flex');
+        
+        const displayAnswer = currentQuestion.answer > 0 ? `+${currentQuestion.answer}` : currentQuestion.answer;
+        document.getElementById('correct-answer').textContent = displayAnswer;
+        document.getElementById('final-score').textContent = score;
+        
+        // Check for high score
+        const isNewHigh = score > highScores[difficulty];
+        document.getElementById('new-high').classList.toggle('hidden', !isNewHigh);
+        
+        if (isNewHigh) {
+          highScores[difficulty] = score;
+          updateHighScoreDisplay();
+          saveHighScore();
+        }
+        
+        ship.classList.remove('exploding');
+      }, 500);
+    }
+
+    // Save high score
+    async function saveHighScore() {
+      if (window.dataSdk && allScores.length < 999) {
+        const result = await window.dataSdk.create({
+          difficulty: difficulty,
+          score: score,
+          date: new Date().toISOString()
+        });
+        if (!result.isOk) {
+          console.error('Failed to save score');
+        }
+      }
+    }
+
+    // Update high score display
+    function updateHighScoreDisplay() {
+      document.getElementById('hs-easy').textContent = highScores.easy;
+      document.getElementById('hs-medium').textContent = highScores.medium;
+      document.getElementById('hs-hard').textContent = highScores.hard;
+    }
+
+    // Start game
+    function startGame(diff) {
+      difficulty = diff;
+      score = 0;
+      shipPosition = 50;
+      
+      // Set fall speed based on difficulty
+      switch(diff) {
+        case 'easy': fallSpeed = 1; break;
+        case 'medium': fallSpeed = 1.75; break;
+        case 'hard': fallSpeed = 2.5; break;
+      }
+      
+      document.getElementById('score').textContent = '0';
+      document.getElementById('current-high').textContent = highScores[diff];
+      
+      const ship = document.getElementById('spaceship');
+      ship.style.left = 'calc(50% - 32px)';
+      
+      document.getElementById('menu-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.remove('flex');
+      document.getElementById('game-screen').classList.remove('hidden');
+      
+      gameState = 'playing';
+      spawnAsteroids();
+      
+      gameLoop = setInterval(update, 16);
+    }
+
+    // Show menu
+    function showMenu() {
+      gameState = 'menu';
+      clearInterval(gameLoop);
+      
+      document.getElementById('game-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.add('hidden');
+      document.getElementById('gameover-screen').classList.remove('flex');
+      document.getElementById('menu-screen').classList.remove('hidden');
+    }
+
+    // Handle keyboard input
+    document.addEventListener('keydown', (e) => {
+      if (gameState !== 'playing') return;
+      
+      const step = 20;
+      if (e.key === 'ArrowLeft') {
+        shipPosition = Math.max(10, shipPosition - step);
+      } else if (e.key === 'ArrowRight') {
+        shipPosition = Math.min(90, shipPosition + step);
+      }
+      
+      const ship = document.getElementById('spaceship');
+      ship.style.left = `calc(${shipPosition}% - 32px)`;
+    });
+
+    // Touch controls for mobile
+    let touchStartX = 0;
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (gameState !== 'playing') return;
+      
+      const touchX = e.touches[0].clientX;
+      const screenWidth = window.innerWidth;
+      shipPosition = Math.max(10, Math.min(90, (touchX / screenWidth) * 100));
+      
+      const ship = document.getElementById('spaceship');
+      ship.style.left = `calc(${shipPosition}% - 32px)`;
+    });
+
+    // Data SDK handler
+    const dataHandler = {
+      onDataChanged(data) {
+        allScores = data;
+        
+        // Calculate high scores from stored data
+        highScores = { easy: 0, medium: 0, hard: 0 };
+        data.forEach(record => {
+          if (record.difficulty && record.score !== undefined) {
+            if (record.score > highScores[record.difficulty]) {
+              highScores[record.difficulty] = record.score;
+            }
+          }
+        });
+        
+        updateHighScoreDisplay();
+      }
+    };
+
+    // Element SDK handler
+    async function onConfigChange(cfg) {
+      config = { ...defaultConfig, ...cfg };
+      
+      const title = document.getElementById('game-title');
+      const instructions = document.getElementById('instructions');
+      const app = document.getElementById('app');
+      
+      if (title) title.textContent = config.game_title;
+      if (instructions) instructions.textContent = config.instructions_text;
+      
+      // Apply font
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      document.querySelectorAll('.font-orbitron').forEach(el => {
+        el.style.fontFamily = `${fontFamily}, Orbitron, monospace`;
+      });
+      
+      // Apply colors
+      if (app) {
+        app.style.background = `linear-gradient(180deg, ${config.background_color} 0%, #1a1a3a 50%, ${config.background_color} 100%)`;
+      }
+      
+      document.querySelectorAll('.text-white').forEach(el => {
+        el.style.color = config.text_color;
+      });
+    }
+
+    // Initialize
+    async function init() {
+      createStars();
+      
+      // Initialize Element SDK
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (cfg) => ({
+            recolorables: [
+              {
+                get: () => cfg.background_color || defaultConfig.background_color,
+                set: (v) => { cfg.background_color = v; window.elementSdk.setConfig({ background_color: v }); }
+              },
+              {
+                get: () => cfg.text_color || defaultConfig.text_color,
+                set: (v) => { cfg.text_color = v; window.elementSdk.setConfig({ text_color: v }); }
+              },
+              {
+                get: () => cfg.accent_color || defaultConfig.accent_color,
+                set: (v) => { cfg.accent_color = v; window.elementSdk.setConfig({ accent_color: v }); }
+              },
+              {
+                get: () => cfg.button_color || defaultConfig.button_color,
+                set: (v) => { cfg.button_color = v; window.elementSdk.setConfig({ button_color: v }); }
+              },
+              {
+                get: () => cfg.highlight_color || defaultConfig.highlight_color,
+                set: (v) => { cfg.highlight_color = v; window.elementSdk.setConfig({ highlight_color: v }); }
+              }
+            ],
+            borderables: [],
+            fontEditable: {
+              get: () => cfg.font_family || defaultConfig.font_family,
+              set: (v) => { cfg.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+            },
+            fontSizeable: {
+              get: () => cfg.font_size || defaultConfig.font_size,
+              set: (v) => { cfg.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+            }
+          }),
+          mapToEditPanelValues: (cfg) => new Map([
+            ['game_title', cfg.game_title || defaultConfig.game_title],
+            ['instructions_text', cfg.instructions_text || defaultConfig.instructions_text]
+          ])
+        });
+      }
+      
+      // Initialize Data SDK
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb8c14da615f4a9',t:'MTc3MDY5NjYwOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
