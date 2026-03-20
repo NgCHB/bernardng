@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chemistry Structure Quiz</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+    
+    body {
+      font-family: 'Space Mono', 'Courier New', monospace;
+    }
+    
+    .option-card {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .option-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+    
+    .option-card.correct {
+      animation: correctPulse 0.5s ease;
+    }
+    
+    .option-card.incorrect {
+      animation: incorrectShake 0.5s ease;
+    }
+    
+    @keyframes correctPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+    
+    @keyframes incorrectShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-10px); }
+      75% { transform: translateX(10px); }
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full m-0 p-0">
+  <div id="app-wrapper" class="h-full w-full overflow-auto" style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);">
+   <div class="min-h-full px-4 py-8">
+    <div class="max-w-4xl mx-auto"><!-- Header -->
+     <div class="text-center mb-8 fade-in">
+      <h1 id="quiz-title" class="text-5xl font-bold text-white mb-3">Chemistry Structure Quiz</h1>
+      <p id="instructions-text" class="text-xl text-gray-300">Identify the structure of each substance</p>
+     </div><!-- Start Screen -->
+     <div id="start-screen" class="rounded-2xl shadow-2xl p-8 fade-in" style="background: #0f3460;">
+      <div class="text-center mb-8">
+       <div class="text-6xl mb-4">
+        🧪
+       </div>
+       <h2 class="text-3xl font-bold mb-4 text-white">Ready to Test Your Knowledge?</h2>
+       <p class="text-lg text-gray-300 mb-6">You'll identify the structure of 15 random substances from O Level Chemistry</p>
+       <div class="rounded-xl p-6 mb-6" style="background: rgba(255, 255, 255, 0.1);">
+        <h3 class="font-bold mb-3 text-lg text-cyan-300">Structure Types:</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-left text-gray-200">
+         <div class="flex items-start"><span class="mr-2">🔷</span> <span class="text-sm"><strong>Giant Ionic Lattice:</strong> e.g., NaCl, MgO</span>
+         </div>
+         <div class="flex items-start"><span class="mr-2">⚛️</span> <span class="text-sm"><strong>Simple Molecular:</strong> e.g., H₂O, CO₂</span>
+         </div>
+         <div class="flex items-start"><span class="mr-2">💎</span> <span class="text-sm"><strong>Giant Molecular:</strong> e.g., Diamond, SiO₂</span>
+         </div>
+         <div class="flex items-start"><span class="mr-2">⚙️</span> <span class="text-sm"><strong>Giant Metallic:</strong> e.g., Fe, Cu</span>
+         </div>
+        </div>
+       </div>
+      </div>
+      <div class="mb-6"><label for="player-name-input" class="block text-sm font-bold mb-2 text-gray-200">Your Name (Optional)</label> <input type="text" id="player-name-input" placeholder="Enter your name" class="w-full px-4 py-3 border-2 rounded-xl focus:outline-none text-lg" style="background: rgba(255, 255, 255, 0.1); border-color: #53a8b6; color: white;">
+      </div><button id="start-button" class="w-full text-white font-bold py-4 px-6 rounded-xl text-xl shadow-lg hover:shadow-xl transition-all" style="background: linear-gradient(135deg, #e94560 0%, #533483 100%);"> Start Quiz </button>
+     </div><!-- Quiz Screen -->
+     <div id="quiz-screen" class="hidden"><!-- Progress Bar -->
+      <div class="rounded-xl shadow-lg p-4 mb-6 fade-in" style="background: #0f3460;">
+       <div class="flex justify-between items-center mb-2"><span class="text-sm font-bold text-gray-300">Question <span id="current-question">1</span> of 15</span> <span class="text-sm font-bold text-cyan-300">⏱️ <span id="timer">00:00</span></span>
+       </div>
+       <div class="w-full rounded-full h-3" style="background: rgba(255, 255, 255, 0.1);">
+        <div id="progress-bar" class="h-3 rounded-full transition-all duration-300" style="width: 0%; background: linear-gradient(90deg, #e94560 0%, #53a8b6 100%);"></div>
+       </div>
+      </div><!-- Question Card -->
+      <div id="question-card" class="rounded-2xl shadow-2xl p-8 mb-6 fade-in" style="background: #0f3460;">
+       <h2 class="text-3xl font-bold mb-2 text-center text-cyan-300"><span id="substance-name"></span></h2>
+       <p class="text-center text-gray-400 mb-6 text-lg" id="substance-formula"></p>
+       <p class="text-xl text-center mb-6 text-gray-200">What is the structure of this substance?</p>
+       <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="options-container"><!-- Options will be inserted here -->
+       </div>
+      </div><!-- Feedback -->
+      <div id="feedback" class="hidden rounded-xl shadow-lg p-4 text-center fade-in">
+       <p id="feedback-text" class="font-bold text-lg"></p>
+      </div>
+     </div><!-- Results Screen -->
+     <div id="results-screen" class="hidden rounded-2xl shadow-2xl p-8 fade-in" style="background: #0f3460;">
+      <div class="text-center">
+       <div class="text-7xl mb-4">
+        🎉
+       </div>
+       <h2 class="text-4xl font-bold mb-4 text-white">Quiz Complete!</h2>
+       <div class="rounded-xl p-6 mb-6" style="background: rgba(255, 255, 255, 0.1);">
+        <p class="text-2xl mb-2 text-gray-300">Your Time:</p>
+        <p id="final-time" class="text-5xl font-bold text-cyan-300">00:00</p>
+       </div>
+       <p class="text-gray-300 mb-6 text-lg">Great job completing all 15 questions! 🧪</p><button id="restart-button" class="w-full text-white font-bold py-4 px-6 rounded-xl text-xl shadow-lg hover:shadow-xl transition-all" style="background: linear-gradient(135deg, #e94560 0%, #533483 100%);"> Try Again </button>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    const substances = [
+      { name: "Sodium Chloride", formula: "NaCl", structure: "Giant Ionic Lattice" },
+      { name: "Magnesium Oxide", formula: "MgO", structure: "Giant Ionic Lattice" },
+      { name: "Calcium Carbonate", formula: "CaCO₃", structure: "Giant Ionic Lattice" },
+      { name: "Potassium Bromide", formula: "KBr", structure: "Giant Ionic Lattice" },
+      { name: "Aluminium Oxide", formula: "Al₂O₃", structure: "Giant Ionic Lattice" },
+      { name: "Copper(II) Sulfate", formula: "CuSO₄", structure: "Giant Ionic Lattice" },
+      { name: "Water", formula: "H₂O", structure: "Simple Molecular" },
+      { name: "Carbon Dioxide", formula: "CO₂", structure: "Simple Molecular" },
+      { name: "Ammonia", formula: "NH₃", structure: "Simple Molecular" },
+      { name: "Methane", formula: "CH₄", structure: "Simple Molecular" },
+      { name: "Oxygen", formula: "O₂", structure: "Simple Molecular" },
+      { name: "Hydrogen", formula: "H₂", structure: "Simple Molecular" },
+      { name: "Nitrogen", formula: "N₂", structure: "Simple Molecular" },
+      { name: "Chlorine", formula: "Cl₂", structure: "Simple Molecular" },
+      { name: "Ethane", formula: "C₂H₆", structure: "Simple Molecular" },
+      { name: "Hydrogen Chloride", formula: "HCl", structure: "Simple Molecular" },
+      { name: "Sulfur Dioxide", formula: "SO₂", structure: "Simple Molecular" },
+      { name: "Diamond", formula: "C", structure: "Giant Molecular" },
+      { name: "Graphite", formula: "C", structure: "Giant Molecular" },
+      { name: "Silicon Dioxide", formula: "SiO₂", structure: "Giant Molecular" },
+      { name: "Iron", formula: "Fe", structure: "Giant Metallic" },
+      { name: "Copper", formula: "Cu", structure: "Giant Metallic" },
+      { name: "Aluminium", formula: "Al", structure: "Giant Metallic" },
+      { name: "Zinc", formula: "Zn", structure: "Giant Metallic" },
+      { name: "Magnesium", formula: "Mg", structure: "Giant Metallic" },
+      { name: "Sodium", formula: "Na", structure: "Giant Metallic" },
+      { name: "Calcium", formula: "Ca", structure: "Giant Metallic" },
+      { name: "Silver", formula: "Ag", structure: "Giant Metallic" },
+      { name: "Gold", formula: "Au", structure: "Giant Metallic" }
+    ];
+
+    const structureTypes = [
+      "Giant Ionic Lattice",
+      "Simple Molecular",
+      "Giant Molecular",
+      "Giant Metallic"
+    ];
+
+    const structureEmojis = {
+      "Giant Ionic Lattice": "🔷",
+      "Simple Molecular": "⚛️",
+      "Giant Molecular": "💎",
+      "Giant Metallic": "⚙️"
+    };
+
+    let quizSubstances = [];
+    let currentQuestionIndex = 0;
+    let startTime = null;
+    let timerInterval = null;
+    let playerName = "";
+    let isProcessing = false;
+
+    const defaultConfig = {
+      quiz_title: "Chemistry Structure Quiz",
+      instructions_text: "Identify the structure of each substance"
+    };
+
+    const dataHandler = {
+      onDataChanged(data) {
+        // No-op for write-only application
+      }
+    };
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function initQuiz() {
+      quizSubstances = shuffleArray(substances).slice(0, 15);
+      currentQuestionIndex = 0;
+      startTime = Date.now();
+      
+      document.getElementById('start-screen').classList.add('hidden');
+      document.getElementById('quiz-screen').classList.remove('hidden');
+      
+      startTimer();
+      displayQuestion();
+    }
+
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const minutes = Math.floor(elapsed / 60);
+        const seconds = elapsed % 60;
+        document.getElementById('timer').textContent = 
+          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }, 1000);
+    }
+
+    function displayQuestion() {
+      if (currentQuestionIndex >= quizSubstances.length) {
+        endQuiz();
+        return;
+      }
+
+      const substance = quizSubstances[currentQuestionIndex];
+      
+      document.getElementById('current-question').textContent = currentQuestionIndex + 1;
+      document.getElementById('substance-name').textContent = substance.name;
+      document.getElementById('substance-formula').textContent = substance.formula;
+      
+      const progress = ((currentQuestionIndex) / quizSubstances.length) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+      
+      const shuffledOptions = shuffleArray(structureTypes);
+      
+      shuffledOptions.forEach(option => {
+        const optionCard = document.createElement('div');
+        optionCard.className = 'option-card border-2 rounded-xl p-6 text-center';
+        optionCard.style.background = 'rgba(255, 255, 255, 0.05)';
+        optionCard.style.borderColor = '#53a8b6';
+        optionCard.innerHTML = `
+          <div class="text-4xl mb-3">${structureEmojis[option]}</div>
+          <p class="font-bold text-white">${option}</p>
+        `;
+        
+        optionCard.addEventListener('click', () => selectAnswer(option, optionCard));
+        optionsContainer.appendChild(optionCard);
+      });
+
+      document.getElementById('feedback').classList.add('hidden');
+    }
+
+    function selectAnswer(selectedOption, optionCard) {
+      if (isProcessing) return;
+      isProcessing = true;
+
+      const substance = quizSubstances[currentQuestionIndex];
+      const isCorrect = selectedOption === substance.structure;
+
+      const allOptions = document.querySelectorAll('.option-card');
+      allOptions.forEach(card => {
+        card.style.pointerEvents = 'none';
+      });
+
+      if (isCorrect) {
+        optionCard.classList.add('correct');
+        optionCard.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        optionCard.style.borderColor = '#059669';
+        optionCard.style.color = 'white';
+        
+        const feedback = document.getElementById('feedback');
+        feedback.className = 'border-2 rounded-xl shadow-lg p-4 text-center fade-in';
+        feedback.style.background = 'rgba(16, 185, 129, 0.2)';
+        feedback.style.borderColor = '#10b981';
+        document.getElementById('feedback-text').textContent = '✓ Correct!';
+        document.getElementById('feedback-text').style.color = '#10b981';
+        feedback.classList.remove('hidden');
+
+        setTimeout(() => {
+          currentQuestionIndex++;
+          isProcessing = false;
+          displayQuestion();
+        }, 1000);
+      } else {
+        optionCard.classList.add('incorrect');
+        optionCard.style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+        optionCard.style.borderColor = '#dc2626';
+        optionCard.style.color = 'white';
+        
+        const feedback = document.getElementById('feedback');
+        feedback.className = 'border-2 rounded-xl shadow-lg p-4 text-center fade-in';
+        feedback.style.background = 'rgba(239, 68, 68, 0.2)';
+        feedback.style.borderColor = '#ef4444';
+        document.getElementById('feedback-text').textContent = `✗ Try again! (Correct: ${substance.structure})`;
+        document.getElementById('feedback-text').style.color = '#ef4444';
+        feedback.classList.remove('hidden');
+
+        setTimeout(() => {
+          optionCard.classList.remove('incorrect');
+          optionCard.style.background = '';
+          optionCard.style.borderColor = '';
+          optionCard.style.color = '';
+          allOptions.forEach(card => {
+            card.style.pointerEvents = 'auto';
+          });
+          feedback.classList.add('hidden');
+          isProcessing = false;
+        }, 1500);
+      }
+    }
+
+    async function endQuiz() {
+      clearInterval(timerInterval);
+      
+      const totalSeconds = Math.floor((Date.now() - startTime) / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      document.getElementById('quiz-screen').classList.add('hidden');
+      document.getElementById('results-screen').classList.remove('hidden');
+      document.getElementById('final-time').textContent = timeString;
+
+      const result = await window.dataSdk.create({
+        player_name: playerName || "Anonymous",
+        time_seconds: totalSeconds,
+        completed_at: new Date().toISOString()
+      });
+
+      if (!result.isOk) {
+        console.error('Failed to save result:', result.error);
+      }
+    }
+
+    document.getElementById('start-button').addEventListener('click', () => {
+      playerName = document.getElementById('player-name-input').value.trim();
+      initQuiz();
+    });
+
+    document.getElementById('restart-button').addEventListener('click', () => {
+      document.getElementById('results-screen').classList.add('hidden');
+      document.getElementById('start-screen').classList.remove('hidden');
+      document.getElementById('player-name-input').value = '';
+    });
+
+    async function onConfigChange(config) {
+      document.getElementById('quiz-title').textContent = config.quiz_title || defaultConfig.quiz_title;
+      document.getElementById('instructions-text').textContent = config.instructions_text || defaultConfig.instructions_text;
+    }
+
+    async function init() {
+      const dataResult = await window.dataSdk.init(dataHandler);
+      if (!dataResult.isOk) {
+        console.error("Failed to initialize data SDK");
+      }
+
+      if (window.elementSdk) {
+        window.elementSdk.init({
+          defaultConfig,
+          onConfigChange,
+          mapToCapabilities: (config) => ({
+            recolorables: [],
+            borderables: [],
+            fontEditable: undefined,
+            fontSizeable: undefined
+          }),
+          mapToEditPanelValues: (config) => new Map([
+            ["quiz_title", config.quiz_title || defaultConfig.quiz_title],
+            ["instructions_text", config.instructions_text || defaultConfig.instructions_text]
+          ])
+        });
+      }
+    }
+
+    init();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c764614b77d9e29',t:'MTc2OTk5OTUwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
