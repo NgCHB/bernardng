@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Metal Displacement Game</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Outfit', sans-serif; }
+    
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.6); }
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    
+    @keyframes card-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    
+    @keyframes timer-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .card-animate {
+      animation: card-float 3s ease-in-out infinite;
+    }
+    
+    .card-animate-delay {
+      animation: card-float 3s ease-in-out infinite;
+      animation-delay: 0.5s;
+    }
+    
+    .timer-critical {
+      animation: timer-pulse 0.5s ease-in-out infinite;
+      color: #ef4444 !important;
+    }
+    
+    .shake {
+      animation: shake 0.5s ease-in-out;
+    }
+    
+    .btn-glow:hover {
+      animation: pulse-glow 1.5s ease-in-out infinite;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full overflow-auto">
+  <div id="app-wrapper" class="w-full min-h-full bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 p-4 md:p-8">
+   <!-- Start Screen -->
+   <div id="start-screen" class="flex flex-col items-center justify-center min-h-full">
+    <div class="w-full max-w-2xl">
+     <h1 id="game-title" class="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500 mb-8">Metal Displacement</h1><button id="start-btn" class="btn-glow w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-lg px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"> Start Game </button>
+    </div>
+   </div><!-- Game Screen -->
+   <div id="game-screen" class="hidden flex flex-col items-center min-h-full">
+    <!-- Header -->
+    <div class="w-full max-w-2xl flex justify-between items-center mb-4 md:mb-6 gap-2">
+     <div class="bg-white/10 backdrop-blur-sm rounded-lg md:rounded-xl px-3 md:px-4 py-2">
+      <span class="text-purple-300 text-xs md:text-sm">Score</span>
+      <p id="score" class="text-amber-400 font-bold text-lg md:text-2xl">0</p>
+     </div>
+     <div id="timer-container" class="bg-white/10 backdrop-blur-sm rounded-full w-12 h-12 md:w-16 md:h-16 flex items-center justify-center flex-shrink-0">
+      <span id="timer" class="text-white font-bold text-lg md:text-2xl">5</span>
+     </div>
+     <div class="bg-white/10 backdrop-blur-sm rounded-lg md:rounded-xl px-3 md:px-4 py-2">
+      <span class="text-purple-300 text-xs md:text-sm">Streak</span>
+      <p id="streak" class="text-orange-400 font-bold text-lg md:text-2xl">🔥 0</p>
+     </div>
+    </div><!-- Question -->
+    <p class="text-purple-200 text-center mb-6 text-lg">Can <span id="question-metal" class="text-amber-400 font-bold">Metal</span> displace the metal in <span id="question-salt" class="text-cyan-400 font-bold">Salt</span>?</p><!-- Cards Container -->
+    <div id="cards-container" class="flex flex-col md:flex-row gap-4 md:gap-10 items-center justify-center mb-6 md:mb-8">
+     <!-- Metal Card -->
+     <div class="card-animate">
+      <div class="bg-gradient-to-br from-amber-500 via-yellow-500 to-orange-600 rounded-2xl md:rounded-3xl p-1 shadow-2xl">
+       <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl md:rounded-3xl p-4 md:p-6 w-32 md:w-40 h-40 md:h-52 flex flex-col items-center justify-center">
+        <span class="text-amber-400 text-xs font-semibold tracking-widest mb-1 md:mb-2">METAL</span>
+        <div class="bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl md:rounded-2xl w-20 md:w-24 h-20 md:h-24 flex items-center justify-center shadow-lg mb-2 md:mb-3">
+         <span id="metal-symbol" class="text-slate-900 text-3xl md:text-4xl font-extrabold">K</span>
+        </div><span id="metal-name" class="text-purple-200 text-xs md:text-sm">Potassium</span>
+       </div>
+      </div>
+     </div><!-- VS Badge -->
+     <div class="text-purple-400 font-bold text-2xl">
+      VS
+     </div><!-- Salt Card -->
+     <div class="card-animate-delay">
+      <div class="bg-gradient-to-br from-cyan-500 via-blue-500 to-purple-600 rounded-3xl p-1 shadow-2xl">
+       <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 w-40 h-52 flex flex-col items-center justify-center">
+        <span class="text-cyan-400 text-xs font-semibold tracking-widest mb-2">SALT</span>
+        <div class="bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl w-24 h-24 flex items-center justify-center shadow-lg mb-3">
+         <span id="salt-formula" class="text-slate-900 text-2xl font-extrabold">CuSO₄</span>
+        </div><span id="salt-name" class="text-purple-200 text-sm">Copper Sulfate</span>
+       </div>
+      </div>
+     </div>
+    </div><!-- Answer Buttons -->
+    <div class="flex gap-4 md:gap-6">
+     <button id="yes-btn" class="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white font-bold text-lg px-6 md:px-10 py-4 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg"> ✓ Displacement </button> <button id="no-btn" class="bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-400 hover:to-red-500 text-white font-bold text-lg px-6 md:px-10 py-4 rounded-2xl transition-all duration-200 transform hover:scale-105 shadow-lg"> ✗ No Displacement </button>
+    </div>
+   </div><!-- Game Over Screen -->
+   <div id="gameover-screen" class="hidden flex flex-col items-center justify-center min-h-full">
+    <div class="w-full max-w-2xl">
+     <h2 class="text-3xl md:text-4xl font-bold text-red-400 mb-4">Game Over</h2>
+     <p id="gameover-reason" class="text-purple-200 mb-6 text-lg">Time ran out!</p>
+     <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="bg-white/10 rounded-lg p-3 md:p-4">
+       <span class="text-purple-300 text-xs md:text-sm">Score</span>
+       <p id="final-score" class="text-amber-400 font-bold text-2xl md:text-3xl">0</p>
+      </div>
+      <div class="bg-white/10 rounded-lg p-3 md:p-4">
+       <span class="text-purple-300 text-xs md:text-sm">Best Streak</span>
+       <p id="final-streak" class="text-orange-400 font-bold text-2xl md:text-3xl">🔥 0</p>
+      </div>
+     </div>
+     <div id="correct-answer" class="bg-slate-800/50 rounded-lg p-4 mb-6 text-left">
+      <p id="answer-explanation" class="text-purple-100 text-sm md:text-base"></p>
+     </div><button id="restart-btn" class="btn-glow w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-bold text-lg px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-105 shadow-lg"> Play Again </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Metal data with reactivity order (0 = most reactive)
+    const metals = [
+      { symbol: 'K', name: 'Potassium', reactivity: 0 },
+      { symbol: 'Na', name: 'Sodium', reactivity: 1 },
+      { symbol: 'Ca', name: 'Calcium', reactivity: 2 },
+      { symbol: 'Mg', name: 'Magnesium', reactivity: 3 },
+      { symbol: 'Al', name: 'Aluminium', reactivity: 4 },
+      { symbol: 'Zn', name: 'Zinc', reactivity: 5 },
+      { symbol: 'Fe', name: 'Iron', reactivity: 6 },
+      { symbol: 'Pb', name: 'Lead', reactivity: 7 },
+      { symbol: 'Cu', name: 'Copper', reactivity: 8 },
+      { symbol: 'Ag', name: 'Silver', reactivity: 9 }
+    ];
+
+    // Salt formulas for each metal
+    const saltFormulas = {
+      'K': { formula: 'KNO₃', name: 'Potassium Nitrate' },
+      'Na': { formula: 'NaCl', name: 'Sodium Chloride' },
+      'Ca': { formula: 'CaCl₂', name: 'Calcium Chloride' },
+      'Mg': { formula: 'MgSO₄', name: 'Magnesium Sulfate' },
+      'Al': { formula: 'AlCl₃', name: 'Aluminium Chloride' },
+      'Zn': { formula: 'ZnSO₄', name: 'Zinc Sulfate' },
+      'Fe': { formula: 'FeSO₄', name: 'Iron(II) Sulfate' },
+      'Pb': { formula: 'Pb(NO₃)₂', name: 'Lead(II) Nitrate' },
+      'Cu': { formula: 'CuSO₄', name: 'Copper Sulfate' },
+      'Ag': { formula: 'AgNO₃', name: 'Silver Nitrate' }
+    };
+
+    // Game state
+    let score = 0;
+    let streak = 0;
+    let bestStreak = 0;
+    let currentMetal = null;
+    let currentSaltMetal = null;
+    let correctAnswer = null;
+    let timerInterval = null;
+    let timeLeft = 5;
+
+    // Default config
+    const defaultConfig = {
+      game_title: 'Metal Displacement',
+      instruction_text: 'Can the metal displace the metal in the salt? You have 5 seconds to decide!',
+      primary_color: '#f59e0b',
+      secondary_color: '#06b6d4',
+      background_color: '#1e1b4b',
+      text_color: '#e9d5ff',
+      accent_color: '#fb923c'
+    };
+
+    // DOM Elements
+    const startScreen = document.getElementById('start-screen');
+    const gameScreen = document.getElementById('game-screen');
+    const gameoverScreen = document.getElementById('gameover-screen');
+    const startBtn = document.getElementById('start-btn');
+    const yesBtn = document.getElementById('yes-btn');
+    const noBtn = document.getElementById('no-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const timerEl = document.getElementById('timer');
+    const scoreEl = document.getElementById('score');
+    const streakEl = document.getElementById('streak');
+    const metalSymbolEl = document.getElementById('metal-symbol');
+    const metalNameEl = document.getElementById('metal-name');
+    const saltFormulaEl = document.getElementById('salt-formula');
+    const saltNameEl = document.getElementById('salt-name');
+    const questionMetalEl = document.getElementById('question-metal');
+    const questionSaltEl = document.getElementById('question-salt');
+    const finalScoreEl = document.getElementById('final-score');
+    const finalStreakEl = document.getElementById('final-streak');
+    const gameoverReasonEl = document.getElementById('gameover-reason');
+    const answerExplanationEl = document.getElementById('answer-explanation');
+    const cardsContainer = document.getElementById('cards-container');
+    const gameTitleEl = document.getElementById('game-title');
+    const instructionTextEl = document.getElementById('instruction-text');
+
+    // Initialize Element SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          gameTitleEl.textContent = config.game_title || defaultConfig.game_title;
+          instructionTextEl.textContent = config.instruction_text || defaultConfig.instruction_text;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => window.elementSdk.setConfig({ background_color: value })
+            },
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => window.elementSdk.setConfig({ primary_color: value })
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => window.elementSdk.setConfig({ secondary_color: value })
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => window.elementSdk.setConfig({ text_color: value })
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => window.elementSdk.setConfig({ accent_color: value })
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['game_title', config.game_title || defaultConfig.game_title],
+          ['instruction_text', config.instruction_text || defaultConfig.instruction_text]
+        ])
+      });
+    }
+
+    // Generate new question
+    function generateQuestion() {
+      // Pick two different metals
+      let metalIndex, saltMetalIndex;
+      do {
+        metalIndex = Math.floor(Math.random() * metals.length);
+        saltMetalIndex = Math.floor(Math.random() * metals.length);
+      } while (metalIndex === saltMetalIndex);
+
+      currentMetal = metals[metalIndex];
+      currentSaltMetal = metals[saltMetalIndex];
+      
+      // A more reactive metal can displace a less reactive one
+      correctAnswer = currentMetal.reactivity < currentSaltMetal.reactivity;
+
+      // Update UI
+      metalSymbolEl.textContent = currentMetal.symbol;
+      metalNameEl.textContent = currentMetal.name;
+      saltFormulaEl.textContent = saltFormulas[currentSaltMetal.symbol].formula;
+      saltNameEl.textContent = saltFormulas[currentSaltMetal.symbol].name;
+      questionMetalEl.textContent = currentMetal.symbol;
+      questionSaltEl.textContent = saltFormulas[currentSaltMetal.symbol].formula;
+    }
+
+    // Start timer
+    function startTimer() {
+      timeLeft = 5;
+      timerEl.textContent = timeLeft;
+      timerEl.classList.remove('timer-critical');
+      
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+        
+        if (timeLeft <= 2) {
+          timerEl.classList.add('timer-critical');
+        }
+        
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          endGame('Time ran out!');
+        }
+      }, 1000);
+    }
+
+    // Stop timer
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // Check answer
+    function checkAnswer(playerAnswer) {
+      stopTimer();
+      
+      if (playerAnswer === correctAnswer) {
+        // Correct!
+        score++;
+        streak++;
+        if (streak > bestStreak) bestStreak = streak;
+        
+        scoreEl.textContent = score;
+        streakEl.textContent = '🔥 ' + streak;
+        
+        // Next question
+        generateQuestion();
+        startTimer();
+      } else {
+        // Wrong!
+        cardsContainer.classList.add('shake');
+        setTimeout(() => cardsContainer.classList.remove('shake'), 500);
+        
+        const reason = playerAnswer ? 
+          `${currentMetal.symbol} is less reactive than ${currentSaltMetal.symbol}, so no displacement occurs.` :
+          `${currentMetal.symbol} is more reactive than ${currentSaltMetal.symbol}, so displacement occurs!`;
+        
+        endGame('Wrong answer!', reason);
+      }
+    }
+
+    // End game
+    function endGame(reason, explanation = '') {
+      stopTimer();
+      
+      gameScreen.classList.add('hidden');
+      gameoverScreen.classList.remove('hidden');
+      
+      finalScoreEl.textContent = score;
+      finalStreakEl.textContent = '🔥 ' + bestStreak;
+      gameoverReasonEl.textContent = reason;
+      
+      if (explanation) {
+        answerExplanationEl.innerHTML = `
+          <span class="text-amber-400 font-bold">${currentMetal.symbol}</span> (${currentMetal.name}) vs 
+          <span class="text-cyan-400 font-bold">${saltFormulas[currentSaltMetal.symbol].formula}</span><br>
+          <span class="mt-2 block">${explanation}</span>
+        `;
+      } else {
+        answerExplanationEl.innerHTML = `
+          <span class="text-amber-400 font-bold">${currentMetal.symbol}</span> (${currentMetal.name}) vs 
+          <span class="text-cyan-400 font-bold">${saltFormulas[currentSaltMetal.symbol].formula}</span><br>
+          <span class="mt-2 block">${correctAnswer ? 'Displacement occurs!' : 'No displacement.'}</span>
+        `;
+      }
+    }
+
+    // Start game
+    function startGame() {
+      score = 0;
+      streak = 0;
+      
+      scoreEl.textContent = score;
+      streakEl.textContent = '🔥 ' + streak;
+      
+      startScreen.classList.add('hidden');
+      gameoverScreen.classList.add('hidden');
+      gameScreen.classList.remove('hidden');
+      
+      generateQuestion();
+      startTimer();
+    }
+
+    // Event listeners
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+    yesBtn.addEventListener('click', () => checkAnswer(true));
+    noBtn.addEventListener('click', () => checkAnswer(false));
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9df1f4f512c9ce32',t:'MTc3Mzk4MDc2Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
