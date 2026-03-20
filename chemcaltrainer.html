@@ -6,7 +6,6 @@
   <title>3C Chemistry Trainer</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
-  <script src="/_sdk/element_sdk.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
@@ -44,10 +43,10 @@
   </style>
   <style>body { box-sizing: border-box; }</style>
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
-  <div id="app" class="h-full w-full overflow-auto" style="background:#0c0f1a;">
-   <!-- Header -->
+  <div id="app" class="h-full w-full overflow-auto" style="background:#0c0f1a;"><!-- Header -->
    <header class="px-4 py-4 sm:px-8 sm:py-5 border-b" style="border-color:#1e2740; background:linear-gradient(135deg,#0c0f1a 0%,#131833 100%);">
     <div class="max-w-4xl mx-auto flex items-center justify-between flex-wrap gap-3">
      <div>
@@ -55,8 +54,7 @@
       <p id="app-subtitle" class="text-sm font-300 mt-0.5" style="color:#64748b;">Convert → Compare → Convert</p>
      </div>
      <div class="flex items-center gap-3">
-      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:#1a1f35;">
-       <i data-lucide="trophy" style="width:16px;height:16px;color:#f59e0b;"></i> <span id="score-display" class="mono text-sm font-600" style="color:#f59e0b;">0/0</span>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:#1a1f35;"><i data-lucide="trophy" style="width:16px;height:16px;color:#f59e0b;"></i> <span id="score-display" class="mono text-sm font-600" style="color:#f59e0b;">0/0</span>
       </div><button id="calc-toggle" onclick="toggleCalculator()" class="p-2 rounded-lg hover:opacity-80" style="background:#10b981;color:#0c0f1a;"> <i data-lucide="calculator" style="width:18px;height:18px;"></i> </button>
      </div>
     </div>
@@ -120,14 +118,12 @@
     </div>
    </main><!-- Calculator Panel -->
    <div id="calculator-panel" class="fixed bottom-4 right-4 z-50 rounded-2xl p-4 shadow-2xl hidden" style="background:#1a1f35;border:1px solid #2a3352;width:260px;">
-    <div class="flex items-center justify-between mb-3">
-     <span class="text-sm font-600" style="color:#e2e8f0;">Calculator</span> <button onclick="toggleCalculator()" class="p-1 rounded hover:opacity-70" style="color:#64748b;"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    <div class="flex items-center justify-between mb-3"><span class="text-sm font-600" style="color:#e2e8f0;">Calculator</span> <button onclick="toggleCalculator()" class="p-1 rounded hover:opacity-70" style="color:#64748b;"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
     </div>
     <div id="calc-display" class="mono text-right text-xl font-600 p-3 rounded-lg mb-3 min-h-[48px] overflow-x-auto" style="background:#0c0f1a;color:#e2e8f0;word-break:break-all;">
      0
     </div>
-    <div class="grid grid-cols-4 gap-1.5">
-     <button onclick="calcInput('C')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#7f1d1d;color:#fca5a5;">C</button> <button onclick="calcInput('(')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#94a3b8;">(</button> <button onclick="calcInput(')')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#94a3b8;">)</button> <button onclick="calcInput('/')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">÷</button> <button onclick="calcInput('7')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">7</button> <button onclick="calcInput('8')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">8</button> <button onclick="calcInput('9')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">9</button> <button onclick="calcInput('*')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">×</button> <button onclick="calcInput('4')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">4</button> <button onclick="calcInput('5')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">5</button> <button onclick="calcInput('6')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">6</button> <button onclick="calcInput('-')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">−</button> <button onclick="calcInput('1')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">1</button> <button onclick="calcInput('2')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">2</button> <button onclick="calcInput('3')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">3</button> <button onclick="calcInput('+')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">+</button> <button onclick="calcInput('0')" class="calc-btn rounded-lg p-2.5 text-sm font-600 col-span-2" style="background:#131833;color:#e2e8f0;">0</button> <button onclick="calcInput('.')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">.</button> <button onclick="calcEquals()" class="calc-btn rounded-lg p-2.5 text-sm font-700" style="background:#10b981;color:#0c0f1a;">=</button>
+    <div class="grid grid-cols-4 gap-1.5"><button onclick="calcInput('C')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#7f1d1d;color:#fca5a5;">C</button> <button onclick="calcInput('(')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#94a3b8;">(</button> <button onclick="calcInput(')')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#94a3b8;">)</button> <button onclick="calcInput('/')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">÷</button> <button onclick="calcInput('7')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">7</button> <button onclick="calcInput('8')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">8</button> <button onclick="calcInput('9')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">9</button> <button onclick="calcInput('*')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">×</button> <button onclick="calcInput('4')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">4</button> <button onclick="calcInput('5')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">5</button> <button onclick="calcInput('6')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">6</button> <button onclick="calcInput('-')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">−</button> <button onclick="calcInput('1')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">1</button> <button onclick="calcInput('2')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">2</button> <button onclick="calcInput('3')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">3</button> <button onclick="calcInput('+')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">+</button> <button onclick="calcInput('0')" class="calc-btn rounded-lg p-2.5 text-sm font-600 col-span-2" style="background:#131833;color:#e2e8f0;">0</button> <button onclick="calcInput('.')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">.</button> <button onclick="calcEquals()" class="calc-btn rounded-lg p-2.5 text-sm font-700" style="background:#10b981;color:#0c0f1a;">=</button>
     </div>
    </div>
   </div>
@@ -1369,30 +1365,36 @@ function applyConfig(config) {
   document.getElementById('app-subtitle').style.fontSize = `${fontSize * 0.875}px`;
 }
 
-window.elementSdk.init({
-  defaultConfig,
-  onConfigChange: async (config) => { applyConfig(config); },
-  mapToCapabilities: (config) => ({
-    recolorables: [
-      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
-      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
-      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
-      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
-      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
-    ],
-    borderables: [],
-    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
-    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
-  }),
-  mapToEditPanelValues: (config) => new Map([
-    ['app_title', config.app_title || defaultConfig.app_title],
-    ['subtitle_text', config.subtitle_text || defaultConfig.subtitle_text]
-  ])
-});
+// Initialize SDK if available
+if (window.elementSdk) {
+  window.elementSdk.init({
+    defaultConfig,
+    onConfigChange: async (config) => { applyConfig(config); },
+    mapToCapabilities: (config) => ({
+      recolorables: [
+        { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+        { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+        { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+        { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+        { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+      ],
+      borderables: [],
+      fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+      fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+    }),
+    mapToEditPanelValues: (config) => new Map([
+      ['app_title', config.app_title || defaultConfig.app_title],
+      ['subtitle_text', config.subtitle_text || defaultConfig.subtitle_text]
+    ])
+  });
+} else {
+  // Fallback: apply default config when SDK is not available
+  applyConfig(defaultConfig);
+}
 
 // ─── Start ───
 startRound();
 lucide.createIcons();
 </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9df1544fb35ffcf8',t:'MTc3Mzk3NDE4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9df16c4210e3820b',t:'MTc3Mzk3NTE2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
