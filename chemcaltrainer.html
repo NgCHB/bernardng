@@ -1,0 +1,1398 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3C Chemistry Trainer</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;family=Outfit:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Outfit', sans-serif; margin: 0; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    .step-badge { transition: all 0.4s cubic-bezier(0.4,0,0.2,1); }
+    .step-badge.active { transform: scale(1.15); }
+    .option-btn { transition: all 0.25s ease; }
+    .option-btn:hover:not(:disabled) { transform: translateY(-2px); }
+    .option-btn.correct { animation: correctPulse 0.5s ease; }
+    .option-btn.wrong { animation: wrongShake 0.4s ease; }
+    @keyframes correctPulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    @keyframes wrongShake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .fade-in { animation: fadeIn 0.4s ease forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .calc-btn { transition: all 0.15s ease; }
+    .calc-btn:active { transform: scale(0.94); }
+    .progress-fill { transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+    .glow { box-shadow: 0 0 30px rgba(16,185,129,0.15); }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full overflow-auto" style="background:#0c0f1a;">
+   <!-- Header -->
+   <header class="px-4 py-4 sm:px-8 sm:py-5 border-b" style="border-color:#1e2740; background:linear-gradient(135deg,#0c0f1a 0%,#131833 100%);">
+    <div class="max-w-4xl mx-auto flex items-center justify-between flex-wrap gap-3">
+     <div>
+      <h1 id="app-title" class="text-xl sm:text-2xl font-800 tracking-tight" style="color:#10b981;">Chemical Calculations</h1>
+      <p id="app-subtitle" class="text-sm font-300 mt-0.5" style="color:#64748b;">Convert → Compare → Convert</p>
+     </div>
+     <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg" style="background:#1a1f35;">
+       <i data-lucide="trophy" style="width:16px;height:16px;color:#f59e0b;"></i> <span id="score-display" class="mono text-sm font-600" style="color:#f59e0b;">0/0</span>
+      </div><button id="calc-toggle" onclick="toggleCalculator()" class="p-2 rounded-lg hover:opacity-80" style="background:#10b981;color:#0c0f1a;"> <i data-lucide="calculator" style="width:18px;height:18px;"></i> </button>
+     </div>
+    </div>
+   </header><!-- Progress Steps -->
+   <div class="px-4 py-3 sm:px-8" style="background:#0e1225;">
+    <div class="max-w-4xl mx-auto">
+     <div class="flex items-center justify-between gap-1" id="step-indicators">
+      <div class="step-badge flex flex-col items-center gap-1" data-step="0">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-0-circle">
+        Q
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Question</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="1">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-1-circle">
+        C1
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Convert</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="2">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-2-circle">
+        C1
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Equation</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="3">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-3-circle">
+        C1
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Calculate</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="4">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-4-circle">
+        C2
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Ratio</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="5">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-5-circle">
+        C2
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Find mol</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="6">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-6-circle">
+        C3
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Equation</span>
+      </div>
+      <div class="flex-1 h-0.5 rounded" style="background:#1a1f35;"></div>
+      <div class="step-badge flex flex-col items-center gap-1" data-step="7">
+       <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs font-700 mono" style="background:#1a1f35;color:#475569;" id="step-7-circle">
+        C3
+       </div><span class="text-[10px] font-500 hidden sm:block" style="color:#475569;">Solve</span>
+      </div>
+     </div>
+    </div>
+   </div><!-- Main Content -->
+   <main class="px-4 py-5 sm:px-8 sm:py-6">
+    <div class="max-w-4xl mx-auto">
+     <div id="content-area"></div>
+    </div>
+   </main><!-- Calculator Panel -->
+   <div id="calculator-panel" class="fixed bottom-4 right-4 z-50 rounded-2xl p-4 shadow-2xl hidden" style="background:#1a1f35;border:1px solid #2a3352;width:260px;">
+    <div class="flex items-center justify-between mb-3">
+     <span class="text-sm font-600" style="color:#e2e8f0;">Calculator</span> <button onclick="toggleCalculator()" class="p-1 rounded hover:opacity-70" style="color:#64748b;"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
+    </div>
+    <div id="calc-display" class="mono text-right text-xl font-600 p-3 rounded-lg mb-3 min-h-[48px] overflow-x-auto" style="background:#0c0f1a;color:#e2e8f0;word-break:break-all;">
+     0
+    </div>
+    <div class="grid grid-cols-4 gap-1.5">
+     <button onclick="calcInput('C')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#7f1d1d;color:#fca5a5;">C</button> <button onclick="calcInput('(')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#94a3b8;">(</button> <button onclick="calcInput(')')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#94a3b8;">)</button> <button onclick="calcInput('/')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">÷</button> <button onclick="calcInput('7')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">7</button> <button onclick="calcInput('8')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">8</button> <button onclick="calcInput('9')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">9</button> <button onclick="calcInput('*')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">×</button> <button onclick="calcInput('4')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">4</button> <button onclick="calcInput('5')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">5</button> <button onclick="calcInput('6')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">6</button> <button onclick="calcInput('-')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">−</button> <button onclick="calcInput('1')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">1</button> <button onclick="calcInput('2')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">2</button> <button onclick="calcInput('3')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">3</button> <button onclick="calcInput('+')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#1e2740;color:#f59e0b;">+</button> <button onclick="calcInput('0')" class="calc-btn rounded-lg p-2.5 text-sm font-600 col-span-2" style="background:#131833;color:#e2e8f0;">0</button> <button onclick="calcInput('.')" class="calc-btn rounded-lg p-2.5 text-sm font-600" style="background:#131833;color:#e2e8f0;">.</button> <button onclick="calcEquals()" class="calc-btn rounded-lg p-2.5 text-sm font-700" style="background:#10b981;color:#0c0f1a;">=</button>
+    </div>
+   </div>
+  </div>
+  <script>
+// ─── State ───
+let currentStep = 0;
+let currentQuestion = null;
+let score = 0;
+let totalAnswered = 0;
+let roundNum = 0;
+let calcExpr = '0';
+let c1Moles = 0; // computed moles from C1
+let c2Moles = 0; // moles of target from C2
+
+// ─── Question Bank ───
+const questions = [
+  {
+    equation: "2Mg + O₂ → 2MgO",
+    mrData: { "Mg": 24, "O₂": 32, "MgO": 40 },
+    coefficients: { "Mg": 2, "O₂": 1, "MgO": 2 },
+    questionText: "What mass of MgO is produced when 4.8 g of Mg reacts completely with oxygen?",
+    givenSubstance: "Mg",
+    givenQuantity: 4.8,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "MgO",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 0.2,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "concentration = moles ÷ volume"],
+    finalAnswer: 8.0
+  },
+  {
+    equation: "N₂ + 3H₂ → 2NH₃",
+    mrData: { "N₂": 28, "H₂": 2, "NH₃": 17 },
+    coefficients: { "N₂": 1, "H₂": 3, "NH₃": 2 },
+    questionText: "What mass of NH₃ is formed from 5.6 g of N₂?",
+    givenSubstance: "N₂",
+    givenQuantity: 5.6,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "NH₃",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = mass × Mr"],
+    c1Answer: 0.2,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "concentration = moles ÷ volume", "mass = moles ÷ Mr"],
+    finalAnswer: 6.8
+  },
+  {
+    equation: "CaCO₃ → CaO + CO₂",
+    mrData: { "CaCO₃": 100, "CaO": 56, "CO₂": 44 },
+    coefficients: { "CaCO₃": 1, "CaO": 1, "CO₂": 1 },
+    questionText: "What mass of CO₂ is released when 25 g of CaCO₃ decomposes?",
+    givenSubstance: "CaCO₃",
+    givenQuantity: 25,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO₂",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = concentration × volume", "moles = volume ÷ 24", "moles = Mr ÷ mass"],
+    c1Answer: 0.25,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = Mr ÷ moles", "concentration = moles × volume"],
+    finalAnswer: 11.0
+  },
+  {
+    equation: "2Na + 2H₂O → 2NaOH + H₂",
+    mrData: { "Na": 23, "H₂O": 18, "NaOH": 40, "H₂": 2 },
+    coefficients: { "Na": 2, "H₂O": 2, "NaOH": 2, "H₂": 1 },
+    questionText: "What mass of H₂ is produced when 4.6 g of Na reacts with excess water?",
+    givenSubstance: "Na",
+    givenQuantity: 4.6,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "H₂",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "mass = moles × Mr"],
+    c1Answer: 0.2,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "moles = mass ÷ Mr"],
+    finalAnswer: 0.2
+  },
+  {
+    equation: "Fe₂O₃ + 3CO → 2Fe + 3CO₂",
+    mrData: { "Fe₂O₃": 160, "CO": 28, "Fe": 56, "CO₂": 44 },
+    coefficients: { "Fe₂O₃": 1, "CO": 3, "Fe": 2, "CO₂": 3 },
+    questionText: "What mass of Fe is produced from 32 g of Fe₂O₃?",
+    givenSubstance: "Fe₂O₃",
+    givenQuantity: 32,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "Fe",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 0.2,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "concentration = moles ÷ volume"],
+    finalAnswer: 22.4
+  },
+  {
+    equation: "CH₄ + 2O₂ → CO₂ + 2H₂O",
+    mrData: { "CH₄": 16, "O₂": 32, "CO₂": 44, "H₂O": 18 },
+    coefficients: { "CH₄": 1, "O₂": 2, "CO₂": 1, "H₂O": 2 },
+    questionText: "What mass of CO₂ is produced when 8 g of CH₄ burns completely?",
+    givenSubstance: "CH₄",
+    givenQuantity: 8,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO₂",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = mass × Mr"],
+    c1Answer: 0.5,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = Mr ÷ moles", "concentration = moles × volume"],
+    finalAnswer: 22.0
+  },
+  {
+    equation: "2C + O₂ → 2CO",
+    mrData: { "C": 12, "O₂": 32, "CO": 28 },
+    coefficients: { "C": 2, "O₂": 1, "CO": 2 },
+    questionText: "What volume of CO gas is produced when 6 g of C reacts with oxygen? (at RTP, 1 mol of gas = 24 dm³)",
+    givenSubstance: "C",
+    givenQuantity: 6,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr ÷ mass"],
+    c1Answer: 0.5,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "volume = moles ÷ 24", "concentration = moles ÷ volume"],
+    finalAnswer: 12.0
+  },
+  {
+    equation: "2H₂ + O₂ → 2H₂O",
+    mrData: { "H₂": 2, "O₂": 32, "H₂O": 18 },
+    coefficients: { "H₂": 2, "O₂": 1, "H₂O": 2 },
+    questionText: "What volume of H₂ gas (in dm³) is needed to produce 18 g of H₂O? (at RTP, 1 mol of gas = 24 dm³)",
+    givenSubstance: "H₂O",
+    givenQuantity: 18,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "H₂",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume × 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 1.0,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "volume = concentration × moles", "mass = volume ÷ Mr"],
+    finalAnswer: 24.0
+  },
+  {
+    equation: "2HCl(aq) + CaCO₃(s) → CaCl₂(aq) + H₂O(l) + CO₂(g)",
+    mrData: { "HCl": 36.5, "CaCO₃": 100, "CaCl₂": 111, "H₂O": 18, "CO₂": 44 },
+    coefficients: { "HCl": 2, "CaCO₃": 1, "CaCl₂": 1, "H₂O": 1, "CO₂": 1 },
+    questionText: "What volume of CO₂ gas (in dm³) is produced when 5 g of CaCO₃ reacts with excess HCl? (at RTP, 1 mol = 24 dm³)",
+    givenSubstance: "CaCO₃",
+    givenQuantity: 5,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO₂",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "volume = moles × Mr"],
+    c1Answer: 0.05,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "volume = moles ÷ 24", "moles = volume × 24"],
+    finalAnswer: 1.2
+  },
+  {
+    equation: "HCl(aq) + NaOH(aq) → NaCl(aq) + H₂O(l)",
+    mrData: { "HCl": 36.5, "NaOH": 40, "NaCl": 58.5, "H₂O": 18 },
+    coefficients: { "HCl": 1, "NaOH": 1, "NaCl": 1, "H₂O": 1 },
+    questionText: "50 cm³ of 2.0 mol/dm³ HCl is neutralised by NaOH. How many moles of NaOH are needed? (note: volume in cm³ must be converted to dm³)",
+    givenSubstance: "HCl",
+    givenQuantity: 0.1,
+    givenUnit: "mol",
+    givenType: "moles",
+    targetSubstance: "NaOH",
+    targetUnit: "mol",
+    targetType: "moles",
+    c1Equation: "No C1 needed - moles already given",
+    c1Options: [],
+    c1Answer: 0.1,
+    c3Equation: "No C3 needed - answer is in moles",
+    c3Options: [],
+    finalAnswer: 0.1,
+    skipC1: true,
+    skipC3: true
+  },
+  {
+    equation: "H₂SO₄(aq) + 2NaOH(aq) → Na₂SO₄(aq) + 2H₂O(l)",
+    mrData: { "H₂SO₄": 98, "NaOH": 40, "Na₂SO₄": 142, "H₂O": 18 },
+    coefficients: { "H₂SO₄": 1, "NaOH": 2, "Na₂SO₄": 1, "H₂O": 2 },
+    questionText: "25 cm³ of 1.0 mol/dm³ H₂SO₄ is neutralised by NaOH. What volume of 2.0 mol/dm³ NaOH is needed?",
+    givenSubstance: "H₂SO₄",
+    givenQuantity: 0.025,
+    givenUnit: "mol",
+    givenType: "moles",
+    targetSubstance: "NaOH",
+    targetUnit: "cm³",
+    targetType: "volume",
+    c1Equation: "moles = concentration × volume (in dm³)",
+    c1Options: ["moles = concentration × volume (in dm³)", "moles = mass ÷ Mr", "volume = moles × 24", "concentration = moles ÷ volume"],
+    c1Answer: 0.025,
+    c3Equation: "volume = moles ÷ concentration",
+    c3Options: ["volume = moles ÷ concentration", "mass = moles × Mr", "concentration = moles × volume", "moles = concentration × volume"],
+    finalAnswer: 25.0
+  },
+  {
+    equation: "2Mg + O₂ → 2MgO",
+    mrData: { "Mg": 24, "O₂": 32, "MgO": 40 },
+    coefficients: { "Mg": 2, "O₂": 1, "MgO": 2 },
+    questionText: "What mass of Mg is needed to produce 10 g of MgO?",
+    givenSubstance: "MgO",
+    givenQuantity: 10,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "Mg",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 0.25,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "concentration = moles ÷ volume"],
+    finalAnswer: 6.0
+  },
+  {
+    equation: "2Mg + O₂ → 2MgO",
+    mrData: { "Mg": 24, "O₂": 32, "MgO": 40 },
+    coefficients: { "Mg": 2, "O₂": 1, "MgO": 2 },
+    questionText: "What mass of O₂ is needed to completely react with 12 g of Mg?",
+    givenSubstance: "Mg",
+    givenQuantity: 12,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "O₂",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 0.5,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "concentration = moles ÷ volume"],
+    finalAnswer: 8.0
+  },
+  {
+    equation: "N₂ + 3H₂ → 2NH₃",
+    mrData: { "N₂": 28, "H₂": 2, "NH₃": 17 },
+    coefficients: { "N₂": 1, "H₂": 3, "NH₃": 2 },
+    questionText: "What mass of H₂ is required to react with 14 g of N₂?",
+    givenSubstance: "N₂",
+    givenQuantity: 14,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "H₂",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = mass × Mr"],
+    c1Answer: 0.5,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "concentration = moles ÷ volume", "mass = moles ÷ Mr"],
+    finalAnswer: 3.0
+  },
+  {
+    equation: "CaCO₃ → CaO + CO₂",
+    mrData: { "CaCO₃": 100, "CaO": 56, "CO₂": 44 },
+    coefficients: { "CaCO₃": 1, "CaO": 1, "CO₂": 1 },
+    questionText: "What mass of CaO is produced when 50 g of CaCO₃ decomposes?",
+    givenSubstance: "CaCO₃",
+    givenQuantity: 50,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CaO",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = concentration × volume", "moles = volume ÷ 24", "moles = Mr ÷ mass"],
+    c1Answer: 0.5,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = Mr ÷ moles", "concentration = moles × volume"],
+    finalAnswer: 28.0
+  },
+  {
+    equation: "2Na + 2H₂O → 2NaOH + H₂",
+    mrData: { "Na": 23, "H₂O": 18, "NaOH": 40, "H₂": 2 },
+    coefficients: { "Na": 2, "H₂O": 2, "NaOH": 2, "H₂": 1 },
+    questionText: "What mass of H₂O is consumed when 2.3 g of Na reacts with excess water?",
+    givenSubstance: "Na",
+    givenQuantity: 2.3,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "H₂O",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "mass = moles × Mr"],
+    c1Answer: 0.1,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "moles = mass ÷ Mr"],
+    finalAnswer: 1.8
+  },
+  {
+    equation: "Fe₂O₃ + 3CO → 2Fe + 3CO₂",
+    mrData: { "Fe₂O₃": 160, "CO": 28, "Fe": 56, "CO₂": 44 },
+    coefficients: { "Fe₂O₃": 1, "CO": 3, "Fe": 2, "CO₂": 3 },
+    questionText: "What mass of CO₂ is produced when 80 g of Fe₂O₃ is reduced?",
+    givenSubstance: "Fe₂O₃",
+    givenQuantity: 80,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO₂",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 0.5,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = moles ÷ Mr", "concentration = moles ÷ volume"],
+    finalAnswer: 66.0
+  },
+  {
+    equation: "CH₄ + 2O₂ → CO₂ + 2H₂O",
+    mrData: { "CH₄": 16, "O₂": 32, "CO₂": 44, "H₂O": 18 },
+    coefficients: { "CH₄": 1, "O₂": 2, "CO₂": 1, "H₂O": 2 },
+    questionText: "What mass of H₂O is produced when 16 g of CH₄ combusts?",
+    givenSubstance: "CH₄",
+    givenQuantity: 16,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "H₂O",
+    targetUnit: "g",
+    targetType: "mass",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = mass × Mr"],
+    c1Answer: 1.0,
+    c3Equation: "mass = moles × Mr",
+    c3Options: ["mass = moles × Mr", "volume = moles × 24", "mass = Mr ÷ moles", "concentration = moles × volume"],
+    finalAnswer: 12.0
+  },
+  {
+    equation: "2C + O₂ → 2CO",
+    mrData: { "C": 12, "O₂": 32, "CO": 28 },
+    coefficients: { "C": 2, "O₂": 1, "CO": 2 },
+    questionText: "What volume of O₂ gas (in dm³) is needed when 12 g of C burns completely? (at RTP, 1 mol = 24 dm³)",
+    givenSubstance: "C",
+    givenQuantity: 12,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "O₂",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr ÷ mass"],
+    c1Answer: 1.0,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "volume = moles ÷ 24", "moles = volume × 24"],
+    finalAnswer: 12.0
+  },
+  {
+    equation: "2H₂ + O₂ → 2H₂O",
+    mrData: { "H₂": 2, "O₂": 32, "H₂O": 18 },
+    coefficients: { "H₂": 2, "O₂": 1, "H₂O": 2 },
+    questionText: "What volume of O₂ gas (in dm³) is required to produce 36 g of H₂O? (at RTP, 1 mol = 24 dm³)",
+    givenSubstance: "H₂O",
+    givenQuantity: 36,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "O₂",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume × 24", "moles = concentration × volume", "moles = Mr × mass"],
+    c1Answer: 2.0,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "volume = concentration × moles", "mass = volume ÷ Mr"],
+    finalAnswer: 24.0
+  },
+  {
+    equation: "2HCl(aq) + CaCO₃(s) → CaCl₂(aq) + H₂O(l) + CO₂(g)",
+    mrData: { "HCl": 36.5, "CaCO₃": 100, "CaCl₂": 111, "H₂O": 18, "CO₂": 44 },
+    coefficients: { "HCl": 2, "CaCO₃": 1, "CaCl₂": 1, "H₂O": 1, "CO₂": 1 },
+    questionText: "What volume of CO₂ gas (in dm³) is produced when 10 g of CaCO₃ reacts with excess HCl? (at RTP, 1 mol = 24 dm³)",
+    givenSubstance: "CaCO₃",
+    givenQuantity: 10,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO₂",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "volume = moles × Mr"],
+    c1Answer: 0.1,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "volume = moles ÷ 24", "moles = volume × 24"],
+    finalAnswer: 2.4
+  },
+  {
+    equation: "HCl(aq) + NaOH(aq) → NaCl(aq) + H₂O(l)",
+    mrData: { "HCl": 36.5, "NaOH": 40, "NaCl": 58.5, "H₂O": 18 },
+    coefficients: { "HCl": 1, "NaOH": 1, "NaCl": 1, "H₂O": 1 },
+    questionText: "100 cm³ of 0.5 mol/dm³ HCl is neutralised by 2.0 mol/dm³ NaOH. What volume of NaOH (in cm³) is needed?",
+    givenSubstance: "HCl",
+    givenQuantity: 0.05,
+    givenUnit: "mol",
+    givenType: "moles",
+    targetSubstance: "NaOH",
+    targetUnit: "cm³",
+    targetType: "volume",
+    c1Equation: "moles = concentration × volume (in dm³)",
+    c1Options: ["moles = concentration × volume (in dm³)", "moles = concentration ÷ volume", "moles = mass ÷ Mr", "concentration = moles × volume"],
+    c1Answer: 0.05,
+    c3Equation: "volume (cm³) = moles ÷ concentration × 1000",
+    c3Options: ["volume (cm³) = moles ÷ concentration × 1000", "mass = moles × Mr", "concentration = moles × volume", "moles = concentration × volume"],
+    finalAnswer: 25.0
+  },
+  {
+    equation: "H₂SO₄(aq) + 2NaOH(aq) → Na₂SO₄(aq) + 2H₂O(l)",
+    mrData: { "H₂SO₄": 98, "NaOH": 40, "Na₂SO₄": 142, "H₂O": 18 },
+    coefficients: { "H₂SO₄": 1, "NaOH": 2, "Na₂SO₄": 1, "H₂O": 2 },
+    questionText: "50 cm³ of 2.0 mol/dm³ H₂SO₄ is neutralised by 1.0 mol/dm³ NaOH. What volume of NaOH (in cm³) is required?",
+    givenSubstance: "H₂SO₄",
+    givenQuantity: 0.1,
+    givenUnit: "mol",
+    givenType: "moles",
+    targetSubstance: "NaOH",
+    targetUnit: "cm³",
+    targetType: "volume",
+    c1Equation: "moles = concentration × volume (in dm³)",
+    c1Options: ["moles = concentration × volume (in dm³)", "moles = mass ÷ Mr", "volume = moles × 24", "concentration = moles ÷ volume"],
+    c1Answer: 0.1,
+    c3Equation: "volume = moles ÷ concentration",
+    c3Options: ["volume = moles ÷ concentration", "mass = moles × Mr", "concentration = moles × volume", "moles = concentration × volume"],
+    finalAnswer: 200.0
+  },
+  {
+    equation: "2C₂H₆ + 7O₂ → 4CO₂ + 6H₂O",
+    mrData: { "C₂H₆": 30, "O₂": 32, "CO₂": 44, "H₂O": 18 },
+    coefficients: { "C₂H₆": 2, "O₂": 7, "CO₂": 4, "H₂O": 6 },
+    questionText: "What volume of CO₂ gas (in dm³) is produced when 30 g of C₂H₆ burns? (at RTP, 1 mol = 24 dm³)",
+    givenSubstance: "C₂H₆",
+    givenQuantity: 30,
+    givenUnit: "g",
+    givenType: "mass",
+    targetSubstance: "CO₂",
+    targetUnit: "dm³",
+    targetType: "volume",
+    c1Equation: "moles = mass ÷ Mr",
+    c1Options: ["moles = mass ÷ Mr", "moles = volume ÷ 24", "moles = concentration × volume", "moles = Mr ÷ mass"],
+    c1Answer: 1.0,
+    c3Equation: "volume = moles × 24",
+    c3Options: ["volume = moles × 24", "mass = moles × Mr", "concentration = moles ÷ volume", "volume = moles ÷ 24"],
+    finalAnswer: 96.0
+  }
+];
+
+// ─── Calculator ───
+function toggleCalculator() {
+  const panel = document.getElementById('calculator-panel');
+  panel.classList.toggle('hidden');
+  lucide.createIcons();
+}
+function calcInput(val) {
+  if (val === 'C') {
+    calcExpr = '0';
+  } else if (calcExpr === '0' && val !== '.' && isNaN(val) === false) {
+    calcExpr = val;
+  } else if (calcExpr === '0' && val === '.') {
+    calcExpr = '0.';
+  } else {
+    calcExpr += val;
+  }
+  updateCalcDisplay();
+}
+
+function updateCalcDisplay() {
+  const display = calcExpr.replace(/\*/g, '×').replace(/\//g, '÷');
+  document.getElementById('calc-display').textContent = display;
+}
+
+function calcEquals() {
+  try {
+    let expr = calcExpr.trim();
+    if (!expr || expr === '0') {
+      document.getElementById('calc-display').textContent = '0';
+      return;
+    }
+    
+    // Safe evaluation using math.js parser or basic evaluation
+    const result = evaluateMath(expr);
+    
+    if (typeof result === 'number' && isFinite(result)) {
+      const rounded = Math.round(result * 100000) / 100000;
+      calcExpr = String(rounded);
+      updateCalcDisplay();
+    } else {
+      showCalcError();
+    }
+  } catch (e) {
+    showCalcError();
+  }
+}
+
+function evaluateMath(expr) {
+  // Remove spaces
+  expr = expr.replace(/\s/g, '');
+  
+  // Tokenize and evaluate with proper operator precedence
+  return parseAddSub(expr, 0).value;
+}
+
+function parseAddSub(expr, pos) {
+  let result = parseMulDiv(expr, pos);
+  pos = result.pos;
+  
+  while (pos < expr.length && (expr[pos] === '+' || expr[pos] === '-')) {
+    const op = expr[pos];
+    pos++;
+    const right = parseMulDiv(expr, pos);
+    pos = right.pos;
+    result.value = op === '+' ? result.value + right.value : result.value - right.value;
+  }
+  
+  return { value: result.value, pos };
+}
+
+function parseMulDiv(expr, pos) {
+  let result = parseParens(expr, pos);
+  pos = result.pos;
+  
+  while (pos < expr.length && (expr[pos] === '*' || expr[pos] === '/')) {
+    const op = expr[pos];
+    pos++;
+    const right = parseParens(expr, pos);
+    pos = right.pos;
+    result.value = op === '*' ? result.value * right.value : result.value / right.value;
+  }
+  
+  return { value: result.value, pos };
+}
+
+function parseParens(expr, pos) {
+  if (expr[pos] === '(') {
+    pos++;
+    const result = parseAddSub(expr, pos);
+    pos = result.pos + 1; // skip closing )
+    return { value: result.value, pos };
+  }
+  
+  return parseNumber(expr, pos);
+}
+
+function parseNumber(expr, pos) {
+  let numStr = '';
+  let hasDecimal = false;
+  
+  while (pos < expr.length) {
+    const char = expr[pos];
+    if (char >= '0' && char <= '9') {
+      numStr += char;
+      pos++;
+    } else if (char === '.' && !hasDecimal) {
+      numStr += char;
+      hasDecimal = true;
+      pos++;
+    } else {
+      break;
+    }
+  }
+  
+  return { value: parseFloat(numStr || '0'), pos };
+}
+
+function showCalcError() {
+  document.getElementById('calc-display').textContent = 'Error';
+  setTimeout(() => {
+    calcExpr = '0';
+    document.getElementById('calc-display').textContent = '0';
+  }, 1500);
+}
+
+// ─── Helpers ───
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function updateStepIndicators() {
+  for (let i = 0; i <= 7; i++) {
+    const circle = document.getElementById(`step-${i}-circle`);
+    const badge = circle.closest('.step-badge');
+    if (i < currentStep) {
+      circle.style.background = '#065f46';
+      circle.style.color = '#10b981';
+      badge.classList.remove('active');
+    } else if (i === currentStep) {
+      circle.style.background = '#10b981';
+      circle.style.color = '#0c0f1a';
+      badge.classList.add('active');
+    } else {
+      circle.style.background = '#1a1f35';
+      circle.style.color = '#475569';
+      badge.classList.remove('active');
+    }
+  }
+}
+
+function updateScore() {
+  document.getElementById('score-display').textContent = `${score}/${totalAnswered}`;
+}
+
+function renderMrTable(mrData) {
+  let rows = '';
+  for (const [sub, mr] of Object.entries(mrData)) {
+    rows += `<div class="flex justify-between px-3 py-1.5 rounded" style="background:#0c0f1a;">
+      <span class="mono text-sm" style="color:#94a3b8;">${sub}</span>
+      <span class="mono text-sm font-600" style="color:#e2e8f0;">${mr}</span>
+    </div>`;
+  }
+  return `<div class="mt-3 p-3 rounded-xl" style="background:#131833;border:1px solid #1e2740;">
+    <div class="flex items-center gap-2 mb-2">
+      <i data-lucide="info" style="width:14px;height:14px;color:#10b981;"></i>
+      <span class="text-xs font-600" style="color:#10b981;">Relative Formula Mass (Mr)</span>
+    </div>
+    <div class="grid gap-1.5">${rows}</div>
+  </div>`;
+}
+
+function makeOptionButtons(options, correctIndex, onCorrect) {
+  const shuffled = options.map((text, i) => ({ text, isCorrect: i === correctIndex }));
+  const mixed = shuffleArray(shuffled);
+  let html = '<div class="grid gap-2 mt-4">';
+  mixed.forEach((opt, idx) => {
+    html += `<button class="option-btn text-left px-4 py-3 rounded-xl text-sm font-500 mono" 
+      style="background:#1a1f35;color:#e2e8f0;border:1px solid #2a3352;" 
+      data-correct="${opt.isCorrect}" id="opt-${idx}"
+      onclick="handleOption(this, ${opt.isCorrect}, '${onCorrect}')">${opt.text}</button>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+function handleOption(btn, isCorrect, callbackName) {
+  const allBtns = btn.parentElement.querySelectorAll('.option-btn');
+  allBtns.forEach(b => b.disabled = true);
+  if (isCorrect) {
+    btn.style.background = '#065f46';
+    btn.style.borderColor = '#10b981';
+    btn.style.color = '#10b981';
+    btn.classList.add('correct');
+    score++;
+    totalAnswered++;
+    updateScore();
+    setTimeout(() => { window[callbackName](); }, 800);
+  } else {
+    btn.style.background = '#7f1d1d';
+    btn.style.borderColor = '#ef4444';
+    btn.style.color = '#fca5a5';
+    btn.classList.add('wrong');
+    allBtns.forEach(b => {
+      if (b.dataset.correct === 'true') {
+        b.style.background = '#065f46';
+        b.style.borderColor = '#10b981';
+        b.style.color = '#10b981';
+      }
+    });
+    totalAnswered++;
+    updateScore();
+    // Show next button instead of auto-advancing
+    showNextButton(callbackName);
+  }
+}
+
+function handleNumericSubmit(inputId, correctAnswer, callbackName, tolerance) {
+  const input = document.getElementById(inputId);
+  const val = parseFloat(input.value);
+  const feedback = document.getElementById(inputId + '-feedback');
+  const btn = document.getElementById(inputId + '-btn');
+  btn.disabled = true;
+  input.disabled = true;
+  const tol = tolerance || 0.05;
+  if (!isNaN(val) && Math.abs(val - correctAnswer) <= tol) {
+    feedback.innerHTML = `<span style="color:#10b981;">✓ Correct! The answer is ${correctAnswer}</span>`;
+    input.style.borderColor = '#10b981';
+    score++;
+    totalAnswered++;
+    updateScore();
+    setTimeout(() => { window[callbackName](); }, 1200);
+  } else {
+    feedback.innerHTML = `<span style="color:#ef4444;">✗ The correct answer is ${correctAnswer}</span>`;
+    input.style.borderColor = '#ef4444';
+    totalAnswered++;
+    updateScore();
+    // Show next button instead of auto-advancing
+    setTimeout(() => { showNextButton(callbackName); }, 1200);
+  }
+}
+
+function showNextButton(callbackName) {
+  const container = document.getElementById('content-area');
+  let nextBtn = container.querySelector('#continue-btn');
+  if (!nextBtn) {
+    nextBtn = document.createElement('button');
+    nextBtn.id = 'continue-btn';
+    nextBtn.textContent = 'Continue →';
+    nextBtn.style.cssText = 'margin-top:1.25rem;width:100%;padding:0.75rem;border-radius:0.75rem;font-size:0.875rem;font-weight:700;background:#10b981;color:#0c0f1a;cursor:pointer;border:none;';
+    nextBtn.onclick = () => { window[callbackName](); };
+    const contentArea = document.getElementById('content-area');
+    contentArea.appendChild(nextBtn);
+  }
+}
+
+// ─── Step Renderers ───
+function startRound() {
+  roundNum++;
+  currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+  currentStep = 0;
+  updateStepIndicators();
+  renderStep0();
+}
+
+// Step 0: Show the question
+function renderStep0() {
+  currentStep = 0;
+  updateStepIndicators();
+  const q = currentQuestion;
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700 mono" style="background:#10b981;color:#0c0f1a;">ROUND ${roundNum}</span>
+        <span class="text-xs font-500" style="color:#64748b;">Read the question carefully</span>
+      </div>
+      <div class="p-5 rounded-2xl glow" style="background:#131833;border:1px solid #1e2740;">
+        <div class="mb-3">
+          <span class="text-xs font-600 uppercase tracking-wider" style="color:#f59e0b;">Balanced Equation</span>
+          <p class="mono text-lg font-600 mt-1" style="color:#e2e8f0;">${q.equation}</p>
+        </div>
+        <div class="mt-4 p-4 rounded-xl" style="background:#0c0f1a;">
+          <p class="text-base font-500 leading-relaxed" style="color:#e2e8f0;">${q.questionText}</p>
+        </div>
+        <div class="mt-4 p-3 rounded-xl" style="background:#0c0f1a;border:1px solid #1e2740;">
+          <div class="flex items-center gap-2 mb-3">
+            <i data-lucide="lightbulb" style="width:14px;height:14px;color:#f59e0b;"></i>
+            <span class="text-xs font-600" style="color:#f59e0b;">3C Method Overview</span>
+          </div>
+          <div class="space-y-2">
+            <div class="flex gap-2">
+              <span class="px-2.5 py-0.5 rounded-lg text-xs font-700" style="background:#3b82f6;color:#fff;">C1</span>
+              <div>
+                <p class="text-xs font-600" style="color:#e2e8f0;">Convert to Moles</p>
+                <p class="text-xs" style="color:#64748b;">Convert the given quantity to moles using Mr or concentration</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <span class="px-2.5 py-0.5 rounded-lg text-xs font-700" style="background:#8b5cf6;color:#fff;">C2</span>
+              <div>
+                <p class="text-xs font-600" style="color:#e2e8f0;">Compare Mole Ratio</p>
+                <p class="text-xs" style="color:#64748b;">Use stoichiometry to find moles of the target substance</p>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <span class="px-2.5 py-0.5 rounded-lg text-xs font-700" style="background:#f59e0b;color:#0c0f1a;">C3</span>
+              <div>
+                <p class="text-xs font-600" style="color:#e2e8f0;">Convert from Moles</p>
+                <p class="text-xs" style="color:#64748b;">Convert moles to the final answer (mass or volume)</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button onclick="goToStep1()" class="mt-5 w-full py-3 rounded-xl text-sm font-700 hover:opacity-90" style="background:#10b981;color:#0c0f1a;">
+        Start Solving →
+      </button>
+    </div>`;
+  lucide.createIcons();
+}
+
+// Step 1: C1 - Identify given substance
+function goToStep1() {
+  const q = currentQuestion;
+  // Skip C1 if not needed
+  if (q.skipC1) {
+    c1Moles = q.c1Answer;
+    goToStep4();
+    return;
+  }
+  
+  currentStep = 1;
+  updateStepIndicators();
+  const substances = Object.keys(q.mrData);
+  const options = substances.map(s => s);
+  const correctIdx = options.indexOf(q.givenSubstance);
+  const shuffled = options.map((text, i) => ({ text, isCorrect: i === correctIdx }));
+  const mixed = shuffleArray(shuffled);
+
+  let btns = '<div class="grid gap-2 mt-4">';
+  mixed.forEach((opt, idx) => {
+    btns += `<button class="option-btn text-left px-4 py-3 rounded-xl text-sm font-500 mono" 
+      style="background:#1a1f35;color:#e2e8f0;border:1px solid #2a3352;" 
+      data-correct="${opt.isCorrect}" id="s1-opt-${idx}"
+      onclick="handleOption(this, ${opt.isCorrect}, 'goToStep2')">${opt.text}</button>`;
+  });
+  btns += '</div>';
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#3b82f6;color:#fff;">C1: CONVERT TO MOLES</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <p class="text-base font-600 mb-1" style="color:#e2e8f0;">Which substance do we have quantity information for?</p>
+        <p class="text-xs mt-1" style="color:#64748b;">Identify the substance whose amount (in ${q.givenUnit}) is given in the question.</p>
+        ${btns}
+      </div>
+    </div>`;
+}
+
+// Step 2: C1 - Select equation for converting to moles
+function goToStep2() {
+  currentStep = 2;
+  updateStepIndicators();
+  const q = currentQuestion;
+  const correctIdx = q.c1Options.indexOf(q.c1Equation);
+  const shuffled = q.c1Options.map((text, i) => ({ text, isCorrect: i === correctIdx }));
+  const mixed = shuffleArray(shuffled);
+
+  let btns = '<div class="grid gap-2 mt-4">';
+  mixed.forEach((opt, idx) => {
+    btns += `<button class="option-btn text-left px-4 py-3 rounded-xl text-sm font-500 mono" 
+      style="background:#1a1f35;color:#e2e8f0;border:1px solid #2a3352;" 
+      data-correct="${opt.isCorrect}" id="s2-opt-${idx}"
+      onclick="handleOption(this, ${opt.isCorrect}, 'goToStep3')">${opt.text}</button>`;
+  });
+  btns += '</div>';
+
+  // Show Mr only if the given type is mass
+  const showMr = q.givenType === 'mass' ? `<p class="text-xs" style="color:#64748b;">Mr = ${q.mrData[q.givenSubstance]}</p>` : '';
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#3b82f6;color:#fff;">C1: CONVERT TO MOLES</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">Given: <span class="font-600" style="color:#10b981;">${q.givenQuantity} ${q.givenUnit} of ${q.givenSubstance}</span></p>
+          ${showMr}
+        </div>
+        <p class="text-base font-600" style="color:#e2e8f0;">Which equation converts ${q.givenUnit} of ${q.givenSubstance} to moles?</p>
+        ${btns}
+      </div>
+    </div>`;
+}
+
+// Step 3: C1 - Compute moles
+function goToStep3() {
+  currentStep = 3;
+  updateStepIndicators();
+  const q = currentQuestion;
+  
+  // Show Mr only if the given type is mass
+  const showMr = q.givenType === 'mass' ? `<p class="text-xs" style="color:#64748b;">Mr = ${q.mrData[q.givenSubstance]}</p>` : '';
+  
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#3b82f6;color:#fff;">C1: CALCULATE MOLES</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">Using: <span class="mono font-600" style="color:#3b82f6;">${q.c1Equation}</span></p>
+          <p class="text-xs mt-1" style="color:#64748b;">${q.givenSubstance}: ${q.givenQuantity} ${q.givenUnit}</p>
+          ${showMr}
+        </div>
+        <p class="text-base font-600 mb-4" style="color:#e2e8f0;">Calculate the moles of ${q.givenSubstance}:</p>
+        <div class="flex gap-2">
+          <input type="number" step="any" id="c1-calc" class="flex-1 px-4 py-3 rounded-xl mono text-sm" style="background:#0c0f1a;color:#e2e8f0;border:1px solid #2a3352;" placeholder="Enter moles...">
+          <button id="c1-calc-btn" onclick="handleNumericSubmit('c1-calc', ${q.c1Answer}, 'goToStep4', 0.05)" class="px-5 py-3 rounded-xl text-sm font-700" style="background:#10b981;color:#0c0f1a;">Check</button>
+        </div>
+        <div id="c1-calc-feedback" class="mt-2 text-sm font-500"></div>
+        <p class="text-xs mt-3" style="color:#475569;">💡 Use the calculator (top-right) if needed</p>
+      </div>
+    </div>`;
+  c1Moles = q.c1Answer;
+}
+
+// Step 4: C2 - Identify target substance
+function goToStep4() {
+  currentStep = 4;
+  updateStepIndicators();
+  const q = currentQuestion;
+  const substances = Object.keys(q.mrData).filter(s => s !== q.givenSubstance);
+  const options = [...substances];
+  if (!options.includes(q.givenSubstance)) options.push(q.givenSubstance);
+  const correctIdx = options.indexOf(q.targetSubstance);
+  const shuffled = options.map((text, i) => ({ text, isCorrect: i === correctIdx }));
+  const mixed = shuffleArray(shuffled);
+
+  let btns = '<div class="grid gap-2 mt-4">';
+  mixed.forEach((opt, idx) => {
+    btns += `<button class="option-btn text-left px-4 py-3 rounded-xl text-sm font-500 mono" 
+      style="background:#1a1f35;color:#e2e8f0;border:1px solid #2a3352;" 
+      data-correct="${opt.isCorrect}" id="s4-opt-${idx}"
+      onclick="handleOption(this, ${opt.isCorrect}, 'goToStep5')">${opt.text}</button>`;
+  });
+  btns += '</div>';
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#8b5cf6;color:#fff;">C2: COMPARE MOLE RATIO</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">We found: <span class="font-600" style="color:#10b981;">${q.c1Answer} mol of ${q.givenSubstance}</span></p>
+        </div>
+        <p class="text-base font-600" style="color:#e2e8f0;">Which substance does the question ask us to find?</p>
+        ${btns}
+      </div>
+    </div>`;
+}
+
+// Step 5: C2 - Select mole ratio and compute target moles
+function goToStep5() {
+  currentStep = 5;
+  updateStepIndicators();
+  const q = currentQuestion;
+  const givenCoeff = q.coefficients[q.givenSubstance];
+  const targetCoeff = q.coefficients[q.targetSubstance];
+  
+  // Simplify ratio to lowest terms
+  const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+  const divisor = gcd(givenCoeff, targetCoeff);
+  const simplifiedGiven = givenCoeff / divisor;
+  const simplifiedTarget = targetCoeff / divisor;
+  const correctRatio = `${simplifiedGiven} : ${simplifiedTarget}`;
+  
+  // Build ratio options - ensure no duplicates and avoid showing multiples of 1:1
+  let ratioOptions = [correctRatio];
+  const possibleRatios = [
+    `${simplifiedTarget} : ${simplifiedGiven}`,  // reversed
+    `2 : 1`,
+    `1 : 2`,
+    `3 : 1`,
+    `1 : 3`,
+    `2 : 3`,
+    `3 : 2`,
+    `4 : 1`,
+    `1 : 4`,
+    `3 : 4`,
+    `4 : 3`
+  ];
+  
+  // Filter out multiples of the correct ratio and avoid duplicates
+  possibleRatios.forEach(r => {
+    if (!ratioOptions.includes(r) && ratioOptions.length < 4) {
+      // Don't include multiples of 1:1 if the answer is 1:1
+      if (correctRatio === '1 : 1' && (r === '2 : 2' || r === '3 : 3')) return;
+      ratioOptions.push(r);
+    }
+  });
+  
+  while (ratioOptions.length < 4) {
+    const newRatio = `${Math.floor(Math.random()*4)+1} : ${Math.floor(Math.random()*4)+1}`;
+    if (!ratioOptions.includes(newRatio)) ratioOptions.push(newRatio);
+  }
+  
+  c2Moles = (q.c1Answer / givenCoeff) * targetCoeff;
+  c2Moles = Math.round(c2Moles * 10000) / 10000;
+
+  const correctIdx = 0;
+  const shuffled = ratioOptions.map((text, i) => ({ text: `${q.givenSubstance} : ${q.targetSubstance} = ${text}`, isCorrect: i === correctIdx }));
+  const mixed = shuffleArray(shuffled);
+
+  let btns = '<div class="grid gap-2 mt-4">';
+  mixed.forEach((opt, idx) => {
+    btns += `<button class="option-btn text-left px-4 py-3 rounded-xl text-sm font-500 mono" 
+      style="background:#1a1f35;color:#e2e8f0;border:1px solid #2a3352;" 
+      data-correct="${opt.isCorrect}" id="s5-opt-${idx}"
+      onclick="handleOption(this, ${opt.isCorrect}, 'goToStep5b')">${opt.text}</button>`;
+  });
+  btns += '</div>';
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#8b5cf6;color:#fff;">C2: COMPARE MOLE RATIO</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">We have <span class="font-600" style="color:#10b981;">${q.c1Answer} mol of ${q.givenSubstance}</span> and need to find mol of <span class="font-600" style="color:#f59e0b;">${q.targetSubstance}</span></p>
+        </div>
+        <p class="text-base font-600" style="color:#e2e8f0;">What is the mole ratio of ${q.givenSubstance} to ${q.targetSubstance}?</p>
+        <p class="text-xs mt-1" style="color:#64748b;">Look at the coefficients in the balanced equation.</p>
+        ${btns}
+      </div>
+    </div>`;
+}
+
+// Step 5b: Calculate moles of target
+function goToStep5b() {
+  const q = currentQuestion;
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#8b5cf6;color:#fff;">C2: FIND MOLES OF ${q.targetSubstance.toUpperCase()}</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">Moles of ${q.givenSubstance} = <span class="font-600" style="color:#10b981;">${q.c1Answer}</span></p>
+          <p class="text-xs mt-1" style="color:#64748b;">Ratio ${q.givenSubstance}:${q.targetSubstance} = <span class="font-600" style="color:#8b5cf6;">${q.coefficients[q.givenSubstance]}:${q.coefficients[q.targetSubstance]}</span></p>
+        </div>
+        <p class="text-base font-600 mb-4" style="color:#e2e8f0;">Calculate the moles of ${q.targetSubstance}:</p>
+        <div class="flex gap-2">
+          <input type="number" step="any" id="c2-calc" class="flex-1 px-4 py-3 rounded-xl mono text-sm" style="background:#0c0f1a;color:#e2e8f0;border:1px solid #2a3352;" placeholder="Enter moles...">
+          <button id="c2-calc-btn" onclick="handleNumericSubmit('c2-calc', ${c2Moles}, 'goToStep6', 0.05)" class="px-5 py-3 rounded-xl text-sm font-700" style="background:#10b981;color:#0c0f1a;">Check</button>
+        </div>
+        <div id="c2-calc-feedback" class="mt-2 text-sm font-500"></div>
+        <p class="text-xs mt-3" style="color:#475569;">💡 moles of ${q.targetSubstance} = moles of ${q.givenSubstance} × (${q.coefficients[q.targetSubstance]} ÷ ${q.coefficients[q.givenSubstance]})</p>
+      </div>
+    </div>`;
+}
+
+// Step 6: C3 - Select equation for converting from moles
+function goToStep6() {
+  const q = currentQuestion;
+  // Skip C3 if not needed
+  if (q.skipC3) {
+    showSummary();
+    return;
+  }
+  
+  currentStep = 6;
+  updateStepIndicators();
+  const correctIdx = q.c3Options.indexOf(q.c3Equation);
+  const shuffled = q.c3Options.map((text, i) => ({ text, isCorrect: i === correctIdx }));
+  const mixed = shuffleArray(shuffled);
+
+  let btns = '<div class="grid gap-2 mt-4">';
+  mixed.forEach((opt, idx) => {
+    btns += `<button class="option-btn text-left px-4 py-3 rounded-xl text-sm font-500 mono" 
+      style="background:#1a1f35;color:#e2e8f0;border:1px solid #2a3352;" 
+      data-correct="${opt.isCorrect}" id="s6-opt-${idx}"
+      onclick="handleOption(this, ${opt.isCorrect}, 'goToStep7')">${opt.text}</button>`;
+  });
+  btns += '</div>';
+
+  // Show Mr only if the target type is mass
+  const showMr = q.targetType === 'mass' ? `<p class="text-xs" style="color:#64748b;">Mr of ${q.targetSubstance} = ${q.mrData[q.targetSubstance]}</p>` : '';
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#f59e0b;color:#0c0f1a;">C3: CONVERT FROM MOLES</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">We have <span class="font-600" style="color:#8b5cf6;">${c2Moles} mol of ${q.targetSubstance}</span></p>
+          <p class="text-xs mt-1" style="color:#64748b;">We need the answer in: <span class="font-600" style="color:#f59e0b;">${q.targetUnit}</span></p>
+          ${showMr}
+        </div>
+        <p class="text-base font-600" style="color:#e2e8f0;">Which equation converts moles of ${q.targetSubstance} to ${q.targetUnit}?</p>
+        ${btns}
+      </div>
+    </div>`;
+}
+
+// Step 7: C3 - Final calculation
+function goToStep7() {
+  currentStep = 7;
+  updateStepIndicators();
+  const q = currentQuestion;
+  
+  // Show Mr only if the target type is mass
+  const showMr = q.targetType === 'mass' ? `<p class="text-xs" style="color:#64748b;">Mr = ${q.mrData[q.targetSubstance]}</p>` : '';
+  
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-4 rounded-xl mb-4" style="background:#0c0f1a;border-left:3px solid #10b981;">
+        <p class="text-xs mono mb-1" style="color:#64748b;">Question</p>
+        <p class="text-sm font-500" style="color:#e2e8f0;">${q.questionText}</p>
+        <p class="text-xs mono mt-2" style="color:#94a3b8;">Equation: ${q.equation}</p>
+      </div>
+      <div class="flex items-center gap-2 mb-4">
+        <span class="px-2.5 py-1 rounded-lg text-xs font-700" style="background:#f59e0b;color:#0c0f1a;">C3: FINAL ANSWER</span>
+      </div>
+      <div class="p-5 rounded-2xl" style="background:#131833;border:1px solid #1e2740;">
+        <div class="p-3 rounded-lg mb-4" style="background:#0c0f1a;">
+          <p class="text-xs" style="color:#64748b;">Using: <span class="mono font-600" style="color:#f59e0b;">${q.c3Equation}</span></p>
+          <p class="text-xs mt-1" style="color:#64748b;">Moles of ${q.targetSubstance} = ${c2Moles}</p>
+          ${showMr}
+        </div>
+        <p class="text-base font-600 mb-4" style="color:#e2e8f0;">Calculate the final answer (${q.targetUnit}):</p>
+        <div class="flex gap-2">
+          <input type="number" step="any" id="c3-calc" class="flex-1 px-4 py-3 rounded-xl mono text-sm" style="background:#0c0f1a;color:#e2e8f0;border:1px solid #2a3352;" placeholder="Enter ${q.targetUnit}...">
+          <button id="c3-calc-btn" onclick="handleNumericSubmit('c3-calc', ${q.finalAnswer}, 'showSummary', 0.2)" class="px-5 py-3 rounded-xl text-sm font-700" style="background:#10b981;color:#0c0f1a;">Check</button>
+        </div>
+        <div id="c3-calc-feedback" class="mt-2 text-sm font-500"></div>
+        <p class="text-xs mt-3" style="color:#475569;">💡 Use the calculator (top-right) if needed</p>
+      </div>
+    </div>`;
+}
+
+// Summary
+function showSummary() {
+  const q = currentQuestion;
+  const pct = totalAnswered > 0 ? Math.round((score / totalAnswered) * 100) : 0;
+  let grade = '🔴';
+  let gradeText = 'Keep practising!';
+  if (pct >= 90) { grade = '🟢'; gradeText = 'Excellent!'; }
+  else if (pct >= 70) { grade = '🟡'; gradeText = 'Good work!'; }
+  else if (pct >= 50) { grade = '🟠'; gradeText = 'Getting there!'; }
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="fade-in">
+      <div class="p-6 rounded-2xl text-center glow" style="background:#131833;border:1px solid #1e2740;">
+        <div class="text-5xl mb-3">${grade}</div>
+        <h2 class="text-xl font-700" style="color:#e2e8f0;">Round ${roundNum} Complete!</h2>
+        <p class="text-sm mt-1" style="color:#64748b;">${gradeText}</p>
+        
+        <div class="grid grid-cols-3 gap-3 mt-5 mb-5">
+          <div class="p-3 rounded-xl" style="background:#0c0f1a;">
+            <p class="text-2xl font-800 mono" style="color:#10b981;">${score}</p>
+            <p class="text-xs" style="color:#64748b;">Correct</p>
+          </div>
+          <div class="p-3 rounded-xl" style="background:#0c0f1a;">
+            <p class="text-2xl font-800 mono" style="color:#e2e8f0;">${totalAnswered}</p>
+            <p class="text-xs" style="color:#64748b;">Total</p>
+          </div>
+          <div class="p-3 rounded-xl" style="background:#0c0f1a;">
+            <p class="text-2xl font-800 mono" style="color:#f59e0b;">${pct}%</p>
+            <p class="text-xs" style="color:#64748b;">Accuracy</p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl text-left mb-5" style="background:#0c0f1a;">
+          <p class="text-xs font-600 mb-2" style="color:#10b981;">Solution Summary</p>
+          <p class="text-xs mono mb-1" style="color:#94a3b8;">C1: ${q.givenQuantity} ${q.givenUnit} ${q.givenSubstance} → ${q.c1Answer} mol</p>
+          <p class="text-xs mono mb-1" style="color:#94a3b8;">C2: ${q.c1Answer} mol ${q.givenSubstance} → ${c2Moles} mol ${q.targetSubstance}</p>
+          <p class="text-xs mono" style="color:#94a3b8;">C3: ${c2Moles} mol ${q.targetSubstance} → ${q.finalAnswer} ${q.targetUnit}</p>
+        </div>
+
+        <button onclick="startRound()" class="w-full py-3 rounded-xl text-sm font-700 hover:opacity-90" style="background:#10b981;color:#0c0f1a;">
+          Next Question →
+        </button>
+      </div>
+    </div>`;
+}
+
+// ─── Element SDK Init ───
+const defaultConfig = {
+  app_title: 'Chemical Calculation Trainer',
+  subtitle_text: '3C: Step by Step',
+  background_color: '#0c0f1a',
+  surface_color: '#131833',
+  text_color: '#e2e8f0',
+  primary_action_color: '#10b981',
+  secondary_action_color: '#f59e0b',
+  font_family: 'Outfit',
+  font_size: 16
+};
+
+function applyConfig(config) {
+  const bg = config.background_color || defaultConfig.background_color;
+  const surface = config.surface_color || defaultConfig.surface_color;
+  const text = config.text_color || defaultConfig.text_color;
+  const primary = config.primary_action_color || defaultConfig.primary_action_color;
+  const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+  const font = config.font_family || defaultConfig.font_family;
+  const fontSize = config.font_size || defaultConfig.font_size;
+
+  document.getElementById('app').style.background = bg;
+  document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+  document.getElementById('app-title').style.color = primary;
+  document.getElementById('app-subtitle').textContent = config.subtitle_text || defaultConfig.subtitle_text;
+  document.getElementById('app-subtitle').style.color = config.text_color ? text : '#64748b';
+  
+  document.body.style.fontFamily = `${font}, Outfit, sans-serif`;
+  document.getElementById('app-title').style.fontSize = `${fontSize * 1.5}px`;
+  document.getElementById('app-subtitle').style.fontSize = `${fontSize * 0.875}px`;
+}
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => { applyConfig(config); },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); } },
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); } }
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['app_title', config.app_title || defaultConfig.app_title],
+    ['subtitle_text', config.subtitle_text || defaultConfig.subtitle_text]
+  ])
+});
+
+// ─── Start ───
+startRound();
+lucide.createIcons();
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9df1544fb35ffcf8',t:'MTc3Mzk3NDE4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
