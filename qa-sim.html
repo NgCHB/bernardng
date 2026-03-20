@@ -1,0 +1,1017 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cation Reactions</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+    
+    @import url('https://fonts.googleapis.com/css2?family=Karla:wght@400;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Karla', sans-serif;
+    }
+    
+    .test-tube {
+      position: relative;
+      width: 35px;
+      height: 200px;
+      background: linear-gradient(to right, 
+        rgba(255, 255, 255, 0.25) 0%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.25) 100%);
+      border: 2.5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 0 0 18px 18px;
+      overflow: hidden;
+      box-shadow: 
+        inset -2px 0 6px rgba(255, 255, 255, 0.25),
+        inset 2px 0 6px rgba(0, 0, 0, 0.08),
+        0 3px 15px rgba(0, 0, 0, 0.15);
+    }
+    
+    .test-tube::before {
+      content: '';
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 9px;
+      height: 25px;
+      background: linear-gradient(to right, 
+        rgba(255, 255, 255, 0.25),
+        rgba(255, 255, 255, 0.08));
+      border: 2.5px solid rgba(255, 255, 255, 0.4);
+      border-bottom: none;
+      border-radius: 4.5px 4.5px 0 0;
+    }
+    
+    .solution {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 60px;
+      transition: height 1s ease-out, background-color 1s ease-in-out;
+    }
+    
+    .precipitate {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 0;
+      background: transparent;
+      opacity: 0;
+      transition: height 1s ease-out, opacity 0.8s ease-out;
+    }
+    
+    .precipitate-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0;
+      box-shadow: 0 0 2px rgba(255, 255, 255, 0.7);
+      animation: precipitate-fall 1.8s ease-out forwards;
+    }
+    
+    @keyframes precipitate-fall {
+      0% {
+        opacity: 0;
+        transform: translateY(-15px);
+      }
+      20% {
+        opacity: 0.85;
+      }
+      100% {
+        opacity: 0.85;
+        transform: translateY(0);
+      }
+    }
+    
+    .precipitate-particle.dissolving {
+      animation: dissolve 1.3s ease-out forwards;
+    }
+    
+    @keyframes dissolve {
+      0% {
+        opacity: 0.85;
+        transform: scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.2);
+      }
+    }
+    
+    .droplet {
+      position: absolute;
+      width: 7px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.65);
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      opacity: 0;
+      animation: drop 1.3s ease-in forwards;
+    }
+    
+    @keyframes drop {
+      0% {
+        opacity: 1;
+        transform: translateY(-80px);
+      }
+      70% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(200px);
+      }
+    }
+    
+    .observation-box {
+      min-height: 120px;
+      transition: all 0.3s ease;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.4s ease-in forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .cation-card {
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    
+    .cation-card:hover {
+      transform: translateY(-3px);
+    }
+    
+    .cation-card.active {
+      transform: scale(1.02);
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.4);
+      border: 2px solid rgba(139, 92, 246, 0.8);
+    }
+    
+    .stage-button {
+      transition: all 0.2s ease;
+    }
+    
+    .stage-button:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+    
+    .stage-button:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+    
+    .stage-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .reagent-button {
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .reagent-button:hover {
+      transform: translateY(-2px);
+    }
+    
+    .reagent-button.active {
+      border-width: 3px;
+    }
+    
+    .deprecated-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .heat-wave {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 40px;
+      height: 30px;
+      opacity: 0;
+    }
+    
+    .heat-wave.active {
+      animation: heatRise 2s ease-in-out infinite;
+    }
+    
+    @keyframes heatRise {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0) scaleX(1);
+      }
+      50% {
+        opacity: 0.6;
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-60px) scaleX(1.5);
+      }
+    }
+    
+    .litmus-paper {
+      position: absolute;
+      top: -35px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 12px;
+      height: 45px;
+      background: #ff6b6b;
+      border-radius: 2px;
+      opacity: 0;
+      border: 1px solid rgba(200, 100, 100, 0.5);
+      transition: opacity 0.5s ease;
+    }
+    
+    .litmus-paper.visible {
+      opacity: 1;
+    }
+    
+    .litmus-paper.turning-blue {
+      animation: turnBlue 3s ease-in-out forwards;
+    }
+    
+    @keyframes turnBlue {
+      0% {
+        background: linear-gradient(to bottom, #ff6b6b 0%, #ff6b6b 50%, #ff6b6b 50%, #ff6b6b 100%);
+      }
+      100% {
+        background: linear-gradient(to bottom, #ff6b6b 0%, #ff6b6b 50%, #4a90e2 50%, #4a90e2 100%);
+      }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto"></div>
+  <script>
+    const defaultConfig = {
+      background_color: "#1a1625",
+      surface_color: "#2d2438",
+      text_color: "#f3f4f6",
+      primary_action_color: "#8b5cf6",
+      secondary_action_color: "#6b7280",
+      font_family: "Karla",
+      font_size: 15,
+      main_title: "Cation Reactions with Sodium Hydroxide & Aqueous Ammonia",
+      subtitle: "Interactive O-Level Chemistry Demonstrations",
+      reset_label: "Reset All"
+    };
+
+    let config = {};
+    let currentCation = null;
+    let currentStage = 'initial';
+    let currentReagent = 'naoh';
+
+    const cations = {
+      calcium: {
+        name: "Calcium (Ca²⁺)",
+        initialColor: "rgba(200, 220, 255, 0.25)",
+        naoh: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(255, 255, 255, 0.92)",
+          excessPpt: "white",
+          particleCount: 75,
+          fewDropsObs: "A <strong>white precipitate</strong> of calcium hydroxide forms:",
+          fewDropsEq: "Ca²⁺(aq) + 2OH⁻(aq) → Ca(OH)��(s)",
+          excessObs: "The precipitate is <strong>slightly soluble</strong> in excess NaOH (remains mostly insoluble).",
+          excessEq: "Ca(OH)₂(s) — slightly soluble",
+          dissolves: false
+        },
+        ammonia: {
+          fewDropsColor: "rgba(220, 235, 255, 0.18)",
+          fewDropsPpt: "none",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 0,
+          fewDropsObs: "<strong>No precipitate</strong> forms. The solution remains colorless.",
+          fewDropsEq: "Ca²⁺(aq) + NH₃(aq) ��� no reaction",
+          excessObs: "<strong>No precipitate</strong> forms in excess ammonia. The solution remains colorless.",
+          excessEq: "No further reaction",
+          dissolves: false,
+          noPrecipitate: true
+        }
+      },
+      aluminium: {
+        name: "Aluminium (Al³⁺)",
+        initialColor: "rgba(200, 220, 255, 0.25)",
+        naoh: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 80,
+          fewDropsObs: "A <strong>white precipitate</strong> of aluminium hydroxide forms:",
+          fewDropsEq: "Al³⁺(aq) + 3OH⁻(aq) → Al(OH)₃(s)",
+          excessObs: "The precipitate <strong>dissolves</strong> in excess NaOH, forming a <strong>colorless solution</strong> of aluminate ions:",
+          excessEq: "Al(OH)₃(s) + OH⁻(aq) → [Al(OH)₄]⁻(aq)",
+          note: "Aluminium hydroxide is amphoteric.",
+          dissolves: true
+        },
+        ammonia: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(255, 255, 255, 0.92)",
+          excessPpt: "white",
+          particleCount: 80,
+          fewDropsObs: "A <strong>white precipitate</strong> of aluminium hydroxide forms:",
+          fewDropsEq: "Al³⁺(aq) + 3NH₃(aq) + 3H₂O(l) → Al(OH)₃(s) + 3NH₄⁺(aq)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess ammonia.",
+          excessEq: "Al(OH)₃(s) — insoluble",
+          dissolves: false
+        }
+      },
+      iron2: {
+        name: "Iron(II) (Fe²⁺)",
+        initialColor: "rgba(180, 255, 200, 0.25)",
+        naoh: {
+          fewDropsColor: "rgba(200, 245, 200, 0.5)",
+          fewDropsPpt: "rgba(128, 150, 90, 0.9)",
+          excessColor: "rgba(200, 245, 200, 0.5)",
+          excessPpt: "rgba(128, 150, 90, 0.9)",
+          particleCount: 70,
+          fewDropsObs: "A <strong>green precipitate</strong> of iron(II) hydroxide forms:",
+          fewDropsEq: "Fe²⁺(aq) + 2OH⁻(aq) → Fe(OH)₂(s)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess NaOH. On standing, it turns <strong>brown</strong> due to oxidation.",
+          excessEq: "4Fe(OH)₂(s) + O₂(g) + 2H₂O(l) → 4Fe(OH)₃(s)",
+          dissolves: false
+        },
+        ammonia: {
+          fewDropsColor: "rgba(200, 245, 200, 0.5)",
+          fewDropsPpt: "rgba(128, 150, 90, 0.9)",
+          excessColor: "rgba(200, 245, 200, 0.5)",
+          excessPpt: "rgba(128, 150, 90, 0.9)",
+          particleCount: 70,
+          fewDropsObs: "A <strong>green precipitate</strong> of iron(II) hydroxide forms:",
+          fewDropsEq: "Fe²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Fe(OH)₂(s) + 2NH₄⁺(aq)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess ammonia. On standing, it turns <strong>brown</strong> due to oxidation.",
+          excessEq: "4Fe(OH)₂(s) + O₂(g) + 2H₂O(l) → 4Fe(OH)₃(s)",
+          dissolves: false
+        }
+      },
+      iron3: {
+        name: "Iron(III) (Fe³⁺)",
+        initialColor: "rgba(255, 215, 150, 0.3)",
+        naoh: {
+          fewDropsColor: "rgba(205, 127, 50, 0.7)",
+          fewDropsPpt: "rgba(205, 127, 50, 0.85)",
+          excessColor: "rgba(205, 127, 50, 0.7)",
+          excessPpt: "rgba(205, 127, 50, 0.85)",
+          particleCount: 75,
+          fewDropsObs: "A <strong>reddish-brown precipitate</strong> of iron(III) hydroxide forms:",
+          fewDropsEq: "Fe³⁺(aq) + 3OH⁻(aq) → Fe(OH)₃(s)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess NaOH.",
+          excessEq: "Fe(OH)₃(s) — insoluble",
+          dissolves: false
+        },
+        ammonia: {
+          fewDropsColor: "rgba(205, 127, 50, 0.7)",
+          fewDropsPpt: "rgba(205, 127, 50, 0.85)",
+          excessColor: "rgba(205, 127, 50, 0.7)",
+          excessPpt: "rgba(205, 127, 50, 0.85)",
+          particleCount: 75,
+          fewDropsObs: "A <strong>reddish-brown precipitate</strong> of iron(III) hydroxide forms:",
+          fewDropsEq: "Fe³⁺(aq) + 3NH₃(aq) + 3H₂O(l) → Fe(OH)₃(s) + 3NH₄⁺(aq)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess ammonia.",
+          excessEq: "Fe(OH)₃(s) — insoluble",
+          dissolves: false
+        }
+      },
+      copper: {
+        name: "Copper(II) (Cu²⁺)",
+        initialColor: "rgba(100, 200, 255, 0.35)",
+        naoh: {
+          fewDropsColor: "rgba(100, 180, 255, 0.55)",
+          fewDropsPpt: "rgba(64, 165, 220, 0.85)",
+          excessColor: "rgba(100, 180, 255, 0.55)",
+          excessPpt: "rgba(64, 165, 220, 0.85)",
+          particleCount: 70,
+          fewDropsObs: "A <strong>blue precipitate</strong> of copper(II) hydroxide forms:",
+          fewDropsEq: "Cu²⁺(aq) + 2OH⁻(aq) → Cu(OH)₂(s)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess NaOH.",
+          excessEq: "Cu(OH)₂(s) — insoluble",
+          dissolves: false
+        },
+        ammonia: {
+          fewDropsColor: "rgba(100, 180, 255, 0.55)",
+          fewDropsPpt: "rgba(64, 165, 220, 0.85)",
+          excessColor: "rgba(30, 100, 200, 0.7)",
+          excessPpt: "none",
+          particleCount: 70,
+          fewDropsObs: "A <strong>blue precipitate</strong> of copper(II) hydroxide forms:",
+          fewDropsEq: "Cu²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Cu(OH)₂(s) + 2NH₄⁺(aq)",
+          excessObs: "The precipitate <strong>dissolves</strong> in excess ammonia, forming a <strong>deep blue solution</strong> of tetraamminecopper(II) complex:",
+          excessEq: "Cu(OH)₂(s) + 4NH₃(aq) → [Cu(NH₃)₄]²⁺(aq) + 2OH⁻(aq)",
+          dissolves: true
+        }
+      },
+      zinc: {
+        name: "Zinc (Zn²⁺)",
+        initialColor: "rgba(200, 220, 255, 0.25)",
+        naoh: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 85,
+          fewDropsObs: "A <strong>white precipitate</strong> of zinc hydroxide forms:",
+          fewDropsEq: "Zn²⁺(aq) + 2OH⁻(aq) → Zn(OH)₂(s)",
+          excessObs: "The precipitate <strong>dissolves</strong> in excess NaOH, forming a <strong>colorless solution</strong> of zincate ions:",
+          excessEq: "Zn(OH)₂(s) + 2OH⁻(aq) → [Zn(OH)₄]²⁻(aq)",
+          note: "Zinc hydroxide is amphoteric.",
+          dissolves: true
+        },
+        ammonia: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 85,
+          fewDropsObs: "A <strong>white precipitate</strong> of zinc hydroxide forms:",
+          fewDropsEq: "Zn²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Zn(OH)₂(s) + 2NH₄⁺(aq)",
+          excessObs: "The precipitate <strong>dissolves</strong> in excess ammonia, forming a <strong>colorless solution</strong> of tetraamminezinc(II) complex:",
+          excessEq: "Zn(OH)₂(s) + 4NH₃(aq) → [Zn(NH₃)₄]²⁺(aq) + 2OH��(aq)",
+          dissolves: true
+        }
+      },
+      ammonium: {
+        name: "Ammonium (NH₄⁺)",
+        initialColor: "rgba(200, 220, 255, 0.25)",
+        naoh: {
+          fewDropsColor: "rgba(220, 235, 255, 0.18)",
+          fewDropsPpt: "none",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 0,
+          fewDropsObs: "<strong>No precipitate</strong> forms. Ammonia gas is released (pungent smell):",
+          fewDropsEq: "NH₄⁺(aq) + OH⁻(aq) → NH₃(g) + H₂O(l)",
+          excessObs: "With excess NaOH and warming, more ammonia gas is released. Test with <strong>damp red litmus paper</strong> (turns blue).",
+          excessEq: "NH₃(g) — alkaline gas",
+          dissolves: false,
+          noPrecipitate: true
+        },
+        ammonia: {
+          fewDropsColor: "rgba(220, 235, 255, 0.18)",
+          fewDropsPpt: "none",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 0,
+          fewDropsObs: "<strong>No reaction</strong> occurs. Ammonium ions do not react with ammonia solution.",
+          fewDropsEq: "NH₄⁺(aq) + NH₃(aq) — no reaction",
+          excessObs: "<strong>No precipitate</strong> forms in excess ammonia.",
+          excessEq: "No further reaction",
+          dissolves: false,
+          noPrecipitate: true
+        }
+      },
+      lead: {
+        name: "Lead(II) (Pb²⁺)",
+        initialColor: "rgba(200, 220, 255, 0.25)",
+        naoh: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(220, 235, 255, 0.18)",
+          excessPpt: "none",
+          particleCount: 75,
+          fewDropsObs: "A <strong>white precipitate</strong> of lead(II) hydroxide forms:",
+          fewDropsEq: "Pb²⁺(aq) + 2OH⁻(aq) → Pb(OH)₂(s)",
+          excessObs: "The precipitate <strong>dissolves</strong> in excess NaOH, forming a <strong>colorless solution</strong> of plumbate ions:",
+          excessEq: "Pb(OH)₂(s) + 2OH⁻(aq) → [Pb(OH)₄]²⁻(aq)",
+          note: "Lead(II) hydroxide is amphoteric.",
+          dissolves: true
+        },
+        ammonia: {
+          fewDropsColor: "rgba(255, 255, 255, 0.92)",
+          fewDropsPpt: "white",
+          excessColor: "rgba(255, 255, 255, 0.92)",
+          excessPpt: "white",
+          particleCount: 75,
+          fewDropsObs: "A <strong>white precipitate</strong> of lead(II) hydroxide forms:",
+          fewDropsEq: "Pb²⁺(aq) + 2NH₃(aq) + 2H₂O(l) → Pb(OH)₂(s) + 2NH₄⁺(aq)",
+          excessObs: "The precipitate is <strong>insoluble</strong> in excess ammonia.",
+          excessEq: "Pb(OH)₂(s) — insoluble",
+          dissolves: false
+        },
+        deprecated: true
+      }
+    };
+
+    function selectReagent(reagent) {
+      currentReagent = reagent;
+      currentStage = 'initial';
+      
+      const naohBtn = document.getElementById('reagent-naoh');
+      const ammoniaBtn = document.getElementById('reagent-ammonia');
+      
+      if (reagent === 'naoh') {
+        naohBtn.classList.add('active');
+        naohBtn.style.borderColor = '#fff';
+        ammoniaBtn.classList.remove('active');
+        ammoniaBtn.style.borderColor = 'transparent';
+      } else {
+        ammoniaBtn.classList.add('active');
+        ammoniaBtn.style.borderColor = '#fff';
+        naohBtn.classList.remove('active');
+        naohBtn.style.borderColor = 'transparent';
+      }
+      
+      if (currentCation) {
+        resetTube();
+        updateObservation();
+        updateButtons();
+      }
+    }
+
+    function selectCation(cationKey) {
+      currentCation = cationKey;
+      currentStage = 'initial';
+      
+      const cards = document.querySelectorAll('.cation-card');
+      cards.forEach(card => card.classList.remove('active'));
+      document.getElementById(`card-${cationKey}`).classList.add('active');
+      
+      resetTube();
+      updateObservation();
+      updateButtons();
+    }
+
+    function resetTube() {
+      const solution = document.getElementById('solution');
+      const precipitate = document.getElementById('precipitate');
+      const heatWave = document.getElementById('heat-wave');
+      const litmusPaper = document.getElementById('litmus-paper');
+      
+      if (currentCation) {
+        const data = cations[currentCation];
+        solution.style.height = '60px';
+        solution.style.background = `linear-gradient(to top, ${data.initialColor}, ${data.initialColor})`;
+      } else {
+        solution.style.height = '60px';
+        solution.style.background = 'rgba(200, 220, 255, 0.25)';
+      }
+      
+      precipitate.style.height = '0';
+      precipitate.style.opacity = '0';
+      precipitate.innerHTML = '';
+      
+      // Clear heating and litmus animations
+      heatWave.classList.remove('active');
+      litmusPaper.classList.remove('visible', 'turning-blue');
+    }
+
+    function addDroplets(count) {
+      const container = document.getElementById('tube-container');
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+          const droplet = document.createElement('div');
+          droplet.className = 'droplet';
+          droplet.style.left = '14px';
+          droplet.style.top = '-80px';
+          container.appendChild(droplet);
+          setTimeout(() => droplet.remove(), 1300);
+        }, i * 180);
+      }
+    }
+
+    function createPrecipitateParticles(count, color) {
+      const precipitate = document.getElementById('precipitate');
+      const particles = [];
+      
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'precipitate-particle';
+        particle.style.background = color;
+        if (color !== 'white') {
+          particle.style.boxShadow = `0 0 2px ${color}`;
+        }
+        particle.style.left = (4 + Math.random() * 27) + 'px';
+        particle.style.bottom = (8 + Math.random() * 50) + 'px';
+        particle.style.animationDelay = (Math.random() * 0.7) + 's';
+        precipitate.appendChild(particle);
+        particles.push(particle);
+      }
+      
+      return particles;
+    }
+
+    function addFewDrops() {
+      if (!currentCation || currentStage !== 'initial') return;
+      
+      currentStage = 'fewdrops';
+      const reagentData = cations[currentCation][currentReagent];
+      addDroplets(4);
+      
+      setTimeout(() => {
+        const solution = document.getElementById('solution');
+        const precipitate = document.getElementById('precipitate');
+        
+        solution.style.background = `linear-gradient(to top, ${reagentData.fewDropsColor}, ${reagentData.fewDropsColor})`;
+        
+        if (!reagentData.noPrecipitate) {
+          precipitate.style.height = '60px';
+          precipitate.style.opacity = '1';
+          createPrecipitateParticles(reagentData.particleCount, reagentData.fewDropsPpt);
+        }
+      }, 800);
+      
+      updateObservation();
+      updateButtons();
+    }
+
+    function addExcess() {
+      if (!currentCation) return;
+      
+      if (currentStage === 'initial') {
+        addFewDrops();
+        setTimeout(() => {
+          if (currentStage === 'fewdrops') {
+            proceedWithExcess();
+          }
+        }, 2200);
+      } else if (currentStage === 'fewdrops') {
+        proceedWithExcess();
+      }
+    }
+
+    function proceedWithExcess() {
+      currentStage = 'excess';
+      const reagentData = cations[currentCation][currentReagent];
+      addDroplets(10);
+      
+      setTimeout(() => {
+        const solution = document.getElementById('solution');
+        const precipitate = document.getElementById('precipitate');
+        
+        solution.style.height = '120px';
+        solution.style.background = `linear-gradient(to top, ${reagentData.excessColor}, ${reagentData.excessColor})`;
+        
+        if (reagentData.dissolves) {
+          const particles = precipitate.querySelectorAll('.precipitate-particle');
+          particles.forEach((particle, index) => {
+            setTimeout(() => {
+              particle.classList.add('dissolving');
+            }, index * 12);
+          });
+          
+          setTimeout(() => {
+            precipitate.innerHTML = '';
+            precipitate.style.opacity = '0';
+          }, 1800);
+        } else {
+          precipitate.style.height = '120px';
+          const particles = precipitate.querySelectorAll('.precipitate-particle');
+          particles.forEach(particle => {
+            const currentBottom = parseFloat(particle.style.bottom);
+            const newBottom = currentBottom * 2;
+            particle.style.transition = 'bottom 1s ease-out';
+            particle.style.bottom = newBottom + 'px';
+          });
+        }
+        
+        // Special animation for ammonium with NaOH
+        if (currentCation === 'ammonium' && currentReagent === 'naoh') {
+          const heatWave = document.getElementById('heat-wave');
+          const litmusPaper = document.getElementById('litmus-paper');
+          
+          // Show heating animation after 1 second
+          setTimeout(() => {
+            heatWave.classList.add('active');
+            
+            // Show litmus paper after heating starts
+            setTimeout(() => {
+              litmusPaper.classList.add('visible');
+              
+              // Turn litmus paper blue after it appears
+              setTimeout(() => {
+                litmusPaper.classList.add('turning-blue');
+              }, 500);
+            }, 1000);
+          }, 1000);
+        }
+      }, 1200);
+      
+      updateObservation();
+      updateButtons();
+    }
+
+    function resetAll() {
+      currentCation = null;
+      currentStage = 'initial';
+      
+      const cards = document.querySelectorAll('.cation-card');
+      cards.forEach(card => card.classList.remove('active'));
+      
+      resetTube();
+      updateObservation();
+      updateButtons();
+    }
+
+    function updateObservation() {
+      const observation = document.getElementById('observation');
+      const textColor = config.text_color || defaultConfig.text_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      
+      const reagentName = currentReagent === 'naoh' ? 'NaOH' : 'NH₃';
+      
+      if (!currentCation) {
+        observation.innerHTML = `<p style="color: ${secondaryColor}">Select a cation above to begin.</p>`;
+        return;
+      }
+      
+      const reagentData = cations[currentCation][currentReagent];
+      
+      if (currentStage === 'initial') {
+        observation.innerHTML = `
+          <div class="fade-in">
+            <p style="color: ${secondaryColor}">Click "Few Drops" or "Excess" to add ${reagentName}.</p>
+          </div>
+        `;
+      } else if (currentStage === 'fewdrops') {
+        observation.innerHTML = `
+          <div class="fade-in">
+            <p class="font-bold mb-2" style="color: ${textColor}">Few Drops ${reagentName}:</p>
+            <p class="mb-2" style="color: ${textColor}">${reagentData.fewDropsObs}</p>
+            <p class="font-mono text-sm" style="color: ${secondaryColor}">${reagentData.fewDropsEq}</p>
+          </div>
+        `;
+      } else if (currentStage === 'excess') {
+        observation.innerHTML = `
+          <div class="fade-in">
+            <p class="font-bold mb-2" style="color: ${textColor}">Excess ${reagentName}:</p>
+            <p class="mb-2" style="color: ${textColor}">${reagentData.excessObs}</p>
+            <p class="font-mono text-sm mb-3" style="color: ${secondaryColor}">${reagentData.excessEq}</p>
+            ${reagentData.note ? `<p class="text-sm" style="color: ${textColor}"><em>${reagentData.note}</em></p>` : ''}
+          </div>
+        `;
+      }
+    }
+
+    function updateButtons() {
+      const fewBtn = document.getElementById('few-drops-btn');
+      const excessBtn = document.getElementById('excess-btn');
+      
+      const reagentName = currentReagent === 'naoh' ? 'NaOH' : 'NH₃';
+      fewBtn.textContent = `Few Drops ${reagentName}`;
+      excessBtn.textContent = `Excess ${reagentName}`;
+      
+      if (!currentCation) {
+        fewBtn.disabled = true;
+        excessBtn.disabled = true;
+      } else {
+        fewBtn.disabled = currentStage !== 'initial';
+        excessBtn.disabled = false;
+      }
+    }
+
+    async function onConfigChange(newConfig) {
+      const app = document.getElementById('app');
+      const baseSize = newConfig.font_size || defaultConfig.font_size;
+      const bgColor = newConfig.background_color || defaultConfig.background_color;
+      const surfaceColor = newConfig.surface_color || defaultConfig.surface_color;
+      const textColor = newConfig.text_color || defaultConfig.text_color;
+      const primaryColor = newConfig.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = newConfig.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontFamily = newConfig.font_family || defaultConfig.font_family;
+      
+      app.style.background = bgColor;
+      app.style.fontFamily = `${fontFamily}, sans-serif`;
+      
+      document.getElementById('main-title').textContent = newConfig.main_title || defaultConfig.main_title;
+      document.getElementById('main-title').style.fontSize = `${baseSize * 1.6}px`;
+      document.getElementById('main-title').style.color = textColor;
+      
+      document.getElementById('subtitle').textContent = newConfig.subtitle || defaultConfig.subtitle;
+      document.getElementById('subtitle').style.fontSize = `${baseSize}px`;
+      document.getElementById('subtitle').style.color = secondaryColor;
+      
+      const cards = document.querySelectorAll('.cation-card');
+      cards.forEach(card => {
+        card.style.background = surfaceColor;
+        card.style.fontSize = `${baseSize * 0.9}px`;
+        const title = card.querySelector('.cation-title');
+        if (title) title.style.color = textColor;
+      });
+      
+      const reagentBtns = document.querySelectorAll('.reagent-button');
+      reagentBtns.forEach(btn => {
+        btn.style.fontSize = `${baseSize * 0.85}px`;
+        const label = btn.querySelector('.reagent-label');
+        if (label) label.style.color = '#ffffff';
+      });
+      
+      const naohBtn = document.getElementById('reagent-naoh');
+      const ammoniaBtn = document.getElementById('reagent-ammonia');
+      naohBtn.style.background = '#d97706';
+      ammoniaBtn.style.background = '#059669';
+      
+      document.getElementById('few-drops-btn').style.fontSize = `${baseSize * 0.85}px`;
+      document.getElementById('few-drops-btn').style.background = primaryColor;
+      
+      document.getElementById('excess-btn').style.fontSize = `${baseSize * 0.85}px`;
+      document.getElementById('excess-btn').style.background = primaryColor;
+      
+      document.getElementById('reset-all-btn').textContent = newConfig.reset_label || defaultConfig.reset_label;
+      document.getElementById('reset-all-btn').style.fontSize = `${baseSize * 0.85}px`;
+      document.getElementById('reset-all-btn').style.background = secondaryColor;
+      
+      document.getElementById('observation-box').style.background = surfaceColor;
+      
+      const observationText = document.querySelectorAll('#observation p');
+      observationText.forEach(el => {
+        el.style.fontSize = `${baseSize * 0.85}px`;
+      });
+      
+      selectReagent(currentReagent);
+    }
+
+    function render() {
+      const app = document.getElementById('app');
+      const baseSize = config.font_size || defaultConfig.font_size;
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      
+      app.style.background = bgColor;
+      app.style.fontFamily = `${fontFamily}, sans-serif`;
+      
+      const cationCards = Object.entries(cations).map(([key, data]) => `
+        <div id="card-${key}" class="cation-card rounded-lg p-4 shadow-md" style="background: ${surfaceColor}; font-size: ${baseSize * 0.9}px" onclick="selectCation('${key}')">
+          <div class="cation-title font-bold mb-1" style="color: ${textColor}">${data.name}</div>
+          ${data.deprecated ? '<div class="deprecated-badge mt-2">Not in current syllabus</div>' : ''}
+        </div>
+      `).join('');
+      
+      app.innerHTML = `
+        <div class="min-h-full p-6 md:p-8">
+          <div class="max-w-6xl mx-auto">
+            <h1 id="main-title" class="font-bold text-center mb-2" style="font-size: ${baseSize * 1.6}px; color: ${textColor}">
+              ${config.main_title || defaultConfig.main_title}
+            </h1>
+            <p id="subtitle" class="text-center mb-6" style="font-size: ${baseSize}px; color: ${secondaryColor}">
+              ${config.subtitle || defaultConfig.subtitle}
+            </p>
+            
+            <div class="flex justify-center gap-3 mb-6">
+              <div id="reagent-naoh" class="reagent-button active rounded-lg p-3 shadow-md border-2" style="background: #d97706; border-color: #fff; font-size: ${baseSize * 0.85}px" onclick="selectReagent('naoh')">
+                <div class="reagent-label font-bold" style="color: #ffffff">Sodium Hydroxide (NaOH)</div>
+              </div>
+              <div id="reagent-ammonia" class="reagent-button rounded-lg p-3 shadow-md border-2" style="background: #059669; border-color: transparent; font-size: ${baseSize * 0.85}px" onclick="selectReagent('ammonia')">
+                <div class="reagent-label font-bold" style="color: #ffffff">Aqueous Ammonia (NH₃)</div>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              ${cationCards}
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="flex flex-col items-center">
+                <div id="tube-container" class="relative mb-5" style="height: 230px; width: 40px;">
+                  <div id="test-tube" class="test-tube">
+                    <div id="solution" class="solution"></div>
+                    <div id="precipitate" class="precipitate"></div>
+                  </div>
+                  <div id="litmus-paper" class="litmus-paper"></div>
+                  <svg id="heat-wave" class="heat-wave" viewBox="0 0 40 30">
+                    <path d="M 0,15 Q 5,5 10,15 T 20,15 T 30,15 T 40,15" stroke="#ff6b6b" stroke-width="2" fill="none" opacity="0.7"/>
+                    <path d="M 0,20 Q 5,10 10,20 T 20,20 T 30,20 T 40,20" stroke="#ff8c42" stroke-width="2" fill="none" opacity="0.5"/>
+                  </svg>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 justify-center">
+                  <button id="few-drops-btn" onclick="addFewDrops()" class="stage-button px-4 py-2 rounded-lg font-bold text-white shadow-md" style="background: ${primaryColor}; font-size: ${baseSize * 0.85}px">
+                    Few Drops NaOH
+                  </button>
+                  <button id="excess-btn" onclick="addExcess()" class="stage-button px-4 py-2 rounded-lg font-bold text-white shadow-md" style="background: ${primaryColor}; font-size: ${baseSize * 0.85}px">
+                    Excess NaOH
+                  </button>
+                  <button id="reset-all-btn" onclick="resetAll()" class="stage-button px-4 py-2 rounded-lg font-bold text-white shadow-md" style="background: ${secondaryColor}; font-size: ${baseSize * 0.85}px">
+                    ${config.reset_label || defaultConfig.reset_label}
+                  </button>
+                </div>
+              </div>
+              
+              <div>
+                <div id="observation-box" class="observation-box rounded-lg p-5 shadow-lg" style="background: ${surfaceColor}">
+                  <div id="observation">
+                    <p style="color: ${secondaryColor}; font-size: ${baseSize * 0.85}px">Select a cation above to begin.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      updateButtons();
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (newConfig) => {
+          config = newConfig;
+          await onConfigChange(newConfig);
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["main_title", config.main_title || defaultConfig.main_title],
+          ["subtitle", config.subtitle || defaultConfig.subtitle],
+          ["reset_label", config.reset_label || defaultConfig.reset_label]
+        ])
+      });
+      
+      config = window.elementSdk.config;
+    }
+    
+    render();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9c6e071133ddae68',t:'MTc2OTkxMzAzNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
