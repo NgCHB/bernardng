@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Box Breathing</title>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+
+    * {
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .breathing-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+
+    .breathing-box {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px;
+      height: 180px;
+      border: 3px solid;
+      border-radius: 32px;
+      transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.3);
+    }
+
+    .breathing-box::before {
+      content: '';
+      position: absolute;
+      inset: -20px;
+      border-radius: 40px;
+      border: 2px solid;
+      opacity: 0.3;
+      transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .breathing-box::after {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      border-radius: 48px;
+      border: 1px solid;
+      opacity: 0.15;
+      transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .breathing-box.inhale {
+      transform: translate(-50%, -50%) scale(1.6) rotate(90deg);
+      opacity: 1;
+      box-shadow: 0 0 80px rgba(59, 130, 246, 0.6), 0 0 120px rgba(59, 130, 246, 0.4);
+    }
+
+    .breathing-box.inhale::before {
+      inset: -30px;
+      opacity: 0.5;
+      transform: rotate(-45deg);
+    }
+
+    .breathing-box.inhale::after {
+      inset: -60px;
+      opacity: 0.3;
+      transform: rotate(45deg);
+    }
+
+    .breathing-box.hold-in {
+      transform: translate(-50%, -50%) scale(1.6) rotate(90deg);
+      opacity: 1;
+      box-shadow: 0 0 80px rgba(59, 130, 246, 0.6), 0 0 120px rgba(59, 130, 246, 0.4);
+    }
+
+    .breathing-box.hold-in::before {
+      inset: -30px;
+      opacity: 0.5;
+      transform: rotate(-45deg);
+    }
+
+    .breathing-box.hold-in::after {
+      inset: -60px;
+      opacity: 0.3;
+      transform: rotate(45deg);
+    }
+
+    .breathing-box.exhale {
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      opacity: 0.5;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .breathing-box.exhale::before {
+      inset: -20px;
+      opacity: 0.2;
+      transform: rotate(0deg);
+    }
+
+    .breathing-box.exhale::after {
+      inset: -40px;
+      opacity: 0.1;
+      transform: rotate(0deg);
+    }
+
+    .breathing-box.hold-out {
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      opacity: 0.5;
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+    }
+
+    .breathing-box.hold-out::before {
+      inset: -20px;
+      opacity: 0.2;
+      transform: rotate(0deg);
+    }
+
+    .breathing-box.hold-out::after {
+      inset: -40px;
+      opacity: 0.1;
+      transform: rotate(0deg);
+    }
+
+    .glow-orb {
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.4;
+      transition: all 4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glow-orb-1 {
+      top: -60px;
+      left: -60px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, transparent 70%);
+    }
+
+    .glow-orb-2 {
+      bottom: -60px;
+      right: -60px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, transparent 70%);
+    }
+
+    .breathing-container.inhale .glow-orb {
+      opacity: 0.8;
+      transform: scale(1.5);
+    }
+
+    .breathing-container.hold-in .glow-orb {
+      opacity: 0.8;
+      transform: scale(1.5);
+    }
+
+    .breathing-container.exhale .glow-orb {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+
+    .breathing-container.hold-out .glow-orb {
+      opacity: 0.3;
+      transform: scale(0.8);
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .float-animation {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    .instruction-text {
+      transition: all 0.3s ease-out;
+    }
+
+    .instruction-text.active {
+      transform: scale(1.05);
+      text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full m-0 p-0 overflow-auto">
+  <div id="app-wrapper" class="w-full h-full flex items-center justify-center p-8">
+   <div class="text-center">
+    <h1 id="title" class="mb-4 font-semibold">Box Breathing</h1>
+    <p id="subtitle" class="mb-12 font-light">Follow the box to calm your mind</p>
+    <div class="flex flex-col items-center gap-8">
+     <div id="breathing-container" class="breathing-container float-animation">
+      <div class="glow-orb glow-orb-1"></div>
+      <div class="glow-orb glow-orb-2"></div>
+      <div id="breathing-box" class="breathing-box"></div>
+     </div>
+     <div class="text-center">
+      <p id="instruction" class="instruction-text text-3xl font-semibold mb-2"></p>
+      <p id="counter" class="text-6xl font-bold"></p>
+     </div><button id="start-button" class="px-8 py-4 rounded-full font-semibold transition-all duration-200 ease-in-out"> Start </button>
+    </div>
+   </div>
+  </div>
+  <script>
+    const defaultConfig = {
+      background_color: "#0f172a",
+      surface_color: "#1e293b",
+      text_color: "#f1f5f9",
+      primary_action_color: "#3b82f6",
+      secondary_action_color: "#64748b",
+      title_text: "Box Breathing",
+      subtitle_text: "Follow the box to calm your mind",
+      font_family: "Space Grotesk",
+      font_size: 16
+    };
+
+    let isBreathing = false;
+    let breathingInterval = null;
+    let currentPhase = 0;
+    let currentCount = 4;
+    
+    const phases = [
+      { name: "Breathe In", class: "inhale" },
+      { name: "Hold", class: "hold-in" },
+      { name: "Breathe Out", class: "exhale" },
+      { name: "Hold", class: "hold-out" }
+    ];
+
+    function updateBreathingCycle() {
+      const container = document.getElementById('breathing-container');
+      const box = document.getElementById('breathing-box');
+      const instruction = document.getElementById('instruction');
+      const counter = document.getElementById('counter');
+      
+      const phase = phases[currentPhase];
+      
+      container.className = 'breathing-container float-animation ' + phase.class;
+      box.className = 'breathing-box ' + phase.class;
+      instruction.className = 'instruction-text text-3xl font-semibold mb-2 active';
+      instruction.textContent = phase.name;
+      counter.textContent = currentCount;
+      
+      setTimeout(() => {
+        instruction.className = 'instruction-text text-3xl font-semibold mb-2';
+      }, 300);
+      
+      if (currentCount > 0) {
+        currentCount--;
+      } else {
+        currentCount = 4;
+        currentPhase = (currentPhase + 1) % 4;
+      }
+    }
+
+    function startBreathing() {
+      if (isBreathing) {
+        stopBreathing();
+        return;
+      }
+      
+      isBreathing = true;
+      currentPhase = 0;
+      currentCount = 4;
+      
+      const button = document.getElementById('start-button');
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      button.textContent = 'Stop';
+      button.style.backgroundColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      
+      updateBreathingCycle();
+      breathingInterval = setInterval(updateBreathingCycle, 1000);
+    }
+
+    function stopBreathing() {
+      isBreathing = false;
+      if (breathingInterval) {
+        clearInterval(breathingInterval);
+        breathingInterval = null;
+      }
+      
+      const container = document.getElementById('breathing-container');
+      const box = document.getElementById('breathing-box');
+      const instruction = document.getElementById('instruction');
+      const counter = document.getElementById('counter');
+      const button = document.getElementById('start-button');
+      const config = window.elementSdk ? window.elementSdk.config : defaultConfig;
+      
+      container.className = 'breathing-container float-animation';
+      box.className = 'breathing-box';
+      instruction.className = 'instruction-text text-3xl font-semibold mb-2';
+      instruction.textContent = '';
+      counter.textContent = '';
+      button.textContent = 'Start';
+      button.style.backgroundColor = config.primary_action_color || defaultConfig.primary_action_color;
+    }
+
+    document.getElementById('start-button').addEventListener('click', startBreathing);
+
+    async function onConfigChange(config) {
+      const appWrapper = document.getElementById('app-wrapper');
+      const title = document.getElementById('title');
+      const subtitle = document.getElementById('subtitle');
+      const box = document.getElementById('breathing-box');
+      const instruction = document.getElementById('instruction');
+      const counter = document.getElementById('counter');
+      const button = document.getElementById('start-button');
+      
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryActionColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryActionColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+      const titleText = config.title_text || defaultConfig.title_text;
+      const subtitleText = config.subtitle_text || defaultConfig.subtitle_text;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const fontSize = config.font_size || defaultConfig.font_size;
+      
+      appWrapper.style.background = backgroundColor;
+      
+      const fontStack = `${fontFamily}, -apple-system, BlinkMacSystemFont, sans-serif`;
+      title.style.fontFamily = fontStack;
+      subtitle.style.fontFamily = fontStack;
+      instruction.style.fontFamily = fontStack;
+      counter.style.fontFamily = fontStack;
+      button.style.fontFamily = fontStack;
+      
+      title.style.fontSize = `${fontSize * 2}px`;
+      title.style.color = textColor;
+      title.textContent = titleText;
+      
+      subtitle.style.fontSize = `${fontSize * 1.125}px`;
+      subtitle.style.color = textColor;
+      subtitle.textContent = subtitleText;
+      
+      box.style.borderColor = surfaceColor;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        .breathing-box::before { border-color: ${surfaceColor}; }
+        .breathing-box::after { border-color: ${surfaceColor}; }
+      `;
+      const oldStyle = document.getElementById('dynamic-border-style');
+      if (oldStyle) oldStyle.remove();
+      style.id = 'dynamic-border-style';
+      document.head.appendChild(style);
+      
+      instruction.style.fontSize = `${fontSize * 1.875}px`;
+      instruction.style.color = textColor;
+      
+      counter.style.fontSize = `${fontSize * 3.75}px`;
+      counter.style.color = textColor;
+      
+      button.style.fontSize = `${fontSize * 1.125}px`;
+      button.style.color = textColor;
+      button.style.backgroundColor = isBreathing ? secondaryActionColor : primaryActionColor;
+    }
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            },
+            {
+              get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+              set: (value) => {
+                config.secondary_action_color = value;
+                window.elementSdk.setConfig({ secondary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ["title_text", config.title_text || defaultConfig.title_text],
+          ["subtitle_text", config.subtitle_text || defaultConfig.subtitle_text]
+        ])
+      });
+      
+      onConfigChange(window.elementSdk.config);
+    } else {
+      onConfigChange(defaultConfig);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cb8ce53b4a0f4a9',t:'MTc3MDY5NzE0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
