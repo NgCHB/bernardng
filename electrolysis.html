@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Electrolysis Step by Step</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'DM Sans', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    @keyframes ionMove {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      100% { opacity: 1; }
+    }
+    @keyframes ionToAnode {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-60px); }
+    }
+    @keyframes ionToCathode {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(60px); }
+    }
+    @keyframes gasRise {
+      0% { transform: translateY(0); opacity: 0.7; }
+      100% { transform: translateY(-30px); opacity: 0; }
+    }
+    @keyframes copperDeposit {
+      0% { width: 12px; }
+      100% { width: 28px; }
+    }
+    @keyframes anodeShrink {
+      0% { width: 12px; }
+      100% { width: 4px; }
+    }
+    @keyframes blueFade {
+      0% { fill: #3b82f6; opacity: 0.8; }
+      50% { fill: #60a5fa; opacity: 0.6; }
+      100% { fill: #bfdbfe; opacity: 0.4; }
+    }
+    .ion-appear { animation: ionMove 0.5s ease forwards; }
+    .ion-to-anode { animation: ionToAnode 1.5s ease-in-out infinite alternate; }
+    .ion-to-cathode { animation: ionToCathode 1.5s ease-in-out infinite alternate; }
+    .gas-bubble { animation: gasRise 2s ease-in-out infinite; }
+    .copper-deposit { animation: copperDeposit 2s ease forwards; }
+    .anode-shrink { animation: anodeShrink 2s ease forwards; transform-origin: center; }
+    .blue-fade { animation: blueFade 2s ease forwards; }
+    
+    .highlight-box {
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border-left: 4px solid #f59e0b;
+    }
+    .step-active {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: white;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full bg-slate-900 text-slate-100 overflow-auto"><!-- Header -->
+   <header class="bg-slate-800 border-b border-slate-700 px-6 py-4">
+    <h1 id="appTitle" class="text-2xl font-bold text-cyan-400">Electrolysis Step by Step</h1>
+    <p class="text-slate-400 text-sm mt-1">O-Level Chemistry Problem Solving Approach</p>
+   </header>
+   <main class="p-4 md:p-6 max-w-6xl mx-auto"><!-- Case Study Selector -->
+    <div class="mb-6"><label class="text-sm text-slate-400 block mb-2 font-medium">Select Case Study:</label> <select id="caseSelector" onchange="selectCase(parseInt(this.value))" class="px-4 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 hover:border-slate-500 transition focus:outline-none focus:border-cyan-500"> </select>
+    </div><!-- Step Progress -->
+    <div class="flex items-center gap-1 mb-6 overflow-x-auto pb-2" id="stepProgress"></div><!-- Main Content Area -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Diagram -->
+     <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
+      <h3 class="text-sm font-medium text-slate-400 mb-3">Electrolytic Cell Diagram</h3>
+      <div id="diagram" class="relative w-full" style="height: 380px;"></div>
+     </div><!-- Info Panel -->
+     <div class="bg-slate-800 rounded-xl p-5 border border-slate-700">
+      <h3 id="stepTitle" class="text-lg font-bold text-cyan-400 mb-3"></h3>
+      <div id="stepContent" class="text-slate-300 space-y-3"></div>
+     </div>
+    </div><!-- Navigation -->
+    <div class="flex justify-between items-center mt-6"><button id="prevBtn" onclick="prevStep()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"> <i data-lucide="chevron-left" style="width:18px;height:18px;"></i> Previous </button> <span id="stepIndicator" class="text-slate-400 text-sm mono"></span> <button id="nextBtn" onclick="nextStep()" class="flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg transition font-medium disabled:opacity-30 disabled:cursor-not-allowed"> Next <i data-lucide="chevron-right" style="width:18px;height:18px;"></i> </button>
+    </div>
+   </main>
+  </div>
+  <script>
+const caseStudies = [
+  {
+    id: 'molten_nacl',
+    name: 'Molten NaCl',
+    electrolyte: 'Molten sodium chloride',
+    type: 'molten',
+    ions: { present: ['Na⁺', 'Cl⁻'], toAnode: ['Cl⁻'], toCathode: ['Na⁺'] },
+    discharge: {
+      anode: { ion: 'Cl⁻', reason: 'Cl⁻ is the only anion present.' },
+      cathode: { ion: 'Na⁺', reason: 'Na⁺ is the only cation present.' }
+    },
+    equations: {
+      anode: '2Cl⁻(l) → Cl₂(g) + 2e⁻',
+      cathode: 'Na⁺(l) + e⁻ → Na(l)',
+      overall: '2NaCl(l) → 2Na(l) + Cl₂(g)'
+    },
+    observations: [
+      'Anode: Greenish-yellow gas (chlorine) produced with vigorous effervescence.',
+      'Cathode: Silvery molten metal (sodium) formed.'
+    ],
+    hasGas: false,
+    hasCopper: false,
+    anodeShrinks: false
+  },
+  {
+    id: 'dilute_nacl',
+    name: 'Dilute NaCl (aq)',
+    electrolyte: 'Dilute aqueous sodium chloride',
+    type: 'aqueous_gas',
+    ions: { present: ['Na⁺', 'Cl⁻', 'H⁺', 'OH⁻'], toAnode: ['Cl⁻', 'OH⁻'], toCathode: ['Na⁺', 'H⁺'] },
+    discharge: {
+      anode: { ion: 'OH⁻', reason: 'OH⁻ is preferentially discharged over Cl⁻ (dilute solution, OH⁻ is selected based on position in electrochemical series).' },
+      cathode: { ion: 'H⁺', reason: 'H⁺ is preferentially discharged over Na⁺ (H⁺ is lower in the electrochemical series than Na⁺).' }
+    },
+    equations: {
+      anode: '4OH⁻(aq) → 2H₂O(l) + O₂(g) + 4e⁻',
+      cathode: '2H⁺(aq) + 2e⁻ → H₂(g)',
+      overall: '2H₂O(l) → 2H₂(g) + O₂(g)'
+    },
+    observations: [
+      'Anode: Colourless gas (oxygen) produced with effervescence. Relights a glowing splint.',
+      'Cathode: Colourless gas (hydrogen) produced with effervescence. Burns with a "pop" sound.',
+      'Volume of H₂ is twice that of O₂.'
+    ],
+    hasGas: true,
+    hasCopper: false,
+    anodeShrinks: false
+  },
+  {
+    id: 'conc_nacl',
+    name: 'Conc. NaCl (aq)',
+    electrolyte: 'Concentrated aqueous sodium chloride',
+    type: 'aqueous_gas',
+    ions: { present: ['Na⁺', 'Cl⁻', 'H⁺', 'OH⁻'], toAnode: ['Cl⁻', 'OH⁻'], toCathode: ['Na⁺', 'H⁺'] },
+    discharge: {
+      anode: { ion: 'Cl⁻', reason: 'Cl⁻ is preferentially discharged because it is present in high concentration (selective discharge based on concentration).' },
+      cathode: { ion: 'H⁺', reason: 'H⁺ is preferentially discharged over Na⁺ (H⁺ is lower in the electrochemical series than Na⁺).' }
+    },
+    equations: {
+      anode: '2Cl⁻(aq) → Cl₂(g) + 2e⁻',
+      cathode: '2H⁺(aq) + 2e⁻ → H₂(g)',
+      overall: '2NaCl(aq) + 2H₂O(l) → Cl₂(g) + H₂(g) + 2NaOH(aq)'
+    },
+    observations: [
+      'Anode: Greenish-yellow gas (chlorine) produced with effervescence. Bleaches damp litmus paper.',
+      'Cathode: Colourless gas (hydrogen) produced with effervescence. Burns with a "pop" sound.',
+      'Solution becomes alkaline (NaOH formed).'
+    ],
+    hasGas: true,
+    hasCopper: false,
+    anodeShrinks: false
+  },
+  {
+    id: 'h2so4',
+    name: 'Dilute H₂SO₄ (aq)',
+    electrolyte: 'Dilute aqueous sulfuric acid',
+    type: 'aqueous_gas',
+    ions: { present: ['H⁺', 'SO₄²⁻', 'H⁺', 'OH⁻'], toAnode: ['SO₄²⁻', 'OH⁻'], toCathode: ['H⁺'] },
+    discharge: {
+      anode: { ion: 'OH⁻', reason: 'OH⁻ is preferentially discharged over SO₄²⁻ (SO₄²⁻ is never discharged as it is too stable).' },
+      cathode: { ion: 'H⁺', reason: 'H⁺ is the only cation present (from H₂SO₄ and water).' }
+    },
+    equations: {
+      anode: '4OH⁻(aq) → 2H₂O(l) + O₂(g) + 4e⁻',
+      cathode: '2H⁺(aq) + 2e⁻ → H₂(g)',
+      overall: '2H₂O(l) → 2H₂(g) + O₂(g)'
+    },
+    observations: [
+      'Anode: Colourless gas (oxygen) produced with effervescence. Relights a glowing splint.',
+      'Cathode: Colourless gas (hydrogen) produced with effervescence. Burns with a "pop" sound.',
+      'Volume of H₂ is twice that of O₂.',
+      'Concentration of H₂SO₄ increases as water is used up.'
+    ],
+    hasGas: true,
+    hasCopper: false,
+    anodeShrinks: false
+  },
+  {
+    id: 'cuso4_inert',
+    name: 'CuSO₄ (inert electrodes)',
+    electrolyte: 'Aqueous copper(II) sulfate with inert (carbon) electrodes',
+    type: 'aqueous_copper',
+    ions: { present: ['Cu²⁺', 'SO₄²⁻', 'H⁺', 'OH⁻'], toAnode: ['SO₄²⁻', 'OH⁻'], toCathode: ['Cu²⁺', 'H⁺'] },
+    discharge: {
+      anode: { ion: 'OH⁻', reason: 'OH⁻ is preferentially discharged over SO₄²⁻ (SO₄²⁻ is never discharged).' },
+      cathode: { ion: 'Cu²⁺', reason: 'Cu²⁺ is preferentially discharged over H⁺ (Cu²⁺ is lower in the electrochemical series than H⁺).' }
+    },
+    equations: {
+      anode: '4OH⁻(aq) → 2H₂O(l) + O₂(g) + 4e⁻',
+      cathode: 'Cu²⁺(aq) + 2e⁻ → Cu(s)',
+      overall: '2CuSO₄(aq) + 2H₂O(l) → 2Cu(s) + O₂(g) + 2H₂SO₄(aq)'
+    },
+    observations: [
+      'Anode: Colourless gas (oxygen) produced.',
+      'Cathode: Reddish-brown solid (copper) deposited.',
+      'Blue solution fades as Cu²⁺ ions are used up.',
+      'Solution becomes more acidic (H₂SO₄ formed).'
+    ],
+    hasGas: false,
+    hasCopper: true,
+    anodeShrinks: false
+  },
+  {
+    id: 'cuso4_cu',
+    name: 'CuSO₄ (Cu electrodes)',
+    electrolyte: 'Aqueous copper(II) sulfate with copper electrodes',
+    type: 'aqueous_copper_cu',
+    ions: { present: ['Cu²⁺', 'SO₄²⁻', 'H⁺', 'OH⁻'], toAnode: ['SO₄²⁻', 'OH⁻'], toCathode: ['Cu²⁺', 'H⁺'] },
+    discharge: {
+      anode: { ion: 'Cu (electrode)', reason: 'The copper anode dissolves preferentially because it is easier to oxidise Cu atoms from the electrode than to discharge OH⁻ or SO₄²⁻.' },
+      cathode: { ion: 'Cu²⁺', reason: 'Cu²⁺ is preferentially discharged over H⁺ (Cu²⁺ is lower in the electrochemical series than H⁺).' }
+    },
+    equations: {
+      anode: 'Cu(s) → Cu²⁺(aq) + 2e⁻',
+      cathode: 'Cu²⁺(aq) + 2e⁻ → Cu(s)',
+      overall: 'Cu(anode) → Cu(cathode)'
+    },
+    observations: [
+      'Anode: Copper electrode becomes thinner/smaller (dissolves).',
+      'Cathode: Reddish-brown solid (copper) deposited — electrode gets bigger.',
+      'Blue colour of solution remains unchanged (Cu²⁺ concentration stays constant).',
+      'Mass lost at anode = mass gained at cathode.'
+    ],
+    hasGas: false,
+    hasCopper: true,
+    anodeShrinks: true
+  }
+];
+
+let currentCase = 0;
+let currentStep = 0;
+let totalSteps = 5;
+
+function init() {
+  renderCaseSelector();
+  selectCase(0);
+}
+
+function renderCaseSelector() {
+  const el = document.getElementById('caseSelector');
+  el.innerHTML = caseStudies.map((c, i) => `<option value="${i}">${c.name}</option>`).join('');
+}
+
+function selectCase(i) {
+  currentCase = i;
+  currentStep = 0;
+  document.getElementById('caseSelector').value = i;
+  const cs = caseStudies[i];
+  const isCopper = cs.hasCopper;
+  totalSteps = isCopper ? 5 : 5;
+  renderAll();
+}
+
+function nextStep() { if (currentStep < totalSteps - 1) { currentStep++; renderAll(); } }
+function prevStep() { if (currentStep > 0) { currentStep--; renderAll(); } }
+
+function renderAll() {
+  renderStepProgress();
+  renderDiagram();
+  renderInfo();
+  document.getElementById('prevBtn').disabled = currentStep === 0;
+  document.getElementById('nextBtn').disabled = currentStep === totalSteps - 1;
+  document.getElementById('stepIndicator').textContent = `Step ${currentStep + 1} / ${totalSteps}`;
+}
+
+function renderStepProgress() {
+  const labels = ['Setup', 'Labels', 'Discharge', 'Equations', 'Observations'];
+  document.getElementById('stepProgress').innerHTML = labels.map((l, i) => `
+    <div class="flex items-center">
+      <div class="px-2 py-1 rounded text-xs font-medium whitespace-nowrap ${i === currentStep ? 'step-active' : i < currentStep ? 'bg-cyan-900 text-cyan-300' : 'bg-slate-700 text-slate-500'}">${l}</div>
+      ${i < labels.length - 1 ? '<div class="w-4 h-0.5 bg-slate-600 mx-0.5"></div>' : ''}
+    </div>
+  `).join('');
+}
+
+function renderDiagram() {
+  const cs = caseStudies[currentCase];
+  const isAqueous = cs.type !== 'molten';
+  const isCopperCu = cs.type === 'aqueous_copper_cu';
+  const isCopper = cs.hasCopper;
+  const showGas = cs.hasGas;
+  
+  const batteryAtBottom = showGas;
+  
+  let svg = `<svg viewBox="0 0 400 360" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">`;
+  
+  const beakerY = batteryAtBottom ? 40 : 80;
+  const beakerH = 180;
+  const beakerColor = isCopper ? '#3b82f6' : (cs.id === 'molten_nacl' ? '#f97316' : '#94a3b8');
+  const beakerOpacity = isCopper ? 0.8 : (cs.id === 'molten_nacl' ? 0.2 : 0.15);
+  
+  svg += `<rect x="100" y="${beakerY}" width="200" height="${beakerH}" rx="5" fill="none" stroke="#64748b" stroke-width="2"/>`;
+  const beakerAnimClass = currentStep >= 3 && isCopper ? ' class="blue-fade"' : '';
+  svg += `<rect x="102" y="${beakerY + 20}" width="196" height="${beakerH - 22}" rx="3" fill="${beakerColor}" opacity="${beakerOpacity}"${beakerAnimClass}/>`;
+  svg += `<text x="200" y="${beakerY + beakerH - 10}" text-anchor="middle" font-size="10" fill="#94a3b8">${cs.electrolyte}</text>`;
+  
+  const elecY = beakerY + 30;
+  const elecH = 100;
+  const anodeX = 150;
+  const cathodeX = 250;
+  const anodeColor = isCopperCu ? '#92400e' : '#64748b';
+  const cathodeColor = isCopperCu ? '#92400e' : '#64748b';
+  const elecW = 12;
+  
+  // Anode with shrinking animation for case 6
+  let anodeAnimClass = '';
+  if (currentStep >= 3 && cs.anodeShrinks) {
+    anodeAnimClass = ' anode-shrink';
+  }
+  svg += `<rect x="${anodeX - elecW/2}" y="${elecY}" width="${elecW}" height="${elecH}" fill="${anodeColor}"${anodeAnimClass ? ' class="' + anodeAnimClass.trim() + '"' : ''}/>`;
+  
+  // Cathode electrode
+  svg += `<rect x="${cathodeX - elecW/2}" y="${elecY}" width="${elecW}" height="${elecH}" fill="${cathodeColor}"/>`;
+  
+  // Copper deposit - fills entire cathode width and height
+  if (currentStep >= 3 && isCopper) {
+    svg += `<rect x="${cathodeX - 14}" y="${elecY}" width="28" height="${elecH}" fill="#b86e1f" opacity="0.9" class="copper-deposit" rx="2"/>`;
+  }
+  
+  // Gas collection tubes
+  if (showGas) {
+    const tubeW = 25;
+    const tubeH = 130;
+    const tubeTop = beakerY - 50;
+    const roundRadius = 12;
+    
+    // Anode tube
+    svg += `<path d="M ${anodeX - tubeW/2} ${tubeTop + roundRadius} Q ${anodeX - tubeW/2} ${tubeTop} ${anodeX - tubeW/2 + roundRadius} ${tubeTop} L ${anodeX + tubeW/2 - roundRadius} ${tubeTop} Q ${anodeX + tubeW/2} ${tubeTop} ${anodeX + tubeW/2} ${tubeTop + roundRadius} L ${anodeX + tubeW/2} ${tubeTop + tubeH} L ${anodeX - tubeW/2} ${tubeTop + tubeH} Z" fill="none" stroke="#94a3b8" stroke-width="1.5"/>`;
+    svg += `<path d="M ${anodeX - tubeW/2 + 1} ${tubeTop + roundRadius} Q ${anodeX - tubeW/2 + 1} ${tubeTop + 2} ${anodeX - tubeW/2 + roundRadius - 1} ${tubeTop + 2} L ${anodeX + tubeW/2 - roundRadius + 1} ${tubeTop + 2} Q ${anodeX + tubeW/2 - 1} ${tubeTop + 2} ${anodeX + tubeW/2 - 1} ${tubeTop + roundRadius} L ${anodeX + tubeW/2 - 1} ${tubeTop + tubeH - 2} Z" fill="#94a3b8" opacity="0.15" stroke="none"/>`;
+    
+    let anodeWaterH = tubeH - 5;
+    if (currentStep >= 3) {
+      if (cs.id === 'dilute_nacl' || cs.id === 'h2so4') anodeWaterH = 62;
+      if (cs.id === 'conc_nacl') anodeWaterH = 44;
+    }
+    svg += `<rect x="${anodeX - tubeW/2 + 1.5}" y="${tubeTop + tubeH - anodeWaterH}" width="${tubeW - 3}" height="${anodeWaterH - 2}" fill="${beakerColor}" opacity="0.5" rx="1"/>`;
+    svg += `<line x1="${anodeX - tubeW/2 + 1.5}" y1="${tubeTop + tubeH - anodeWaterH}" x2="${anodeX + tubeW/2 - 1.5}" y2="${tubeTop + tubeH - anodeWaterH}" stroke="#60a5fa" stroke-width="1" opacity="0.7"/>`;
+    
+    // Cathode tube
+    svg += `<path d="M ${cathodeX - tubeW/2} ${tubeTop + roundRadius} Q ${cathodeX - tubeW/2} ${tubeTop} ${cathodeX - tubeW/2 + roundRadius} ${tubeTop} L ${cathodeX + tubeW/2 - roundRadius} ${tubeTop} Q ${cathodeX + tubeW/2} ${tubeTop} ${cathodeX + tubeW/2} ${tubeTop + roundRadius} L ${cathodeX + tubeW/2} ${tubeTop + tubeH} L ${cathodeX - tubeW/2} ${tubeTop + tubeH} Z" fill="none" stroke="#94a3b8" stroke-width="1.5"/>`;
+    svg += `<path d="M ${cathodeX - tubeW/2 + 1} ${tubeTop + roundRadius} Q ${cathodeX - tubeW/2 + 1} ${tubeTop + 2} ${cathodeX - tubeW/2 + roundRadius - 1} ${tubeTop + 2} L ${cathodeX + tubeW/2 - roundRadius + 1} ${tubeTop + 2} Q ${cathodeX + tubeW/2 - 1} ${tubeTop + 2} ${cathodeX + tubeW/2 - 1} ${tubeTop + roundRadius} L ${cathodeX + tubeW/2 - 1} ${tubeTop + tubeH - 2} Z" fill="#94a3b8" opacity="0.15" stroke="none"/>`;
+    
+    let cathodeWaterH = tubeH - 5;
+    if (currentStep >= 3) {
+      if (cs.id === 'dilute_nacl' || cs.id === 'h2so4') cathodeWaterH = 31;
+      if (cs.id === 'conc_nacl') cathodeWaterH = 44;
+    }
+    svg += `<rect x="${cathodeX - tubeW/2 + 1.5}" y="${tubeTop + tubeH - cathodeWaterH}" width="${tubeW - 3}" height="${cathodeWaterH - 2}" fill="${beakerColor}" opacity="0.5" rx="1"/>`;
+    svg += `<line x1="${cathodeX - tubeW/2 + 1.5}" y1="${tubeTop + tubeH - cathodeWaterH}" x2="${cathodeX + tubeW/2 - 1.5}" y2="${tubeTop + tubeH - cathodeWaterH}" stroke="#60a5fa" stroke-width="1" opacity="0.7"/>`;
+    
+    if (currentStep >= 3) {
+      const anodeGasColor = cs.id === 'conc_nacl' ? '#dcf230' : '#e2e8f0';
+      svg += `<circle cx="${anodeX}" cy="${tubeTop + 55}" r="3" fill="${anodeGasColor}" opacity="0.7" class="gas-bubble"/>`;
+      svg += `<circle cx="${cathodeX}" cy="${tubeTop + 60}" r="3" fill="#e2e8f0" opacity="0.5" class="gas-bubble" style="animation-delay:0.5s"/>`;
+    }
+  }
+  
+  // Wires and Battery
+  if (batteryAtBottom) {
+    const battY = 300;
+    svg += `<line x1="${anodeX}" y1="${elecY + elecH}" x2="${anodeX}" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="${cathodeX}" y1="${elecY + elecH}" x2="${cathodeX}" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="${anodeX}" y1="${battY}" x2="185" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="${cathodeX}" y1="${battY}" x2="215" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    
+    svg += `<line x1="185" y1="${battY - 12}" x2="185" y2="${battY + 12}" stroke="#e2e8f0" stroke-width="3"/>`;
+    svg += `<line x1="195" y1="${battY - 7}" x2="195" y2="${battY + 7}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="205" y1="${battY - 12}" x2="205" y2="${battY + 12}" stroke="#e2e8f0" stroke-width="3"/>`;
+    svg += `<line x1="215" y1="${battY - 7}" x2="215" y2="${battY + 7}" stroke="#e2e8f0" stroke-width="2"/>`;
+    
+    if (currentStep >= 1) {
+      svg += `<text x="185" y="${battY + 20}" text-anchor="middle" font-size="11" fill="#22d3ee" font-weight="bold">+</text>`;
+      svg += `<text x="215" y="${battY + 20}" text-anchor="middle" font-size="11" fill="#f87171" font-weight="bold">−</text>`;
+    }
+  } else {
+    const battY = 30;
+    svg += `<line x1="${anodeX}" y1="${elecY}" x2="${anodeX}" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="${cathodeX}" y1="${elecY}" x2="${cathodeX}" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="${anodeX}" y1="${battY}" x2="185" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="${cathodeX}" y1="${battY}" x2="215" y2="${battY}" stroke="#e2e8f0" stroke-width="2"/>`;
+    
+    svg += `<line x1="185" y1="${battY - 12}" x2="185" y2="${battY + 12}" stroke="#e2e8f0" stroke-width="3"/>`;
+    svg += `<line x1="195" y1="${battY - 7}" x2="195" y2="${battY + 7}" stroke="#e2e8f0" stroke-width="2"/>`;
+    svg += `<line x1="205" y1="${battY - 12}" x2="205" y2="${battY + 12}" stroke="#e2e8f0" stroke-width="3"/>`;
+    svg += `<line x1="215" y1="${battY - 7}" x2="215" y2="${battY + 7}" stroke="#e2e8f0" stroke-width="2"/>`;
+    
+    if (currentStep >= 1) {
+      svg += `<text x="185" y="${battY - 18}" text-anchor="middle" font-size="11" fill="#22d3ee" font-weight="bold">+</text>`;
+      svg += `<text x="215" y="${battY - 18}" text-anchor="middle" font-size="11" fill="#f87171" font-weight="bold">−</text>`;
+    }
+  }
+  
+  // Electrode labels
+  if (currentStep >= 1) {
+    svg += `<text x="${anodeX}" y="${beakerY + beakerH + 18}" text-anchor="middle" font-size="12" fill="#22d3ee" font-weight="bold">ANODE (+)</text>`;
+    svg += `<text x="${cathodeX}" y="${beakerY + beakerH + 18}" text-anchor="middle" font-size="12" fill="#f87171" font-weight="bold">CATHODE (−)</text>`;
+    if (isCopperCu) {
+      svg += `<text x="${anodeX}" y="${beakerY + beakerH + 32}" text-anchor="middle" font-size="9" fill="#92400e">(Cu electrode)</text>`;
+      svg += `<text x="${cathodeX}" y="${beakerY + beakerH + 32}" text-anchor="middle" font-size="9" fill="#92400e">(Cu electrode)</text>`;
+    }
+  }
+  
+  // Ions moving
+  if (currentStep >= 2) {
+    const ionY = beakerY + 80;
+    cs.ions.toAnode.forEach((ion, i) => {
+      svg += `<text x="${190 - i * 10}" y="${ionY + i * 20}" text-anchor="middle" font-size="11" fill="#fbbf24" class="ion-appear ion-to-anode"${currentStep >= 2 ? '' : ' style="animation: none"'}">${ion}</text>`;
+    });
+    cs.ions.toCathode.forEach((ion, i) => {
+      svg += `<text x="${210 + i * 10}" y="${ionY + i * 20}" text-anchor="middle" font-size="11" fill="#34d399" class="ion-appear ion-to-cathode"${currentStep >= 2 ? '' : ' style="animation: none"'}">${ion}</text>`;
+    });
+  }
+  
+  // Gas bubbles and copper deposit only animate from step 3
+  if (currentStep < 3) {
+    svg = svg.replace(/class="gas-bubble"/g, 'class="gas-bubble" style="animation: none"');
+    svg = svg.replace(/class="copper-deposit"/g, 'class="copper-deposit" style="animation: none"');
+    svg = svg.replace(/class="anode-shrink"/g, 'class="anode-shrink" style="animation: none"');
+    svg = svg.replace(/class="blue-fade"/g, 'class="blue-fade" style="animation: none"');
+  }
+  
+  svg += `</svg>`;
+  document.getElementById('diagram').innerHTML = svg;
+}
+
+function renderInfo() {
+  const cs = caseStudies[currentCase];
+  
+  const titles = ['Electrolytic Cell Setup', 'Anode & Cathode', 'Selective Discharge', 'Half Equations', 'Observations'];
+  const stepTitle = titles[currentStep];
+  
+  let html = '';
+  
+  switch(currentStep) {
+    case 0:
+      html = `<p>The electrolytic cell consists of:</p>
+        <ul class="list-disc pl-5 space-y-1 text-sm">
+          <li><strong>Electrolyte:</strong> ${cs.electrolyte}</li>
+          <li><strong>Electrodes:</strong> ${cs.type === 'aqueous_copper_cu' ? 'Copper (active)' : 'Carbon/Platinum (inert)'}</li>
+          <li><strong>Battery:</strong> Provides direct current (d.c.)</li>
+          ${cs.hasGas ? '<li><strong>Gas collection:</strong> Inverted test tubes over each electrode</li>' : ''}
+        </ul>`;
+      break;
+    case 1:
+      html = `<div class="space-y-3">
+        <div class="bg-cyan-900/30 border border-cyan-700 p-3 rounded">
+          <p class="text-sm">Connected to + terminal. <strong>Oxidation</strong> occurs here (loss of electrons).</p>
+        </div>
+        <div class="bg-red-900/30 border border-red-700 p-3 rounded">
+          <p class="text-sm">Connected to − terminal. <strong>Reduction</strong> occurs here (gain of electrons).</p>
+        </div>
+        <p class="text-xs text-slate-400 italic">Remember: AN OX (Anode = Oxidation), RED CAT (Reduction = Cathode)</p>
+      </div>`;
+      break;
+    case 2:
+      html = `<div class="space-y-3">
+        <div class="bg-cyan-900/20 border-l-4 border-cyan-500 p-3 rounded-r">
+          <p class="text-sm"><strong>${cs.discharge.anode.ion}</strong> is discharged at the anode.</p>
+          <p class="text-xs text-slate-400 mt-1">Reason: ${cs.discharge.anode.reason}</p>
+        </div>
+        <div class="bg-red-900/20 border-l-4 border-red-500 p-3 rounded-r">
+          <p class="text-sm"><strong>${cs.discharge.cathode.ion}</strong> is discharged at the cathode.</p>
+          <p class="text-xs text-slate-400 mt-1">Reason: ${cs.discharge.cathode.reason}</p>
+        </div>
+      </div>`;
+      break;
+    case 3:
+      html = `<div class="space-y-3 mono text-sm">
+        <div class="bg-slate-700/50 p-3 rounded">
+          <p class="text-cyan-400 text-xs font-sans font-bold mb-1">At Anode (oxidation):</p>
+          <p>${cs.equations.anode}</p>
+        </div>
+        <div class="bg-slate-700/50 p-3 rounded">
+          <p class="text-red-400 text-xs font-sans font-bold mb-1">At Cathode (reduction):</p>
+          <p>${cs.equations.cathode}</p>
+        </div>
+        <div class="bg-amber-900/30 border border-amber-700 p-3 rounded">
+          <p class="text-amber-400 text-xs font-sans font-bold mb-1">Overall Equation:</p>
+          <p>${cs.equations.overall}</p>
+        </div>
+      </div>`;
+      break;
+    case 4:
+      html = `<div class="space-y-2">
+        ${cs.observations.map(o => `<div class="flex items-start gap-2 text-sm"><span class="text-emerald-400 mt-0.5">●</span><span>${o}</span></div>`).join('')}
+      </div>`;
+      break;
+  }
+  
+  document.getElementById('stepTitle').textContent = stepTitle;
+  document.getElementById('stepContent').innerHTML = html;
+}
+
+// Element SDK
+const defaultConfig = {
+  app_title: 'Electrolysis Step by Step',
+  background_color: '#0f172a',
+  surface_color: '#1e293b',
+  text_color: '#e2e8f0',
+  primary_color: '#06b6d4',
+  secondary_color: '#64748b',
+  font_family: 'DM Sans',
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const app = document.getElementById('app');
+    app.style.backgroundColor = config.background_color || defaultConfig.background_color;
+    app.style.color = config.text_color || defaultConfig.text_color;
+    app.style.fontFamily = (config.font_family || defaultConfig.font_family) + ', sans-serif';
+    
+    const header = app.querySelector('header');
+    header.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+    
+    const title = document.getElementById('appTitle');
+    title.textContent = config.app_title || defaultConfig.app_title;
+    title.style.color = config.primary_color || defaultConfig.primary_color;
+    
+    const baseFontSize = config.font_size || defaultConfig.font_size;
+    app.style.fontSize = baseFontSize + 'px';
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
+      { get: () => config.secondary_color || defaultConfig.secondary_color, set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } }
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['app_title', config.app_title || defaultConfig.app_title]
+  ])
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  init();
+  lucide.createIcons();
+});
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f4b3d201759fe0c',t:'MTc3NzYwMTMxMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
