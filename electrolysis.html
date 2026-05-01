@@ -64,16 +64,20 @@
   <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full">
-  <div id="app" class="h-full w-full bg-slate-900 text-slate-100 overflow-auto"><!-- Header -->
+  <div id="app" class="h-full w-full bg-slate-900 text-slate-100 overflow-auto">
+   <!-- Header -->
    <header class="bg-slate-800 border-b border-slate-700 px-6 py-4">
     <h1 id="appTitle" class="text-2xl font-bold text-cyan-400">Electrolysis Step by Step</h1>
     <p class="text-slate-400 text-sm mt-1">O-Level Chemistry Problem Solving Approach</p>
    </header>
-   <main class="p-4 md:p-6 max-w-6xl mx-auto"><!-- Case Study Selector -->
-    <div class="mb-6"><label class="text-sm text-slate-400 block mb-2 font-medium">Select Case Study:</label> <select id="caseSelector" onchange="selectCase(parseInt(this.value))" class="px-4 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 hover:border-slate-500 transition focus:outline-none focus:border-cyan-500"> </select>
+   <main class="p-4 md:p-6 max-w-6xl mx-auto">
+    <!-- Case Study Selector -->
+    <div class="mb-6">
+     <label class="text-sm text-slate-400 block mb-2 font-medium">Select Case Study:</label> <select id="caseSelector" onchange="selectCase(parseInt(this.value))" class="px-4 py-2 bg-slate-700 text-white rounded-lg border border-slate-600 hover:border-slate-500 transition focus:outline-none focus:border-cyan-500"> </select>
     </div><!-- Step Progress -->
     <div class="flex items-center gap-1 mb-6 overflow-x-auto pb-2" id="stepProgress"></div><!-- Main Content Area -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6"><!-- Diagram -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+     <!-- Diagram -->
      <div class="bg-slate-800 rounded-xl p-4 border border-slate-700">
       <h3 class="text-sm font-medium text-slate-400 mb-3">Electrolytic Cell Diagram</h3>
       <div id="diagram" class="relative w-full" style="height: 380px;"></div>
@@ -83,7 +87,8 @@
       <div id="stepContent" class="text-slate-300 space-y-3"></div>
      </div>
     </div><!-- Navigation -->
-    <div class="flex justify-between items-center mt-6"><button id="prevBtn" onclick="prevStep()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"> <i data-lucide="chevron-left" style="width:18px;height:18px;"></i> Previous </button> <span id="stepIndicator" class="text-slate-400 text-sm mono"></span> <button id="nextBtn" onclick="nextStep()" class="flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg transition font-medium disabled:opacity-30 disabled:cursor-not-allowed"> Next <i data-lucide="chevron-right" style="width:18px;height:18px;"></i> </button>
+    <div class="flex justify-between items-center mt-6">
+     <button id="prevBtn" onclick="prevStep()" class="flex items-center gap-2 px-5 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg transition disabled:opacity-30 disabled:cursor-not-allowed"> <i data-lucide="chevron-left" style="width:18px;height:18px;"></i> Previous </button> <span id="stepIndicator" class="text-slate-400 text-sm mono"></span> <button id="nextBtn" onclick="nextStep()" class="flex items-center gap-2 px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 rounded-lg transition font-medium disabled:opacity-30 disabled:cursor-not-allowed"> Next <i data-lucide="chevron-right" style="width:18px;height:18px;"></i> </button>
     </div>
    </main>
   </div>
@@ -548,10 +553,51 @@ window.elementSdk.init({
   ])
 });
 
+// Initialize immediately, don't wait for DOM
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const app = document.getElementById('app');
+    if (!app) return;
+    app.style.backgroundColor = config.background_color || defaultConfig.background_color;
+    app.style.color = config.text_color || defaultConfig.text_color;
+    app.style.fontFamily = (config.font_family || defaultConfig.font_family) + ', sans-serif';
+    
+    const header = app.querySelector('header');
+    if (header) header.style.backgroundColor = config.surface_color || defaultConfig.surface_color;
+    
+    const title = document.getElementById('appTitle');
+    if (title) {
+      title.textContent = config.app_title || defaultConfig.app_title;
+      title.style.color = config.primary_color || defaultConfig.primary_color;
+    }
+    
+    const baseFontSize = config.font_size || defaultConfig.font_size;
+    app.style.fontSize = baseFontSize + 'px';
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); } },
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); } },
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); } },
+      { get: () => config.primary_color || defaultConfig.primary_color, set: (v) => { config.primary_color = v; window.elementSdk.setConfig({ primary_color: v }); } },
+      { get: () => config.secondary_color || defaultConfig.secondary_color, set: (v) => { config.secondary_color = v; window.elementSdk.setConfig({ secondary_color: v }); } }
+    ],
+    borderables: [],
+    fontEditable: { get: () => config.font_family || defaultConfig.font_family, set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); } },
+    fontSizeable: { get: () => config.font_size || defaultConfig.font_size, set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); } }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ['app_title', config.app_title || defaultConfig.app_title]
+  ])
+});
+
+// Render on DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-  init();
+  renderCaseSelector();
+  selectCase(0);
   lucide.createIcons();
 });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f4b48bae632fe0c',t:'MTc3NzYwMTc4Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9f4b4fe163f5fe0c',t:'MTc3NzYwMjA3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
