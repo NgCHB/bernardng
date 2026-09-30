@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simple Cell: Virtual Experiment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6f7;--panel:#fff;--ink:#17262d;--mute:#5b6b73;--line:#cdd8dc;--acid:#dff1ec;--accent:#0c7c6b;--wire:#3a4a52;--e:#e08a00;--glass:#8aa3ab;--face:#fbfcf6;--neg:#b3261e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1a1f;--panel:#17262d;--ink:#e6eef0;--mute:#9db0b7;--line:#2c414a;--acid:#173a3a;--accent:#4fd1b8;--wire:#a9bcc3;--e:#ffb534;--glass:#5d7882;--face:#e9ecdc;--neg:#ff8a80}}
+:root[data-theme="dark"]{--bg:#0f1a1f;--panel:#17262d;--ink:#e6eef0;--mute:#9db0b7;--line:#2c414a;--acid:#173a3a;--accent:#4fd1b8;--wire:#a9bcc3;--e:#ffb534;--glass:#5d7882;--face:#e9ecdc;--neg:#ff8a80}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif}
+main{max-width:860px;margin:0 auto;padding:20px 16px 32px}
+h1{font-size:1.5rem;margin:0 0 2px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 16px}
+.picker{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.picker b{margin-right:4px}
+.picker button{font:inherit;padding:8px 14px;border:2px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;cursor:pointer;min-width:64px}
+.picker button[aria-pressed=true]{border-color:var(--accent);background:var(--acid);font-weight:700}
+.picker button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:inherit;fill:var(--ink)}
+.read{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:600px){.read{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card h2{font-size:1rem;margin:0 0 4px}
+.big{font-size:2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.neg{color:var(--neg)}
+.card p{margin:4px 0;color:var(--ink)}
+.eq{font-size:.95rem;color:var(--mute)}
+.ecs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.ecs span{padding:2px 10px;border-radius:99px;border:1px solid var(--line);font-size:.9rem}
+.ecs span.on{background:var(--acid);border-color:var(--accent);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+<h1>Simple cell: virtual experiment</h1>
+<p class="sub">Electrolyte: dilute sulfuric acid. Cathode (positive electrode): copper. Choose the metal for the anode.</p>
+
+<div class="picker" role="group" aria-label="Anode metal">
+<b>Anode metal:</b>
+<button data-m="Mg" aria-pressed="true">Mg</button><button data-m="Zn" aria-pressed="false">Zn</button><button data-m="Fe" aria-pressed="false">Fe</button><button data-m="Cu" aria-pressed="false">Cu</button><button data-m="Ag" aria-pressed="false">Ag</button>
+<button id="pp" type="button" style="margin-left:auto">Pause</button>
+</div>
+
+<div class="stage">
+<svg viewBox="0 0 700 480" role="img" aria-label="Simple cell with voltmeter and moving electrons">
+<defs><clipPath id="liq"><rect x="102" y="275" width="496" height="173"/></clipPath></defs>
+<rect x="102" y="275" width="496" height="173" fill="#7fc8d8" opacity=".28"/>
+<path d="M100 225V450H600V225" fill="none" stroke="var(--glass)" stroke-width="4" stroke-linejoin="round"/>
+<line x1="102" y1="275" x2="598" y2="275" stroke="#3aa0b8" stroke-width="2" opacity=".7"/>
+<text x="350" y="440" text-anchor="middle" font-size="14" opacity=".75">dilute sulfuric acid</text>
+<g fill="none" stroke="var(--wire)" stroke-width="4" stroke-linejoin="round"><path d="M170 180H295V150"/><path d="M530 180H405V150"/></g>
+<path id="wire" d="M170 395V180H295V140H405V180H530V395" fill="none" stroke="none"/>
+<rect id="anode" x="158" y="178" width="24" height="232" rx="3" fill="#aab4bd" stroke="var(--wire)" stroke-width="2"/>
+<rect id="cathode" x="518" y="178" width="24" height="232" rx="3" fill="#b87333" stroke="var(--wire)" stroke-width="2"/>
+<g id="fx" clip-path="url(#liq)"></g>
+<g id="dots"></g>
+<text id="aLab" x="170" y="432" text-anchor="middle" font-weight="700" font-size="16">Mg</text>
+<text x="170" y="466" text-anchor="middle" font-size="13" opacity=".8">anode (−)</text>
+<text x="530" y="432" text-anchor="middle" font-weight="700" font-size="16">Cu</text>
+<text x="530" y="466" text-anchor="middle" font-size="13" opacity=".8">cathode (+)</text>
+<rect x="250" y="12" width="200" height="138" rx="12" fill="var(--face)" stroke="var(--wire)" stroke-width="3"/>
+<g id="ticks"></g>
+<line id="needle" x1="350" y1="128" x2="350" y2="66" stroke="#c62828" stroke-width="3" stroke-linecap="round"/>
+<circle cx="350" cy="128" r="6" fill="#333"/>
+<text id="dig" x="350" y="36" text-anchor="middle" font-size="20" font-weight="700" style="fill:#17262d">+1.84 V</text>
+<text x="350" y="146" text-anchor="middle" font-size="12" style="fill:#17262d">voltmeter</text>
+<circle cx="295" cy="150" r="7" fill="#222"/><circle cx="405" cy="150" r="7" fill="#c62828"/>
+<text x="278" y="130" text-anchor="middle" font-size="18" font-weight="700">−</text>
+<text x="422" y="130" text-anchor="middle" font-size="18" font-weight="700">+</text>
+<text id="flow" x="350" y="208" text-anchor="middle" font-size="15" font-weight="700" style="fill:var(--e)"></text>
+</svg>
+</div>
+
+<div class="read">
+<div class="card"><h2>Voltmeter reading</h2><div class="big" id="volt">+1.84 V</div><p class="eq" id="vnote"></p></div>
+<div class="card"><h2>Direction of electron flow</h2><p id="dir"><b></b></p><p class="eq" id="why"></p></div>
+</div>
+<div class="card" style="margin-top:12px"><h2>Reactions</h2><p class="eq" id="rxn"></p>
+<h2 style="margin-top:10px">Electrochemical series (most to least electron-losing)</h2><div class="ecs" id="ecs"></div></div>
+</main>
+<script>
+const V={Mg:1.84,Zn:.92,Fe:.49,Cu:0,Ag:-.17};
+const COL={Mg:'#b7bfc6',Zn:'#9fb0bd',Fe:'#7b7f84',Cu:'#b87333',Ag:'#dfe3e6'};
+const ION={Mg:'Mg²⁺',Zn:'Zn²⁺',Fe:'Fe²⁺',Cu:'Cu²⁺',Ag:'Ag⁺'};
+const $=id=>document.getElementById(id);
+const NS='http://www.w3.org/2000/svg';
+// gauge ticks
+const tk=$('ticks');
+[-2,-1,0,1,2].forEach(v=>{const a=v*27.5*Math.PI/180,s=Math.sin(a),c=Math.cos(a);
+ const l=document.createElementNS(NS,'line');l.setAttribute('x1',350+s*70);l.setAttribute('y1',128-c*70);l.setAttribute('x2',350+s*78);l.setAttribute('y2',128-c*78);l.setAttribute('stroke','#17262d');l.setAttribute('stroke-width',2);tk.appendChild(l);
+ const t=document.createElementNS(NS,'text');t.setAttribute('x',350+s*90);t.setAttribute('y',128-c*90+4);t.setAttribute('text-anchor','middle');t.setAttribute('font-size',12);t.setAttribute('style','fill:#17262d');t.textContent=(v>0?'+':v<0?'−':'')+Math.abs(v);tk.appendChild(t);});
+// electrons
+const wire=$('wire'),L=wire.getTotalLength(),N=18,dots=[];
+for(let i=0;i<N;i++){const g=document.createElementNS(NS,'g');g.innerHTML='<circle r="8" fill="#ffb534" stroke="#7a4a00" stroke-width="1.2"/><text y="3" text-anchor="middle" font-size="9" font-weight="700" style="fill:#3b2500">e⁻</text>';$('dots').appendChild(g);dots.push(g)}
+let ions=[];
+let m='Mg',v=V[m],pos=0,last=performance.now(),bubs=[];
+const fmt=x=>(x>0?'+':x<0?'−':'')+Math.abs(x).toFixed(2);
+function update(){
+ v=V[m];
+ $('anode').setAttribute('fill',COL[m]);$('aLab').textContent=m;
+ $('volt').textContent=fmt(v)+' V';$('volt').className='big'+(v<0?' neg':'');
+ $('dig').textContent=fmt(v)+' V';
+ const ang=Math.max(-2,Math.min(2,v))*27.5;
+ $('needle').style.transformOrigin='350px 128px';$('needle').style.transform='rotate('+ang+'deg)';$('needle').style.transition='transform .8s cubic-bezier(.3,1.5,.5,1)';
+ $('vnote').textContent=v>0?'Positive: the '+m+' terminal is the negative terminal of the cell.':v<0?'Negative: the leads are reversed. Copper loses electrons more readily than silver, so copper is the negative terminal here.':'Same metal on both electrodes: no voltage.';
+ let dir,why,rxn,flow;
+ if(v>0){dir='From '+m+' (anode) → through the wire and voltmeter → to Cu (cathode)';flow='e⁻ flow →';
+  why=m+' is more reactive than Cu, so it loses electrons more readily. The larger the voltage, the further apart the two metals are in the series.';
+  rxn='Anode ('+m+', negative): '+m+' → '+ION[m]+' + '+(m==='Ag'?'e⁻':'2e⁻')+'\nCathode (Cu, positive): 2H⁺ + 2e⁻ → H₂ (bubbles at copper)'}
+ else if(v<0){dir='From Cu → through the wire and voltmeter → to Ag';flow='← e⁻ flow';
+  why='Cu is more reactive than Ag, so electrons flow from Cu to Ag: the opposite of the other cells.';
+  rxn='Negative electrode (Cu): Cu → Cu²⁺ + 2e⁻\nPositive electrode (Ag): 2H⁺ + 2e⁻ → H₂ (bubbles at silver)'}
+ else{dir='No electron flow';flow='';why='Both electrodes are copper, so neither has a greater tendency to lose electrons. The voltmeter reads 0.00 V.';rxn='No overall reaction.'}
+ $('dir').innerHTML='<b>'+dir+'</b>';$('why').textContent=why;$('rxn').innerHTML=rxn.replace(/\n/g,'<br>');$('flow').textContent=flow;
+ document.querySelectorAll('.picker button[data-m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===m));
+ $('ecs').innerHTML=['Mg','Zn','Fe','Cu','Ag'].map(x=>'<span class="'+(x===m?'on':'')+'">'+x+'</span>').join(' > ').replace(/ &gt; /g,'');
+ bubs=[];ions=[];
+}
+document.querySelectorAll('.picker button[data-m]').forEach(b=>b.onclick=()=>{m=b.dataset.m;update()});
+$('pp').onclick=()=>{paused=!paused;$('pp').textContent=paused?'Play':'Pause'};
+const reduce=false;let paused=false;
+function tick(now){
+ const dt=paused?0:Math.min(.05,(now-last)/1000);last=now;
+ // direction: v>0 electrons go anode→cathode (path start→end); v<0 reverse
+ if(v!==0){pos=(pos+Math.sign(v)*(reduce?0:1)*(70+Math.abs(v)*60)*dt+L)%L;
+  dots.forEach((c,i)=>{const p=wire.getPointAtLength((pos+i*L/N)%L);c.setAttribute('transform','translate('+p.x+' '+p.y+')');c.style.display=''})}
+ else dots.forEach(c=>c.style.display='none');
+ // fx: H2 bubbles at electrode receiving e-, metal ions leaving electrode losing e-
+ let h='';
+ if(v!==0&&!reduce){const rx=v>0?530:170,lx=v>0?170:530,sd=v>0?1:-1;
+  if(Math.random()<dt*10*(0.4+Math.abs(v)))bubs.push({x:rx+(Math.random()*34-17),y:395,r:2+Math.random()*3,s:30+Math.random()*30});
+  if(Math.random()<dt*4*(0.5+Math.abs(v)))ions.push({x:lx+sd*14,y:300+Math.random()*90,sd,a:0});
+  bubs.forEach(b=>{b.y-=b.s*dt});bubs=bubs.filter(b=>b.y>275);
+  ions.forEach(o=>{o.a+=dt;o.x+=o.sd*28*dt});ions=ions.filter(o=>o.a<3);
+  h=bubs.map(b=>'<circle cx="'+b.x.toFixed(1)+'" cy="'+b.y.toFixed(1)+'" r="'+b.r.toFixed(1)+'" fill="none" stroke="#fff" stroke-width="1.5"/>').join('')+
+  ions.map(o=>'<g opacity="'+(1-o.a/3).toFixed(2)+'"><circle cx="'+o.x.toFixed(1)+'" cy="'+o.y.toFixed(1)+'" r="11" fill="#0c7c6b"/><text x="'+o.x.toFixed(1)+'" y="'+(o.y+4).toFixed(1)+'" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">2+</text></g>').join('')}
+ else{bubs=[];ions=[]}
+ $('fx').innerHTML=h;
+ requestAnimationFrame(tick)}
+update();requestAnimationFrame(tick);
+</script>
+</body>
+</html>
