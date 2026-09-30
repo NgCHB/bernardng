@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Structure &amp; Bonding Visualiser</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--tx:#0f172a;--mu:#475569;--bd:#e2e8f0;--ac:#0d9488;--acx:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131c2e;--tx:#e2e8f0;--mu:#94a3b8;--bd:#25324a;--ac:#2dd4bf;--acx:#052e2b}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#131c2e;--tx:#e2e8f0;--mu:#94a3b8;--bd:#25324a;--ac:#2dd4bf;--acx:#052e2b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:.2rem 0}
+.sub{color:var(--mu);margin:0 0 12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:7px 12px;border-radius:8px}
+button.on{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:600}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin-top:10px}
+canvas{width:100%;height:min(62vw,420px);min-height:280px;display:block;border-radius:10px;background:#0f172a;touch-action:none;cursor:grab}
+.ctrl{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:8px;color:var(--mu);font-size:.9rem}
+.ctrl label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:.88rem}
+.legend span{display:flex;align-items:center;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block}
+.ln{width:22px;height:0;border-top:3px solid;display:inline-block}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+.chip{background:var(--ac);color:var(--acx);border-radius:999px;padding:2px 10px;font-size:.82rem;font-weight:600}
+dl{display:grid;grid-template-columns:150px 1fr;gap:6px 12px;margin:8px 0 0}
+dt{color:var(--mu);font-weight:600}dd{margin:0}
+@media(max-width:560px){dl{grid-template-columns:1fr}dt{margin-top:6px}}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;min-width:760px;width:100%;font-size:.86rem}
+th,td{border:1px solid var(--bd);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg)}
+.hide{display:none}
+</style></head>
+<body><main>
+<h1>Structure &amp; Bonding Visualiser</h1>
+<p class="sub">Drag to rotate. Compare how particles are arranged, what holds them together, and how that explains properties.</p>
+<div class="tabs" id="tabs"></div>
+<div id="view">
+  <div class="tabs hide" id="subtabs"></div>
+  <div class="card"><canvas id="cv"></canvas>
+    <div class="ctrl" id="ctrl"></div><div class="legend" id="legend"></div></div>
+  <div class="card" id="info"></div>
+</div>
+<div class="card hide" id="cmp"><div class="scroll"><table id="tbl"></table></div></div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]);
+function autoBonds(atoms,d,tol,type){const b=[];for(let i=0;i<atoms.length;i++)for(let j=i+1;j<atoms.length;j++)if(Math.abs(dist(atoms[i].p,atoms[j].p)-d)<tol)b.push([i,j,type]);return b}
+function freeE(n,box,flat){const f=[];for(let i=0;i<n;i++){const r=k=>box[k][0]+rnd()*(box[k][1]-box[k][0]);f.push({p:[r(0),r(1),r(2)],v:[(rnd()-.5)*1.6,flat?0:(rnd()-.5)*1.6,(rnd()-.5)*1.6],box})}return f}
+
+/* ---------- scene builders ---------- */
+function ionic(){seed=7;const n=4,s=46,o=(n-1)/2,a=[];
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let k=0;k<n;k++){const cl=(i+j+k)%2;a.push({p:[(i-o)*s,(j-o)*s,(k-o)*s],c:cl?'#4ade80':'#a78bfa',r:cl?13:8,t:cl?'−':'+'})}
+ return{size:110,atoms:a,bonds:autoBonds(a,s,1,'ion'),free:[],
+ legend:[['dot','#a78bfa','Na⁺ ion (positive)'],['dot','#4ade80','Cl⁻ ion (negative)'],['ln','#a78bfa','Strong ionic bond: electrostatic attraction between + and − ions']],ctrl:[]}}
+
+function simple(){seed=11;const a=[],b=[],mols=[],g=105,ms=[];
+ for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++){
+  const c=[(i-.5)*g,(j-.5)*g,(k-.5)*g],ax=rnd()*6.28,ay=rnd()*6.28,az=rnd()*6.28;
+  const rot=v=>{let[x,y,z]=v,t;t=y*Math.cos(ax)-z*Math.sin(ax);z=y*Math.sin(ax)+z*Math.cos(ax);y=t;t=x*Math.cos(ay)+z*Math.sin(ay);z=-x*Math.sin(ay)+z*Math.cos(ay);x=t;t=x*Math.cos(az)-y*Math.sin(az);y=x*Math.sin(az)+y*Math.cos(az);x=t;return[x,y,z]};
+  const m=ms.length,st=a.length;ms.push(m);
+  const H=Math.sin(52.25*Math.PI/180)*36,V=Math.cos(52.25*Math.PI/180)*36;
+  [[0,0,0,'#f87171',12,'O'],[H,V,0,'#f1f5f9',7,'H'],[-H,V,0,'#f1f5f9',7,'H']].forEach(q=>{const r=rot([q[0],q[1],q[2]]);a.push({p:[c[0]+r[0],c[1]+r[1],c[2]+r[2]],base:[c[0]+r[0],c[1]+r[1],c[2]+r[2]],c:q[3],r:q[4],t:'',m,ph:rnd()*6})});
+  b.push([st,st+1,'cov'],[st,st+2,'cov'])}
+ a.forEach((x,i)=>{if(i%3)return;let best=-1,bd=1e9;a.forEach((y,j)=>{if(j%3!==0&&y.m!==x.m){const d=dist(x.p,y.p);if(d<bd){bd=d;best=j}}});if(best>=0&&bd<110)b.push([i,best,'weak'])});
+ return{size:130,atoms:a,bonds:b,free:[],
+ update(t){this.atoms.forEach(x=>{x.p=[x.base[0]+Math.sin(t+x.ph)*5,x.base[1]+Math.cos(t*1.2+x.ph)*5,x.base[2]+Math.sin(t*.8+x.ph)*5]})},
+ legend:[['dot','#f87171','Oxygen'],['dot','#f1f5f9','Hydrogen'],['ln','#cbd5e1','Strong covalent bond (inside a molecule)'],['dot','#f472b6','Weak intermolecular forces (between molecules)']],ctrl:[]}}
+
+function diamond(){const a=[],A=100,base=[[0,0,0],[0,.5,.5],[.5,0,.5],[.5,.5,0]];
+ for(let i=0;i<2;i++)for(let j=0;j<2;j++)for(let k=0;k<2;k++)base.forEach(q=>[0,.25].forEach(s=>{const p=[i+q[0]+s,j+q[1]+s,k+q[2]+s];if(p.every(v=>v<=1.51))a.push({p:p.map(v=>(v-.75)*A*1.4),c:'#94a3b8',r:9,t:''})}));
+ const bl=Math.sqrt(3)/4*A*1.4,b=autoBonds(a,bl,2,'cov');
+ let ci=0,cd=1e9;a.forEach((x,i)=>{const d=dist(x.p,[0,0,0]);if(d<cd){cd=d;ci=i}});
+ a[ci].h=1;b.forEach(x=>{if(x[0]===ci||x[1]===ci){x[3]=1;a[x[0]].h=1;a[x[1]].h=1}});
+ return{size:115,atoms:a,bonds:b,free:[],legend:[['dot','#94a3b8','Carbon atom'],['ln','#cbd5e1','Strong covalent bond (4 per carbon)'],['dot','#facc15','Highlighted: one carbon and its 4 bonded neighbours']],
+ ctrl:[['hl','Highlight tetrahedron',true]]}}
+
+function graphite(){seed=5;const L=40,a=[],b=[],per=[],g=85;
+ const a1=[1.5*L,Math.sqrt(3)/2*L],a2=[1.5*L,-Math.sqrt(3)/2*L],pts=[];
+ for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++)[0,L].forEach(o=>{const x=i*a1[0]+j*a2[0]+o,y=i*a1[1]+j*a2[1];if(x*x+y*y<(3.3*L)**2)pts.push([x,y])});
+ for(let l=0;l<3;l++){const st=a.length;pts.forEach(q=>a.push({base:[q[0],(l-1)*g,q[1]],p:[q[0],(l-1)*g,q[1]],c:'#64748b',r:6,t:'',l}));
+  for(let i=st;i<a.length;i++)for(let j=i+1;j<a.length;j++)if(Math.abs(dist(a[i].base,a[j].base)-L)<1)b.push([i,j,'cov']);per.push(st)}
+ const n=pts.length;for(let l=0;l<2;l++)for(let k=0;k<n;k++)if(k%2===0)b.push([l*n+k,(l+1)*n+k,'weak']);
+ const e=[];[-.5,.5].forEach(h=>{e.push(...freeE(18,[[-110,110],[h*g,h*g],[-100,100]],true))});
+ return{size:150,atoms:a,bonds:b,free:e,
+ update(t,s){const off=s.slide?Math.sin(t*1.4)*45:0;this.atoms.forEach(x=>{x.p[0]=x.base[0]+off*(x.l-1)})},
+ legend:[['dot','#64748b','Carbon atom'],['ln','#cbd5e1','Strong covalent bonds in a layer (3 per carbon, hexagons)'],['dot','#f472b6','Weak intermolecular forces between layers'],['dot','#38bdf8','Delocalised electron (4th outer electron)']],
+ ctrl:[['slide','Slide the layers',false],['elec','Show delocalised electrons',true]]}}
+
+function metallic(){seed=3;const n=3,s=52,o=(n-1)/2,a=[];
+ for(let i=0;i<n;i++)for(let j=0;j<n;j++)for(let k=0;k<n;k++)a.push({p:[(i-o)*s,(j-o)*s,(k-o)*s],base:[(i-o)*s,(j-o)*s,(k-o)*s],c:'#fb923c',r:13,t:'+',ph:rnd()*6});
+ const h=o*s+30;
+ return{size:110,atoms:a,bonds:[],free:freeE(50,[[-h,h],[-h,h],[-h,h]]),
+ update(t){this.atoms.forEach(x=>{x.p=[x.base[0]+Math.sin(t*3+x.ph)*2,x.base[1]+Math.cos(t*3+x.ph)*2,x.base[2]]})},
+ legend:[['dot','#fb923c','Positive metal ion (fixed in lattice)'],['dot','#38bdf8','Delocalised electron (free to move)']],ctrl:[]}}
+
+/* ---------- content ---------- */
+const INFO={
+ionic:{name:'Giant ionic lattice',ex:'NaCl, MgO, CaF₂',chips:['Ionic bonding'],bond:'Ionic bond: strong electrostatic attraction between oppositely charged ions (formed by transfer of electrons from metal to non-metal).',part:'Positive and negative ions',arr:'Regular 3D lattice of alternating cations and anions.',mp:'High: a lot of energy is needed to overcome the strong electrostatic forces between oppositely charged ions.',el:'Solid: no (ions can only vibrated about fixed positions). Molten or aqueous: yes (ions free to move and carry charge).',sol:'generally soluble in water; insoluble in organic solvents.',oth:'Hard but brittle: a shifted layer brings like charges together, which repel and the crystal cracks.'},
+simple:{name:'Simple molecular (simple covalent)',ex:'H₂O, CO₂, CH₄, I₂',chips:['Covalent bonds inside molecules','Weak intermolecular forces between molecules'],bond:'Atoms in each molecule share electrons in strong covalent bonds. Separate molecules are attracted only by weak intermolecular forces (shown: hydrogen bonds between water molecules).',part:'Small neutral molecules',arr:'Molecules are close together but not bonded to each other; they are not a lattice.',mp:'Low: small amount of energy needed to overcome the weak intermolecular forces during melting or boiling.',el:'No, at any state: molecules are neutral and there are no free ions or electrons.',sol:'Usually insoluble in water but soluble in organic solvents.',oth:'Often gases or liquids at room temperature; solids are soft.'},
+diamond:{name:'Giant covalent: diamond',ex:'Diamond, silicon(IV) oxide (SiO₂)',chips:['Covalent bonding','3D network'],bond:'Each carbon forms 4 strong covalent bonds to 4 other carbons, arranged as a tetrahedron. The network continues throughout the whole crystal.',part:'Carbon atoms',arr:'Giant 3D tetrahedral network of covalent bonds.',mp:'Very high (about 3550 °C): a huge number of strong covalent bonds must be broken.',el:'No: all 4 outer electrons are used in bonding, so no free electrons or ions.',sol:'Insoluble in water.',oth:'Extremely hard because every atom is held rigidly by 4 bonds. Used in cutting tools and drill bits.'},
+graphite:{name:'Giant covalent: graphite',ex:'Graphite, graphene layers',chips:['Covalent bonding in layers','Weak forces between layers'],bond:'Each carbon forms 3 strong covalent bonds in flat hexagonal layers. Between the layers only weak intermolecular forces act.',part:'Carbon atoms',arr:'Layers of hexagonal rings stacked on top of each other.',mp:'Very high (about 3600 °C): strong covalent bonds within layers must be broken. Sliding layers only needs the weak forces overcome.',el:'Yes: the 4th outer electron of each carbon is delocalised and moves along the layers.',sol:'Insoluble in water.',oth:'Soft and slippery: layers slide over each other. Used as a lubricant and in pencils and electrodes.'},
+metallic:{name:'Giant metallic lattice',ex:'Cu, Fe, Na, Al',chips:['Metallic bonding'],bond:'Metallic bond: strong electrostatic attraction between positive metal ions and the sea of delocalised electrons.',part:'Positive ions in a sea of delocalised electrons',arr:'Regular layers of metal cations surrounded by mobile electrons.',mp:'Usually high: strong attraction between ions and electrons must be overcome.',el:'Yes, as solid and liquid: delocalised electrons carry charge.',sol:'Insoluble in water.',oth:'Malleable and ductile: layers of ions slide but the electron sea keeps them bonded. Good thermal conductors.'}};
+const BUILD={ionic,simple,diamond,graphite,metallic};
+const TABS=[['ionic','Giant ionic'],['simple','Simple covalent'],['gc','Giant covalent'],['metallic','Giant metallic'],['cmp','Compare all']];
+
+/* ---------- engine ---------- */
+const cv=$('cv'),ctx=cv.getContext('2d');let scene,state={},ry=.6,rx=.35,drag=false,lx,ly,auto=true,cur='ionic';
+function load(k){cur=k;scene=BUILD[k]();state={};(scene.ctrl||[]).forEach(c=>state[c[0]]=c[2]);
+ $('ctrl').innerHTML='<label><input type="checkbox" id="auto" '+(auto?'checked':'')+'> Auto-rotate</label><button id="rst">Reset view</button>';
+ $('auto').onchange=e=>auto=e.target.checked;$('rst').onclick=()=>{ry=.6;rx=.35};
+ (scene.ctrl||[]).forEach(c=>{const l=document.createElement('label');l.innerHTML='<input type="checkbox" '+(c[2]?'checked':'')+'> '+c[1];l.firstChild.onchange=e=>state[c[0]]=e.target.checked;$('ctrl').appendChild(l)});
+ $('legend').innerHTML=scene.legend.map(q=>q[0]==='dot'?`<span><i class="dot" style="background:${q[1]}"></i>${q[2]}</span>`:`<span><i class="ln" style="border-color:${q[1]}"></i>${q[2]}</span>`).join('');
+ const d=INFO[k];$('info').innerHTML=`<h2 style="margin:0;font-size:1.15rem">${d.name}</h2><div class="chips">${d.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div><dl><dt>Bonding</dt><dd>${d.bond}</dd><dt>Particles</dt><dd>${d.part}</dd><dt>Arrangement</dt><dd>${d.arr}</dd><dt>Melting point</dt><dd>${d.mp}</dd><dt>Conducts electricity?</dt><dd>${d.el}</dd><dt>Solubility</dt><dd>${d.sol}</dd><dt>Other properties</dt><dd>${d.oth}</dd><dt>Examples</dt><dd>${d.ex}</dd></dl>`}
+function resize(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;if(cv.width!==Math.round(r.width*d)){cv.width=Math.round(r.width*d);cv.height=Math.round(r.height*d)}return d}
+function frame(ms){const t=ms/1000,d=resize(),W=cv.width,H=cv.height;
+ if(auto&&!drag)ry+=.005;
+ scene.update&&scene.update(t,state);
+ scene.free.forEach(f=>{for(let k=0;k<3;k++){f.p[k]+=f.v[k];if(f.p[k]<f.box[k][0]||f.p[k]>f.box[k][1])f.v[k]*=-1}});
+ ctx.clearRect(0,0,W,H);
+ const s=Math.min(W,H)*.42/scene.size,cx=W/2,cy=H/2,cyy=Math.cos(ry),syy=Math.sin(ry),cxx=Math.cos(rx),sxx=Math.sin(rx);
+ const P=p=>{const x1=p[0]*cyy+p[2]*syy,z1=-p[0]*syy+p[2]*cyy,y2=p[1]*cxx-z1*sxx,z2=p[1]*sxx+z1*cxx,k=700/(700+z2);return{x:cx+x1*k*s,y:cy+y2*k*s,z:z2,k:k*s}};
+ const pr=scene.atoms.map(a=>P(a.p)),items=[];
+ scene.bonds.forEach(b=>{const A=pr[b[0]],B=pr[b[1]];items.push({z:(A.z+B.z)/2,f(){ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);
+  if(b[2]==='cov'){const h=state.hl&&b[3];ctx.setLineDash([]);ctx.lineWidth=(h?7:4)*A.k/s*1.1;ctx.strokeStyle=h?'#facc15':'#cbd5e1'}
+  else if(b[2]==='ion'){ctx.setLineDash([6*d,4*d]);ctx.lineWidth=1.6*d;ctx.strokeStyle='#a78bfa88'}
+  else{ctx.setLineDash([2*d,5*d]);ctx.lineWidth=2*d;ctx.strokeStyle='#f472b6'}
+  if(b[2]==='cov')ctx.lineWidth=Math.max(2,ctx.lineWidth*d);ctx.stroke();ctx.setLineDash([])}})});
+ scene.atoms.forEach((a,i)=>{const q=pr[i];items.push({z:q.z,f(){const r=a.r*q.k,h=state.hl&&a.h;const gr=ctx.createRadialGradient(q.x-r*.3,q.y-r*.3,r*.1,q.x,q.y,r);gr.addColorStop(0,'#fff');gr.addColorStop(.25,h?'#facc15':a.c);gr.addColorStop(1,h?'#a16207':a.c);
+  ctx.globalAlpha=.95;ctx.fillStyle=gr;ctx.beginPath();ctx.arc(q.x,q.y,r,0,7);ctx.fill();ctx.globalAlpha=1;
+  if(a.t&&r>8){ctx.fillStyle='#0f172a';ctx.font='bold '+r*1.1+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(a.t,q.x,q.y+r*.05)}}})});
+ if(state.elec!==false)scene.free.forEach(f=>{const q=P(f.p);items.push({z:q.z,f(){ctx.fillStyle='#38bdf8';ctx.shadowColor='#38bdf8';ctx.shadowBlur=8*d;ctx.beginPath();ctx.arc(q.x,q.y,3.2*q.k/s*d*1.2,0,7);ctx.fill();ctx.shadowBlur=0}})});
+ items.sort((a,b)=>b.z-a.z).forEach(i=>i.f());
+ requestAnimationFrame(frame)}
+cv.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;cv.setPointerCapture(e.pointerId)});
+cv.addEventListener('pointermove',e=>{if(!drag)return;ry+=(e.clientX-lx)*.01;rx+=(e.clientY-ly)*.01;rx=Math.max(-1.5,Math.min(1.5,rx));lx=e.clientX;ly=e.clientY});
+['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,()=>drag=false));
+
+/* ---------- tabs & compare ---------- */
+function show(k){document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
+ const c=k==='cmp';$('view').classList.toggle('hide',c);$('cmp').classList.toggle('hide',!c);
+ $('subtabs').classList.toggle('hide',k!=='gc');
+ if(k==='gc')sub('diamond');else if(!c)load(k)}
+function sub(k){$('subtabs').innerHTML=[['diamond','Diamond (3D tetrahedral network)'],['graphite','Graphite (2D hexagonal layers)']].map(q=>`<button data-s="${q[0]}" class="${q[0]===k?'on':''}">${q[1]}</button>`).join('');
+ $('subtabs').querySelectorAll('button').forEach(b=>b.onclick=()=>sub(b.dataset.s));load(k)}
+$('tabs').innerHTML=TABS.map(t=>`<button data-k="${t[0]}">${t[1]}</button>`).join('');
+$('tabs').querySelectorAll('button').forEach(b=>b.onclick=()=>show(b.dataset.k));
+const cols=['ionic','simple','diamond','graphite','metallic'],rows=[['Bonding','bond'],['Particles','part'],['Melting point','mp'],['Conducts electricity?','el'],['Solubility in water','sol'],['Other','oth'],['Examples','ex']];
+$('tbl').innerHTML='<tr><th></th>'+cols.map(c=>`<th>${INFO[c].name.replace('Giant covalent: ','')}</th>`).join('')+'</tr>'+rows.map(r=>`<tr><th>${r[0]}</th>`+cols.map(c=>`<td>${INFO[c][r[1]]}</td>`).join('')+'</tr>').join('');
+show('ionic');requestAnimationFrame(frame);
+</script></body></html>
