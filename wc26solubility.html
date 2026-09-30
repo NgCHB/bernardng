@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FIFA World Cup 2026 — O Level Salt Solubility</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pitch-dark:#0b3d24;
+    --pitch:#0f5132;
+    --pitch-light:#1a7a4c;
+    --line:#e8f5ee;
+    --gold:#f5c542;
+    --gold-deep:#c9971f;
+    --navy:#0d1b2a;
+    --navy-card:#132a3e;
+    --red-card:#e63946;
+    --sky:#8ecae6;
+    --text:#eef6f0;
+    --muted:#a9c3b4;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    font-family:'Oswald',sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(circle at 50% -10%, rgba(245,197,66,0.10), transparent 55%),
+      repeating-linear-gradient(90deg, var(--pitch) 0 80px, var(--pitch-light) 80px 160px);
+    overflow-x:hidden;
+    position:relative;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background:
+      radial-gradient(ellipse at center, rgba(0,0,0,0) 40%, rgba(0,0,0,0.45) 100%);
+    pointer-events:none;
+    z-index:0;
+  }
+  #app{position:relative; z-index:1; max-width:900px; margin:0 auto; padding:18px 16px 60px;}
+
+  h1,h2,h3{font-family:'Anton',sans-serif; letter-spacing:0.5px; margin:0;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--gold);
+    opacity:0.9;
+  }
+
+  /* ---------- Top bar / stadium header ---------- */
+  .stadium-header{
+    text-align:center;
+    padding:22px 10px 14px;
+    position:relative;
+  }
+  .stadium-header h1{
+    font-size:clamp(34px,7vw,54px);
+    color:var(--gold);
+    text-shadow:0 3px 0 rgba(0,0,0,0.35), 0 0 30px rgba(245,197,66,0.25);
+    line-height:1;
+  }
+  .stadium-header p{margin:6px 0 0; color:var(--muted); font-size:15px;}
+
+  /* ---------- Panels ---------- */
+  .panel{
+    background:linear-gradient(180deg, var(--navy-card), var(--navy));
+    border:2px solid rgba(245,197,66,0.25);
+    border-radius:18px;
+    padding:22px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04);
+    margin-bottom:18px;
+  }
+
+  /* ---------- Country grid (start screen) ---------- */
+  .country-search{
+    width:100%; padding:12px 14px; border-radius:12px; border:2px solid rgba(245,197,66,0.3);
+    background:rgba(0,0,0,0.25); color:var(--text); font-family:'Oswald'; font-size:15px; margin-bottom:14px;
+  }
+  .country-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(78px,1fr));
+    gap:12px;
+    max-height:420px;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scroll-behavior:auto;
+    padding-right:4px;
+  }
+  .country-grid::-webkit-scrollbar{width:8px;}
+  .country-grid::-webkit-scrollbar-thumb{background:var(--gold-deep); border-radius:8px;}
+
+  .flag-badge{
+    width:64px; height:64px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    background:radial-gradient(circle at 35% 30%, #ffffff, #d8e6dd 60%, #b9cfc1 100%);
+    border:3px solid var(--gold-deep);
+    box-shadow:0 4px 10px rgba(0,0,0,0.4);
+  }
+  .flag-badge img{width:100%; height:100%; object-fit:cover; display:block;}
+  .flag-inline{
+    height:0.8em; width:auto; vertical-align:-0.08em; border-radius:2px;
+    box-shadow:0 0 0 1px rgba(0,0,0,0.25); margin:0 3px; display:inline-block;
+  }
+  .country-cell{
+    display:flex; flex-direction:column; align-items:center; gap:6px;
+    cursor:pointer; padding:8px 4px; border-radius:12px;
+    transition:transform .15s ease, background .15s ease;
+    text-align:center;
+  }
+  .country-cell:hover{background:rgba(245,197,66,0.12); transform:translateY(-3px);}
+  .country-cell.selected .flag-badge{
+    border-color:var(--gold); box-shadow:0 0 0 4px rgba(245,197,66,0.35), 0 4px 14px rgba(0,0,0,0.5);
+  }
+  .country-cell .cname{font-size:11px; color:var(--muted); letter-spacing:0.5px;}
+  .country-cell.selected .cname{color:var(--gold); font-weight:600;}
+
+  .options-row{display:flex; flex-wrap:wrap; gap:18px; align-items:center; margin:14px 0 4px;}
+  .toggle-wrap{display:flex; align-items:center; gap:10px; font-size:14px; color:var(--muted);}
+  .switch{position:relative; width:46px; height:26px;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider-tog{position:absolute; cursor:pointer; inset:0; background:#3a4a42; border-radius:26px; transition:.2s;}
+  .slider-tog:before{content:""; position:absolute; height:20px; width:20px; left:3px; bottom:3px; background:var(--text); border-radius:50%; transition:.2s;}
+  .switch input:checked + .slider-tog{background:var(--gold-deep);}
+  .switch input:checked + .slider-tog:before{transform:translateX(20px);}
+
+  .btn{
+    font-family:'Anton',sans-serif; letter-spacing:1px;
+    background:linear-gradient(180deg, var(--gold), var(--gold-deep));
+    color:#28230a; border:none; border-radius:14px;
+    padding:16px 20px; font-size:19px; cursor:pointer;
+    box-shadow:0 6px 0 #8a6a12, 0 10px 18px rgba(0,0,0,0.4);
+    transition:transform .08s ease;
+    width:100%;
+  }
+  .btn:active{transform:translateY(4px); box-shadow:0 2px 0 #8a6a12, 0 4px 10px rgba(0,0,0,0.3);}
+  .btn:disabled{opacity:0.4; cursor:not-allowed; box-shadow:none;}
+  .btn.secondary{
+    background:linear-gradient(180deg,#22405a,#152c3f);
+    color:var(--text); box-shadow:0 6px 0 #0a1a26, 0 10px 18px rgba(0,0,0,0.4);
+  }
+
+  /* ---------- Bracket tracker ---------- */
+  .bracket{
+    display:flex; justify-content:space-between; align-items:center;
+    margin-bottom:10px; gap:4px; overflow-x:auto;
+  }
+  .bracket-stage{
+    flex:1; text-align:center; position:relative; padding-bottom:10px; min-width:56px;
+  }
+  .bracket-stage .dot{
+    width:16px; height:16px; border-radius:50%; margin:0 auto 6px;
+    background:#2c4437; border:2px solid #3a5a48;
+  }
+  .bracket-stage.done .dot{background:var(--gold); border-color:var(--gold-deep); box-shadow:0 0 10px rgba(245,197,66,0.7);}
+  .bracket-stage.current .dot{background:#fff; border-color:var(--gold); box-shadow:0 0 0 4px rgba(245,197,66,0.35); animation:pulse 1.2s infinite;}
+  .bracket-stage .lbl{font-size:9px; letter-spacing:0.5px; color:var(--muted); text-transform:uppercase; font-family:'JetBrains Mono',monospace;}
+  .bracket-stage.current .lbl{color:var(--gold);}
+  .bracket-line{position:absolute; top:7px; left:-50%; width:100%; height:2px; background:#2c4437; z-index:-1;}
+  .bracket-stage.done .bracket-line{background:var(--gold-deep);}
+  .bracket-stage:first-child .bracket-line{display:none;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.25);}}
+
+  /* ---------- Goal meter (streak) ---------- */
+  .goalmeter-wrap{margin-bottom:16px;}
+  .goalmeter-label{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); font-family:'JetBrains Mono',monospace; margin-bottom:6px; letter-spacing:1px;}
+  .goalmeter{
+    position:relative; height:26px; border-radius:13px; overflow:hidden;
+    background:repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 20px, rgba(255,255,255,0.02) 20px 40px);
+    border:2px solid rgba(245,197,66,0.3);
+  }
+  .goalmeter-fill{
+    height:100%; border-radius:13px 0 0 13px;
+    background:linear-gradient(90deg, #f5c542, #ffe27a);
+    transition:width .5s cubic-bezier(.34,1.56,.64,1);
+    position:relative;
+  }
+  .goalmeter-ball{
+    position:absolute; top:50%; transform:translate(-50%,-50%);
+    font-size:20px; transition:left .5s cubic-bezier(.34,1.56,.64,1);
+  }
+
+  /* ---------- Match display ---------- */
+  .match-row{
+    display:flex; align-items:flex-start; justify-content:center; gap:18px;
+    margin-bottom:6px;
+  }
+  .team{display:flex; flex-direction:column; align-items:center; gap:6px; flex:1;}
+  .flag-score-row{display:flex; align-items:center; gap:10px; justify-content:center;}
+  .team .flag-badge{width:84px; height:84px; flex-shrink:0;}
+  .team .tname{font-family:'Anton'; font-size:14px; letter-spacing:0.5px; text-align:center;}
+  .score-num{
+    font-family:'Anton'; font-size:38px; color:var(--gold); line-height:1;
+    text-shadow:0 2px 0 rgba(0,0,0,0.4); animation:pop .4s ease;
+  }
+  .scorer-list{
+    font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted);
+    text-align:center; line-height:1.6; animation:pop .4s ease;
+  }
+  .scorer-row{white-space:nowrap;}
+  .scorer-row.scorer-none{opacity:0.5;}
+  .scorer-min{color:var(--gold); opacity:0.9;}
+  .vs{font-family:'Anton'; font-size:26px; color:var(--gold); text-shadow:0 2px 0 rgba(0,0,0,0.4); margin-top:26px;}
+  .vs.dash{font-size:34px;}
+  .stage-tag{
+    text-align:center; font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:2px;
+    color:var(--gold); text-transform:uppercase; margin-bottom:14px;
+  }
+
+  /* ---------- Salt card & solubility buttons ---------- */
+  .qcard{margin-top:4px;}
+  .salt-card{
+    text-align:center; font-family:'Anton',sans-serif; font-size:clamp(24px,7vw,34px);
+    letter-spacing:0.5px; background:rgba(255,255,255,0.05); border:2px solid rgba(245,197,66,0.3);
+    border-radius:16px; padding:26px 14px; margin-bottom:18px; line-height:1.3;
+  }
+  .salt-card sub{font-size:0.6em;}
+  .sol-buttons{display:flex; gap:14px;}
+  .sol-btn{
+    flex:1; font-family:'Anton',sans-serif; letter-spacing:1px; font-size:18px; line-height:1.6;
+    border-radius:16px; padding:20px 10px; cursor:pointer; border:3px solid rgba(245,197,66,0.3);
+    transition:all .15s ease;
+    background:linear-gradient(180deg, var(--navy-card), var(--navy));
+    color:var(--text);
+    box-shadow:0 6px 0 rgba(0,0,0,0.35), 0 10px 18px rgba(0,0,0,0.4);
+  }
+  .sol-btn:hover:not(:disabled){background:rgba(245,197,66,0.12);}
+  .sol-btn:active:not(:disabled){transform:translateY(4px);}
+  .sol-btn:disabled{cursor:default;}
+  .sol-btn.correct{border-color:var(--gold); box-shadow:0 6px 0 rgba(0,0,0,0.3), 0 0 0 4px rgba(245,197,66,0.35), 0 10px 18px rgba(0,0,0,0.4);}
+  .sol-btn.wrong-fade{opacity:0.35;}
+  .sol-btn.picked-wrong{opacity:1; filter:grayscale(0.3);}
+
+  .hint-box{border-left-color:var(--sky); background:rgba(142,202,230,0.12); color:var(--sky);}
+
+  .lifelines{display:flex; gap:12px; margin-top:16px;}
+  .life-btn{
+    flex:1; padding:10px; border-radius:12px; border:2px solid rgba(245,197,66,0.35);
+    background:rgba(255,255,255,0.04); color:var(--text); font-family:'JetBrains Mono'; font-size:12px;
+    cursor:pointer; text-align:center; letter-spacing:0.5px;
+  }
+  .life-btn:disabled{opacity:0.25; cursor:not-allowed;}
+  .life-btn:hover:not(:disabled){background:rgba(245,197,66,0.15);}
+
+  .timer-bar-wrap{height:8px; border-radius:4px; background:rgba(255,255,255,0.08); overflow:hidden; margin-bottom:14px;}
+  .timer-bar{height:100%; background:linear-gradient(90deg,#3fce7a,#f5c542,var(--red-card)); transition:width 1s linear;}
+
+  /* ---------- Commentary banner ---------- */
+  .commentary{
+    text-align:center;
+    padding:14px; border-radius:14px; margin-bottom:16px;
+    animation:pop .4s ease;
+    display:flex; flex-direction:column; gap:6px;
+  }
+  .commentary .score-line{
+    font-family:'Anton'; font-size:clamp(18px,5vw,24px); letter-spacing:0.5px; line-height:1.2;
+  }
+  .commentary .status-line{
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.3px;
+    opacity:0.9; line-height:1.5;
+  }
+  .commentary.good{background:rgba(63,206,122,0.18); color:#7cf0a8; border:2px solid #3fce7a;}
+  .commentary.bad{background:rgba(230,57,70,0.18); color:#ff9aa3; border:2px solid var(--red-card);}
+  @keyframes pop{0%{transform:scale(0.7); opacity:0;}60%{transform:scale(1.08);}100%{transform:scale(1); opacity:1;}}
+
+  .explain-box{
+    background:rgba(0,0,0,0.25); border-left:4px solid var(--gold); padding:12px 14px;
+    border-radius:8px; font-size:14.5px; color:var(--muted); margin-bottom:16px; line-height:1.5;
+  }
+
+  /* ---------- Confetti ---------- */
+  .confetti-piece{
+    position:fixed; top:-20px; width:9px; height:14px; z-index:50; pointer-events:none;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    to{transform:translateY(110vh) rotate(540deg); opacity:0.3;}
+  }
+  .floaty{
+    position:fixed; z-index:60; font-size:26px; pointer-events:none;
+    animation:floatup 1.4s ease-out forwards;
+  }
+  @keyframes floatup{
+    0%{transform:translateY(0) scale(0.6); opacity:0;}
+    20%{opacity:1;}
+    100%{transform:translateY(-140px) scale(1.3); opacity:0;}
+  }
+
+  /* ---------- Win screen ---------- */
+  .win-screen{text-align:center;}
+  .win-screen .trophy-img{max-width:260px; width:60%; filter:drop-shadow(0 15px 25px rgba(0,0,0,0.5)); margin:10px auto 6px; animation:trophyIn 1s cubic-bezier(.34,1.56,.64,1); display:block;}
+  @keyframes trophyIn{0%{transform:scale(0) rotate(-15deg); opacity:0;}100%{transform:scale(1) rotate(0); opacity:1;}}
+  .win-screen h2{font-size:clamp(30px,6vw,46px); color:var(--gold); margin-bottom:6px; text-shadow:0 3px 0 rgba(0,0,0,0.4);}
+  .win-stat{
+    display:flex; justify-content:center; gap:26px; margin:18px 0; flex-wrap:wrap;
+  }
+  .win-stat div{background:rgba(255,255,255,0.05); border-radius:12px; padding:10px 18px; border:1px solid rgba(245,197,66,0.25);}
+  .win-stat b{display:block; font-family:'Anton'; color:var(--gold); font-size:20px;}
+  .win-stat span{font-size:11px; color:var(--muted); letter-spacing:1px;}
+
+  /* ---------- Elimination screen ---------- */
+  .elim-screen{text-align:center;}
+  .elim-screen .redcard{
+    width:70px; height:96px; background:var(--red-card); border-radius:6px; margin:10px auto 18px;
+    box-shadow:0 10px 24px rgba(230,57,70,0.5); animation:shake .5s ease;
+  }
+  @keyframes shake{0%,100%{transform:rotate(0);}25%{transform:rotate(-8deg);}75%{transform:rotate(8deg);}}
+
+  .footer-note{text-align:center; font-size:12px; color:var(--muted); margin-top:20px; opacity:0.7;}
+  .hidden{display:none !important;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation:none !important; transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ COUNTRY DATA ============ */
+// Flag images served from flagcdn.com (reliable cross-platform rendering, unlike emoji flags on Windows browsers)
+function flagUrl(code, height){
+  return `https://flagcdn.com/h${height||240}/${code}.png`;
+}
+function flagImgTag(code, name, cls){
+  const fallback = code.startsWith("gb-") ? "gb" : code;
+  return `<img class="${cls||''}" src="${flagUrl(code)}" alt="${name} flag" loading="lazy" onerror="this.onerror=null;this.src='${flagUrl(fallback,240)}';">`;
+}
+function flagInlineTag(code, name){
+  const fallback = code.startsWith("gb-") ? "gb" : code;
+  return `<img class="flag-inline" src="${flagUrl(code,60)}" alt="${name} flag" loading="lazy" onerror="this.onerror=null;this.src='${flagUrl(fallback,60)}';">`;
+}
+// The confirmed 48 teams at the 2026 FIFA World Cup
+const COUNTRIES = [
+  ["dz","Algeria"],["ar","Argentina"],["au","Australia"],["at","Austria"],["be","Belgium"],
+  ["ba","Bosnia and Herzegovina"],["br","Brazil"],["cv","Cabo Verde"],["ca","Canada"],["co","Colombia"],
+  ["hr","Croatia"],["cw","Curaçao"],["cz","Czechia"],["cd","DR Congo"],["ec","Ecuador"],
+  ["eg","Egypt"],["gb-eng","England"],["fr","France"],["de","Germany"],["gh","Ghana"],
+  ["ht","Haiti"],["ir","Iran"],["iq","Iraq"],["jp","Japan"],["jo","Jordan"],
+  ["mx","Mexico"],["ma","Morocco"],["nl","Netherlands"],["nz","New Zealand"],["no","Norway"],
+  ["pa","Panama"],["py","Paraguay"],["pt","Portugal"],["qa","Qatar"],["sa","Saudi Arabia"],
+  ["gb-sct","Scotland"],["sn","Senegal"],["za","South Africa"],["kr","South Korea"],["es","Spain"],
+  ["se","Sweden"],["ch","Switzerland"],["tn","Tunisia"],["tr","Türkiye"],["us","United States"],
+  ["uy","Uruguay"],["uz","Uzbekistan"],["ci","Côte d'Ivoire"]
+].map(([code,name])=>({code,name}));
+
+/* ============ KEY PLAYERS (for match commentary flavor) ============ */
+// Five well-known players per nation, used purely to generate fun,
+// randomised in-game scorelines — not an official squad list.
+const KEY_PLAYERS = {
+  "dz": ["Riyad Mahrez","Islam Slimani","Ismaël Bennacer","Ramy Bensebaini","Youcef Atal"],
+  "ar": ["Lionel Messi","Julián Álvarez","Rodrigo De Paul","Alexis Mac Allister","Enzo Fernández"],
+  "au": ["Mitchell Duke","Aaron Mooy","Craig Goodwin","Riley McGree","Jackson Irvine"],
+  "at": ["David Alaba","Marcel Sabitzer","Marko Arnautović","Konrad Laimer","Christoph Baumgartner"],
+  "be": ["Kevin De Bruyne","Romelu Lukaku","Jérémy Doku","Youri Tielemans","Leandro Trossard"],
+  "ba": ["Edin Džeko","Miralem Pjanić","Sead Kolašinac","Ermedin Demirović","Amar Dedić"],
+  "br": ["Vinícius Júnior","Rodrygo","Neymar Jr.","Casemiro","Lucas Paquetá"],
+  "cv": ["Ryan Mendes","Jamiro Monteiro","Dylan Tavares","Willy Semedo","Kenny Rocha Santos"],
+  "ca": ["Alphonso Davies","Jonathan David","Stephen Eustáquio","Cyle Larin","Tajon Buchanan"],
+  "co": ["James Rodríguez","Luis Díaz","Jefferson Lerma","Davinson Sánchez","Radamel Falcao"],
+  "hr": ["Luka Modrić","Mateo Kovačić","Ivan Perišić","Josko Gvardiol","Marcelo Brozović"],
+  "cw": ["Leandro Bacuna","Cuco Martina","Juninho Bacuna","Elson Hooi","Rangelo Janga"],
+  "cz": ["Patrik Schick","Tomáš Souček","Vladimír Coufal","Adam Hložek","Antonín Barák"],
+  "cd": ["Chancel Mbemba","Cédric Bakambu","Fiston Mayele","Yoane Wissa","Silas Katompa"],
+  "ec": ["Moisés Caicedo","Enner Valencia","Piero Hincapié","Pervis Estupiñán","Gonzalo Plata"],
+  "eg": ["Mohamed Salah","Omar Marmoush","Mohamed Elneny","Trézéguet","Ahmed Hegazy"],
+  "gb-eng": ["Harry Kane","Jude Bellingham","Bukayo Saka","Phil Foden","Declan Rice"],
+  "fr": ["Kylian Mbappé","Antoine Griezmann","Ousmane Dembélé","Aurélien Tchouaméni","Eduardo Camavinga"],
+  "de": ["Jamal Musiala","Florian Wirtz","Kai Havertz","Joshua Kimmich","Leroy Sané"],
+  "gh": ["Thomas Partey","Mohammed Kudus","Jordan Ayew","André Ayew","Iñaki Williams"],
+  "ht": ["Duckens Nazon","Frantzdy Pierrot","Steward Ceus","Ricardo Ade","Jefferson Belizaire"],
+  "ir": ["Mehdi Taremi","Sardar Azmoun","Alireza Jahanbakhsh","Ali Gholizadeh","Ramin Rezaeian"],
+  "iq": ["Aymen Hussein","Amir Al-Ammari","Youssef Amyn","Ali Jasim","Zaid Tahseen"],
+  "jp": ["Takefusa Kubo","Kaoru Mitoma","Daichi Kamada","Wataru Endo","Ritsu Doan"],
+  "jo": ["Musa Al-Taamari","Yazan Al-Naimat","Baha Faisal","Salem Al-Ajalin","Anas Bani Yaseen"],
+  "mx": ["Hirving Lozano","Santiago Giménez","Edson Álvarez","César Montes","Orbelín Pineda"],
+  "ma": ["Achraf Hakimi","Hakim Ziyech","Sofyan Amrabat","Youssef En-Nesyri","Azzedine Ounahi"],
+  "nl": ["Memphis Depay","Virgil van Dijk","Frenkie de Jong","Cody Gakpo","Xavi Simons"],
+  "nz": ["Chris Wood","Sarpreet Singh","Liberato Cacace","Marko Stamenić","Joe Bell"],
+  "no": ["Erling Haaland","Martin Ødegaard","Alexander Sørloth","Antonio Nusa","Morten Thorsby"],
+  "pa": ["José Fajardo","Adalberto Carrasquilla","César Yanis","Ismael Díaz","Eric Davis"],
+  "py": ["Miguel Almirón","Julio Enciso","Omar Alderete","Gustavo Gómez","Antonio Sanabria"],
+  "pt": ["Cristiano Ronaldo","Bernardo Silva","Bruno Fernandes","Rafael Leão","Rúben Dias"],
+  "qa": ["Akram Afif","Almoez Ali","Hassan Al-Haydos","Karim Boudiaf","Ismaeel Mohammad"],
+  "sa": ["Salem Al-Dawsari","Firas Al-Buraikan","Saleh Al-Shehri","Abdulelah Al-Malki","Sultan Al-Ghannam"],
+  "gb-sct": ["Andy Robertson","Scott McTominay","John McGinn","Che Adams","Kieran Tierney"],
+  "sn": ["Sadio Mané","Kalidou Koulibaly","Pape Matar Sarr","Ismaïla Sarr","Nicolas Jackson"],
+  "za": ["Percy Tau","Lyle Foster","Themba Zwane","Sipho Mbule","Teboho Mokoena"],
+  "kr": ["Son Heung-min","Lee Kang-in","Kim Min-jae","Hwang Hee-chan","Cho Gue-sung"],
+  "es": ["Rodri","Pedri","Lamine Yamal","Álvaro Morata","Nico Williams"],
+  "se": ["Alexander Isak","Viktor Gyökeres","Dejan Kulusevski","Emil Forsberg","Anthony Elanga"],
+  "ch": ["Granit Xhaka","Xherdan Shaqiri","Breel Embolo","Manuel Akanji","Ricardo Rodríguez"],
+  "tn": ["Youssef Msakni","Wahbi Khazri","Ellyes Skhiri","Hannibal Mejbri","Aissa Laidouni"],
+  "tr": ["Arda Güler","Hakan Çalhanoğlu","Kenan Yıldız","Barış Alper Yılmaz","Merih Demiral"],
+  "us": ["Christian Pulisic","Weston McKennie","Tyler Adams","Folarin Balogun","Gio Reyna"],
+  "uy": ["Federico Valverde","Darwin Núñez","Ronald Araújo","Manuel Ugarte","Facundo Pellistri"],
+  "uz": ["Eldor Shomurodov","Abbosbek Fayzullaev","Jaloliddin Masharipov","Otabek Shukurov","Khojiakbar Alijonov"],
+  "ci": ["Sébastien Haller","Franck Kessié","Nicolas Pépé","Wilfried Singo","Simon Adingra"],
+};
+const DEFAULT_PLAYERS = ["The Captain","The Star Striker","The Midfield Anchor","The Defensive Rock","The Goalkeeper"];
+function playersFor(code){ return KEY_PLAYERS[code] || DEFAULT_PLAYERS; }
+
+// Pool of possible goal minutes, including stoppage time at the end of each half
+// (e.g. 45+2, 90+6) alongside regular minutes 1-90.
+const MINUTE_POOL = (()=>{
+  const pool = [];
+  for(let i=1;i<=45;i++) pool.push(String(i));
+  for(let i=1;i<=6;i++) pool.push(`45+${i}`);
+  for(let i=46;i<=90;i++) pool.push(String(i));
+  for(let i=1;i<=6;i++) pool.push(`90+${i}`);
+  return pool;
+})();
+function minuteSortKey(m){
+  if(typeof m==="string" && m.includes("+")){
+    const [base,extra] = m.split("+").map(Number);
+    return base + extra/100;
+  }
+  return Number(m);
+}
+function randomDistinctMinutes(n){
+  const shuffled = MINUTE_POOL.slice().sort(()=>Math.random()-0.5);
+  return shuffled.slice(0,n).sort((a,b)=>minuteSortKey(a)-minuteSortKey(b));
+}
+// Builds a list of scorers for one team given a goal count, grouping
+// repeated scorers (braces/hat-tricks) into a single entry with multiple minutes.
+function buildScorers(team, goals){
+  if(goals<=0) return [];
+  const pool = playersFor(team.code);
+  const minutes = randomDistinctMinutes(goals);
+  const grouped = {};
+  const order = [];
+  for(let i=0;i<goals;i++){
+    const player = pool[Math.floor(Math.random()*pool.length)];
+    if(!grouped[player]){ grouped[player]=[]; order.push(player); }
+    grouped[player].push(minutes[i]);
+  }
+  return order.map(player=>({player, minutes: grouped[player].sort((a,b)=>minuteSortKey(a)-minuteSortKey(b))}));
+}
+function generateMatchResult(country, opponent, countryWins){
+  let countryGoals, opponentGoals;
+  if(countryWins){
+    countryGoals = 1 + Math.floor(Math.random()*3); // 1-3
+    opponentGoals = Math.floor(Math.random()*countryGoals); // strictly fewer: a win
+  } else {
+    opponentGoals = 1 + Math.floor(Math.random()*3); // 1-3
+    countryGoals = Math.floor(Math.random()*opponentGoals); // strictly fewer: a loss
+  }
+  return {
+    scoreText: `${country.name} ${countryGoals} – ${opponentGoals} ${opponent.name}`,
+    countryGoals,
+    opponentGoals,
+    countryScorers: buildScorers(country, countryGoals),
+    opponentScorers: buildScorers(opponent, opponentGoals),
+    countryWins,
+  };
+}
+function scorerListHtml(list){
+  if(!list || list.length===0) return `<div class="scorer-row scorer-none">—</div>`;
+  return list.map(s=>`<div class="scorer-row">${s.player} <span class="scorer-min">${s.minutes.map(m=>m+"'").join(", ")}</span></div>`).join("");
+}
+
+
+/* ============ SALT SOLUBILITY DATABASE ============ */
+// Restricted to salts on the O Level syllabus, covering the 5 solubility rules:
+// 1. All nitrates are soluble.
+// 2. All Group 1 metal and ammonium (SPA) salts are soluble.
+// 3. All sulfates are soluble, except calcium, barium and lead sulfate.
+// 4. All chlorides are soluble, except silver and lead chloride.
+// 5. All carbonates are insoluble, except Group 1 metal and ammonium carbonates.
+const SALTS = {
+EASY:[
+{name:"Sodium chloride", formula:"NaCl", cationType:"group1", cationName:"Sodium", anion:"chloride"},
+{name:"Potassium nitrate", formula:"KNO<sub>3</sub>", cationType:"group1", cationName:"Potassium", anion:"nitrate"},
+{name:"Calcium carbonate", formula:"CaCO<sub>3</sub>", cationType:"other", cationKey:"calcium", cationName:"Calcium", anion:"carbonate"},
+{name:"Ammonium sulfate", formula:"(NH<sub>4</sub>)<sub>2</sub>SO<sub>4</sub>", cationType:"ammonium", cationName:"Ammonium", anion:"sulfate"},
+{name:"Magnesium nitrate", formula:"Mg(NO<sub>3</sub>)<sub>2</sub>", cationType:"other", cationKey:"magnesium", cationName:"Magnesium", anion:"nitrate"},
+{name:"Copper(II) sulfate", formula:"CuSO<sub>4</sub>", cationType:"other", cationKey:"copper", cationName:"Copper(II)", anion:"sulfate"},
+{name:"Zinc chloride", formula:"ZnCl<sub>2</sub>", cationType:"other", cationKey:"zinc", cationName:"Zinc", anion:"chloride"},
+{name:"Potassium carbonate", formula:"K<sub>2</sub>CO<sub>3</sub>", cationType:"group1", cationName:"Potassium", anion:"carbonate"},
+{name:"Sodium sulfate", formula:"Na<sub>2</sub>SO<sub>4</sub>", cationType:"group1", cationName:"Sodium", anion:"sulfate"},
+{name:"Ammonium chloride", formula:"NH<sub>4</sub>Cl", cationType:"ammonium", cationName:"Ammonium", anion:"chloride"},
+{name:"Magnesium sulfate", formula:"MgSO<sub>4</sub>", cationType:"other", cationKey:"magnesium", cationName:"Magnesium", anion:"sulfate"},
+{name:"Potassium chloride", formula:"KCl", cationType:"group1", cationName:"Potassium", anion:"chloride"},
+{name:"Zinc nitrate", formula:"Zn(NO<sub>3</sub>)<sub>2</sub>", cationType:"other", cationKey:"zinc", cationName:"Zinc", anion:"nitrate"},
+{name:"Copper(II) carbonate", formula:"CuCO<sub>3</sub>", cationType:"other", cationKey:"copper", cationName:"Copper(II)", anion:"carbonate"},
+{name:"Sodium nitrate", formula:"NaNO<sub>3</sub>", cationType:"group1", cationName:"Sodium", anion:"nitrate"},
+{name:"Ammonium nitrate", formula:"NH<sub>4</sub>NO<sub>3</sub>", cationType:"ammonium", cationName:"Ammonium", anion:"nitrate"},
+],
+MEDIUM:[
+{name:"Barium sulfate", formula:"BaSO<sub>4</sub>", cationType:"other", cationKey:"barium", cationName:"Barium", anion:"sulfate"},
+{name:"Silver chloride", formula:"AgCl", cationType:"other", cationKey:"silver", cationName:"Silver", anion:"chloride"},
+{name:"Lead(II) nitrate", formula:"Pb(NO<sub>3</sub>)<sub>2</sub>", cationType:"other", cationKey:"lead", cationName:"Lead(II)", anion:"nitrate"},
+{name:"Iron(III) chloride", formula:"FeCl<sub>3</sub>", cationType:"other", cationKey:"iron", cationName:"Iron(III)", anion:"chloride"},
+{name:"Ammonium carbonate", formula:"(NH<sub>4</sub>)<sub>2</sub>CO<sub>3</sub>", cationType:"ammonium", cationName:"Ammonium", anion:"carbonate"},
+{name:"Magnesium carbonate", formula:"MgCO<sub>3</sub>", cationType:"other", cationKey:"magnesium", cationName:"Magnesium", anion:"carbonate"},
+{name:"Aluminium sulfate", formula:"Al<sub>2</sub>(SO<sub>4</sub>)<sub>3</sub>", cationType:"other", cationKey:"aluminium", cationName:"Aluminium", anion:"sulfate"},
+{name:"Sodium carbonate", formula:"Na<sub>2</sub>CO<sub>3</sub>", cationType:"group1", cationName:"Sodium", anion:"carbonate"},
+{name:"Iron(II) sulfate", formula:"FeSO<sub>4</sub>", cationType:"other", cationKey:"iron", cationName:"Iron(II)", anion:"sulfate"},
+{name:"Zinc carbonate", formula:"ZnCO<sub>3</sub>", cationType:"other", cationKey:"zinc", cationName:"Zinc", anion:"carbonate"},
+{name:"Potassium sulfate", formula:"K<sub>2</sub>SO<sub>4</sub>", cationType:"group1", cationName:"Potassium", anion:"sulfate"},
+{name:"Copper(II) chloride", formula:"CuCl<sub>2</sub>", cationType:"other", cationKey:"copper", cationName:"Copper(II)", anion:"chloride"},
+{name:"Lithium nitrate", formula:"LiNO<sub>3</sub>", cationType:"group1", cationName:"Lithium", anion:"nitrate"},
+{name:"Magnesium chloride", formula:"MgCl<sub>2</sub>", cationType:"other", cationKey:"magnesium", cationName:"Magnesium", anion:"chloride"},
+{name:"Iron(III) sulfate", formula:"Fe<sub>2</sub>(SO<sub>4</sub>)<sub>3</sub>", cationType:"other", cationKey:"iron", cationName:"Iron(III)", anion:"sulfate"},
+{name:"Barium nitrate", formula:"Ba(NO<sub>3</sub>)<sub>2</sub>", cationType:"other", cationKey:"barium", cationName:"Barium", anion:"nitrate"},
+],
+HARD:[
+{name:"Calcium sulfate", formula:"CaSO<sub>4</sub>", cationType:"other", cationKey:"calcium", cationName:"Calcium", anion:"sulfate"},
+{name:"Calcium chloride", formula:"CaCl<sub>2</sub>", cationType:"other", cationKey:"calcium", cationName:"Calcium", anion:"chloride"},
+{name:"Calcium nitrate", formula:"Ca(NO<sub>3</sub>)<sub>2</sub>", cationType:"other", cationKey:"calcium", cationName:"Calcium", anion:"nitrate"},
+{name:"Lead(II) chloride", formula:"PbCl<sub>2</sub>", cationType:"other", cationKey:"lead", cationName:"Lead(II)", anion:"chloride"},
+{name:"Lead(II) carbonate", formula:"PbCO<sub>3</sub>", cationType:"other", cationKey:"lead", cationName:"Lead(II)", anion:"carbonate"},
+{name:"Silver nitrate", formula:"AgNO<sub>3</sub>", cationType:"other", cationKey:"silver", cationName:"Silver", anion:"nitrate"},
+{name:"Barium chloride", formula:"BaCl<sub>2</sub>", cationType:"other", cationKey:"barium", cationName:"Barium", anion:"chloride"},
+{name:"Lead(II) sulfate", formula:"PbSO<sub>4</sub>", cationType:"other", cationKey:"lead", cationName:"Lead(II)", anion:"sulfate"},
+{name:"Barium carbonate", formula:"BaCO<sub>3</sub>", cationType:"other", cationKey:"barium", cationName:"Barium", anion:"carbonate"},
+{name:"Silver carbonate", formula:"Ag<sub>2</sub>CO<sub>3</sub>", cationType:"other", cationKey:"silver", cationName:"Silver", anion:"carbonate"},
+{name:"Aluminium chloride", formula:"AlCl<sub>3</sub>", cationType:"other", cationKey:"aluminium", cationName:"Aluminium", anion:"chloride"},
+{name:"Aluminium nitrate", formula:"Al(NO<sub>3</sub>)<sub>3</sub>", cationType:"other", cationKey:"aluminium", cationName:"Aluminium", anion:"nitrate"},
+{name:"Iron(III) nitrate", formula:"Fe(NO<sub>3</sub>)<sub>3</sub>", cationType:"other", cationKey:"iron", cationName:"Iron(III)", anion:"nitrate"},
+{name:"Iron(II) carbonate", formula:"FeCO<sub>3</sub>", cationType:"other", cationKey:"iron", cationName:"Iron(II)", anion:"carbonate"},
+{name:"Zinc sulfate", formula:"ZnSO<sub>4</sub>", cationType:"other", cationKey:"zinc", cationName:"Zinc", anion:"sulfate"},
+{name:"Lithium carbonate", formula:"Li<sub>2</sub>CO<sub>3</sub>", cationType:"group1", cationName:"Lithium", anion:"carbonate"},
+],
+};
+
+// Applies the 5 solubility rules to a salt and returns {soluble, reason}
+function classifySalt(salt){
+  if(salt.cationType==="group1"){
+    return {soluble:true, reason:`${salt.cationName} is a Group 1 metal — all Group 1 metal salts are soluble, whatever the anion.`};
+  }
+  if(salt.cationType==="ammonium"){
+    return {soluble:true, reason:"Ammonium (SPA) salts are always soluble, whatever the anion."};
+  }
+  if(salt.anion==="nitrate"){
+    return {soluble:true, reason:"All nitrates are soluble — there are no exceptions to this rule."};
+  }
+  if(salt.anion==="sulfate"){
+    if(["calcium","barium","lead"].includes(salt.cationKey)){
+      return {soluble:false, reason:`${salt.cationName} sulfate is one of the three exceptions — calcium, barium and lead sulfate are insoluble.`};
+    }
+    return {soluble:true, reason:"Sulfates are soluble, except calcium, barium and lead sulfate."};
+  }
+  if(salt.anion==="chloride"){
+    if(["silver","lead"].includes(salt.cationKey)){
+      return {soluble:false, reason:`${salt.cationName} chloride is one of the two exceptions — silver and lead chloride are insoluble.`};
+    }
+    return {soluble:true, reason:"Chlorides are soluble, except silver and lead chloride."};
+  }
+  if(salt.anion==="carbonate"){
+    return {soluble:false, reason:"Carbonates are insoluble, except Group 1 metal and ammonium carbonates."};
+  }
+}
+function anionHint(anion){
+  const hints = {
+    nitrate:"This is a NITRATE salt. Rule: ALL nitrates are soluble — no exceptions.",
+    sulfate:"This is a SULFATE salt. Rule: soluble, except calcium, barium and lead sulfate.",
+    chloride:"This is a CHLORIDE salt. Rule: soluble, except silver and lead chloride.",
+    carbonate:"This is a CARBONATE salt. Rule: insoluble, except Group 1 metal and ammonium carbonates.",
+  };
+  return hints[anion];
+}
+
+/* ============ STAGE CONFIG ============ */
+const STAGES = [
+  {key:"friendly1", label:"Friendly", pool:"EASY"},
+  {key:"friendly2", label:"Friendly", pool:"EASY"},
+  {key:"group1", label:"Group Stage", pool:"EASY"},
+  {key:"group2",    label:"Group Stage",   pool:"MEDIUM"},
+  {key:"group3",    label:"Group Stage",    pool:"MEDIUM"},
+  {key:"r32",    label:"Round of 32",    pool:"MEDIUM"},
+  {key:"r16",    label:"Round of 16",    pool:"MEDIUM"},
+  {key:"quarter-final",    label:"Quarter-final",    pool:"HARD"},
+  {key:"semi-final", label:"Semi-final", pool:"HARD"},
+  {key:"final", label:"Final", pool:"HARD"},
+];
+const BRACKET_GROUPS = [
+  {label:"FRIENDLY",count:2},{label:"GROUP",count:3},{label:"R32",count:1},{label:"R16",count:1},{label:"QF",count:1},{label:"SF",count:1},{label:"FINAL",count:1}
+];
+
+/* ============ STATE ============ */
+let state = {
+  screen:"start", // start | play | elim | win
+  country:null,
+  timerEnabled:false,
+  stageIdx:0,
+  usedQ:new Set(),
+  currentQ:null,
+  currentOpponent:null,
+  varUsed:false,
+  subUsed:false,
+  answered:false,
+  selectedGuess:null, // true = tapped Soluble, false = tapped Insoluble
+  hintShown:false,
+  timeLeft:20,
+  timerId:null,
+  commentary:null, // {type:'good'|'bad', scoreText, statusText}
+  matchResult:null, // {scoreText, countryScorers, opponentScorers, countryWins}
+};
+
+function pickQuestion(poolName){
+  const pool = SALTS[poolName];
+  let available = pool.map((s,i)=>({...s,_id:poolName+i})).filter(s=>!state.usedQ.has(s._id));
+  if(available.length===0){ state.usedQ.clear(); available = pool.map((s,i)=>({...s,_id:poolName+i})); }
+  const salt = available[Math.floor(Math.random()*available.length)];
+  state.usedQ.add(salt._id);
+  const displayMode = Math.random()<0.5 ? "name" : "formula";
+  const result = classifySalt(salt);
+  return {salt, displayMode, soluble:result.soluble, reason:result.reason};
+}
+
+function randomOpponent(){
+  const others = COUNTRIES.filter(c=>c.code!==state.country.code);
+  return others[Math.floor(Math.random()*others.length)];
+}
+
+function startTournament(){
+  state.stageIdx = 0;
+  state.varUsed = false;
+  state.subUsed = false;
+  state.usedQ.clear();
+  loadStage();
+}
+
+function loadStage(){
+  const stage = STAGES[state.stageIdx];
+  state.currentQ = pickQuestion(stage.pool);
+  state.currentOpponent = randomOpponent();
+  state.answered = false;
+  state.selectedGuess = null;
+  state.hintShown = false;
+  state.commentary = null;
+  state.matchResult = null;
+  state.screen = "play";
+  if(state.timerEnabled){
+    state.timeLeft = 20;
+    clearInterval(state.timerId);
+    state.timerId = setInterval(()=>{
+      state.timeLeft--;
+      if(state.timeLeft<=0){
+        clearInterval(state.timerId);
+        if(!state.answered) handleAnswer(null, true);
+      } else {
+        renderTimerOnly();
+      }
+    },1000);
+  }
+  render();
+}
+
+function handleAnswer(guess, timedOut){
+  if(state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerId);
+  state.selectedGuess = guess;
+  const correct = !timedOut && guess === state.currentQ.soluble;
+  const result = generateMatchResult(state.country, state.currentOpponent, correct);
+  state.matchResult = result;
+  if(correct){
+    const isFinalWin = state.stageIdx === STAGES.length-1;
+    state.commentary = {type:"good", scoreText: result.scoreText, statusText: isFinalWin ? `FULL-TIME — ${state.country.name.toUpperCase()} WINS THE WORLD CUP!` : "FULL-TIME — THROUGH TO THE NEXT ROUND!"};
+    spawnFloaty("⚽");
+    spawnFloaty("🎉");
+  } else {
+    state.commentary = {type:"bad", scoreText: result.scoreText, statusText: (timedOut?"⏱ TIME'S UP! ":"")+"FULL-TIME — ELIMINATED"};
+  }
+  render();
+  setTimeout(()=>{
+    if(correct){
+      if(state.stageIdx === STAGES.length-1){
+        state.screen = "win";
+        launchConfetti();
+        render();
+      } else {
+        state.stageIdx++;
+        loadStage();
+      }
+    } else {
+      state.screen = "elim";
+      render();
+    }
+  }, 2600);
+}
+
+function useVAR(){
+  if(state.varUsed || state.answered) return;
+  state.varUsed = true;
+  state.hintShown = true;
+  render();
+}
+function useSub(){
+  if(state.subUsed || state.answered) return;
+  state.subUsed = true;
+  state.answered = true;
+  clearInterval(state.timerId);
+  state.commentary = {type:"good", statusText:"🔄 SUBSTITUTION MADE — Auto-advance to the next round!"};
+  state.matchResult = null;
+  render();
+  setTimeout(()=>{
+    if(state.stageIdx === STAGES.length-1){
+      state.screen = "win";
+      launchConfetti();
+      render();
+    } else {
+      state.stageIdx++;
+      loadStage();
+    }
+  }, 1300);
+}
+
+function restartFromGroup(){
+  state.stageIdx = 0;
+  state.varUsed = false;
+  state.subUsed = false;
+  loadStage();
+}
+function goToStart(){
+  state.screen = "start";
+  state.country = null;
+  render();
+}
+
+/* ============ FX ============ */
+function spawnFloaty(emoji){
+  const el = document.createElement("div");
+  el.className = "floaty";
+  el.textContent = emoji;
+  el.style.left = (40+Math.random()*20)+"%";
+  el.style.bottom = "30%";
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1500);
+}
+function launchConfetti(){
+  const colors=["#f5c542","#3fce7a","#8ecae6","#e63946","#ffffff"];
+  for(let i=0;i<80;i++){
+    setTimeout(()=>{
+      const el = document.createElement("div");
+      el.className="confetti-piece";
+      el.style.left = Math.random()*100+"vw";
+      el.style.background = colors[Math.floor(Math.random()*colors.length)];
+      el.style.animationDuration = (2.5+Math.random()*2)+"s";
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),5000);
+    }, i*30);
+  }
+}
+
+/* ============ RENDER ============ */
+function render(){
+  const app = document.getElementById("app");
+  if(state.screen==="start") app.innerHTML = renderStart();
+  else if(state.screen==="play") app.innerHTML = renderPlay();
+  else if(state.screen==="elim") app.innerHTML = renderElim();
+  else if(state.screen==="win") app.innerHTML = renderWin();
+  attachHandlers();
+}
+function renderTimerOnly(){
+  const bar = document.getElementById("timerbar");
+  const txt = document.getElementById("timertxt");
+  if(bar){ bar.style.width = (state.timeLeft/20*100)+"%"; }
+  if(txt){ txt.textContent = state.timeLeft+"s"; }
+}
+
+function renderHeader(sub){
+  return `<div class="stadium-header">
+    <div class="eyebrow">⚽ CHEMISTRY REVISION ARENA</div>
+    <h1>FIFA WORLD CUP 2026</h1>
+    <p>${sub}</p>
+  </div>`;
+}
+
+function renderStart(){
+  const grid = COUNTRIES.map(c=>`
+    <div class="country-cell ${state.country && state.country.code===c.code?'selected':''}" data-code="${c.code}">
+      <div class="flag-badge">${flagImgTag(c.code,c.name)}</div>
+      <div class="cname">${c.name}</div>
+    </div>`).join("");
+  return `
+    ${renderHeader("SALTS | SOLUBILITY")}
+    <div class="panel">
+      <h3 style="margin-bottom:10px;">1. Choose your country</h3>
+      <input class="country-search" id="search" placeholder="Search countries...">
+      <div class="country-grid" id="grid">${grid}</div>
+    </div>
+    <div class="panel">
+      <h3 style="margin-bottom:6px;">2. Match settings</h3>
+      <div class="options-row">
+        <div class="toggle-wrap">
+          <label class="switch"><input type="checkbox" id="timerToggle" ${state.timerEnabled?'checked':''}><span class="slider-tog"></span></label>
+          <span>20-second shot clock per question (bonus flair)</span>
+        </div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);line-height:1.5;margin-top:10px;">
+        🧪 Each match shows a salt (name or formula) — tap <b>SOLUBLE</b> or <b>INSOLUBLE</b>.<br>
+        🏟️ 10 correct answers in a row wins the Cup: <b>Friendlies (2)</b> → <b>Group Stage (3)</b> → <b>Round of 32 (1)</b> → <b>Round of 16 (1)</b> → <b>Quarter-final (1)</b> → <b>Semi-final (1)</b> → <b>Final (1)</b>.<br>
+        🟥 One wrong answer = <b>eliminated</b> — back to the Friendlies.<br>
+        🎫 Each run you get one <b>VAR Review</b> (reveals a hint) and one <b>Substitution</b> (auto-skip a question).
+      </p>
+      <button class="btn" id="kickoffBtn" ${!state.country?'disabled':''} style="margin-top:14px;">KICK OFF ${state.country?flagInlineTag(state.country.code,state.country.name):''}</button>
+    </div>
+    <div class="footer-note"></div>
+  `;
+}
+
+function renderBracket(){
+  let flatIdx = 0;
+  return `<div class="bracket">${BRACKET_GROUPS.map(g=>{
+    let groupDone = true, groupCurrent=false;
+    for(let i=0;i<g.count;i++){
+      if(flatIdx > state.stageIdx) groupDone=false;
+      if(flatIdx === state.stageIdx) groupCurrent=true;
+      flatIdx++;
+    }
+    const cls = groupCurrent?"current":(groupDone?"done":"");
+    return `<div class="bracket-stage ${cls}"><div class="bracket-line"></div><div class="dot"></div><div class="lbl">${g.label}</div></div>`;
+  }).join("")}</div>`;
+}
+
+function renderGoalMeter(){
+  const pct = (state.stageIdx/10)*100;
+  return `<div class="goalmeter-wrap">
+    <div class="goalmeter-label"><span>STREAK</span><span>${state.stageIdx} / 10 WINS</span></div>
+    <div class="goalmeter">
+      <div class="goalmeter-fill" style="width:${pct}%"></div>
+      <div class="goalmeter-ball" style="left:${pct}%">⚽</div>
+    </div>
+  </div>`;
+}
+
+function renderPlay(){
+  const stage = STAGES[state.stageIdx];
+  const q = state.currentQ;
+  const opp = state.currentOpponent;
+  const displayText = q.displayMode==="name" ? q.salt.name : q.salt.formula;
+
+  let solBtnCls = "sol-btn soluble", insolBtnCls = "sol-btn insoluble";
+  if(state.answered){
+    if(q.soluble===true) solBtnCls += " correct"; else solBtnCls += " wrong-fade";
+    if(q.soluble===false) insolBtnCls += " correct"; else insolBtnCls += " wrong-fade";
+    if(state.selectedGuess===true && !q.soluble) solBtnCls += " picked-wrong";
+    if(state.selectedGuess===false && q.soluble) insolBtnCls += " picked-wrong";
+  }
+  const disabled = state.answered ? "disabled" : "";
+
+  const commentaryHtml = state.commentary?`<div class="commentary ${state.commentary.type}">
+      <div class="status-line">${state.commentary.statusText}</div>
+    </div>`:"";
+  const explainHtml = state.answered? `<div class="explain-box">💡 ${q.reason}</div>` : "";
+  const hintHtml = (state.hintShown && !state.answered)? `<div class="explain-box hint-box">🔍 VAR Review: ${anionHint(q.salt.anion)}</div>` : "";
+  const timerHtml = state.timerEnabled? `
+    <div class="timer-bar-wrap"><div class="timer-bar" id="timerbar" style="width:${(state.timeLeft/20*100)}%"></div></div>
+  `:"";
+
+  const mr = state.matchResult;
+  const showScore = state.answered && mr;
+  const countryScorersHtml = showScore ? `<div class="scorer-list">${scorerListHtml(mr.countryScorers)}</div>` : "";
+  const opponentScorersHtml = showScore ? `<div class="scorer-list">${scorerListHtml(mr.opponentScorers)}</div>` : "";
+  const countryScoreHtml = showScore ? `<div class="score-num">${mr.countryGoals}</div>` : "";
+  const opponentScoreHtml = showScore ? `<div class="score-num">${mr.opponentGoals}</div>` : "";
+  const centerHtml = showScore ? `<div class="vs dash">–</div>` : `<div class="vs">VS</div>`;
+
+  return `
+    ${renderHeader(state.country.name+" "+flagInlineTag(state.country.code,state.country.name)+" — chasing the World Cup")}
+    <div class="panel">
+      ${renderBracket()}
+      ${renderGoalMeter()}
+      <div class="stage-tag">${stage.label.toUpperCase()} — MATCH ${state.stageIdx+1} OF 10</div>
+      <div class="match-row">
+        <div class="team">
+          <div class="flag-score-row">
+            <div class="flag-badge">${flagImgTag(state.country.code,state.country.name)}</div>
+            ${countryScoreHtml}
+          </div>
+          <div class="tname">${state.country.name}</div>
+          ${countryScorersHtml}
+        </div>
+        ${centerHtml}
+        <div class="team">
+          <div class="flag-score-row">
+            ${opponentScoreHtml}
+            <div class="flag-badge">${flagImgTag(opp.code,opp.name)}</div>
+          </div>
+          <div class="tname">${opp.name}</div>
+          ${opponentScorersHtml}
+        </div>
+      </div>
+      ${timerHtml}
+      ${commentaryHtml}
+      <div class="qcard">
+        <div class="salt-card">${displayText}</div>
+        ${hintHtml}
+        <div class="sol-buttons">
+          <button class="${solBtnCls}" id="solBtn" ${disabled}>SOLUBLE</button>
+          <button class="${insolBtnCls}" id="insolBtn" ${disabled}>INSOLUBLE</button>
+        </div>
+      </div>
+      ${explainHtml}
+      <div class="lifelines">
+        <button class="life-btn" id="varBtn" ${state.varUsed||state.answered?'disabled':''}>🔍 VAR REVIEW (hint)${state.varUsed?' — used':''}</button>
+        <button class="life-btn" id="subBtn" ${state.subUsed||state.answered?'disabled':''}>🔄 SUBSTITUTION (skip)${state.subUsed?' — used':''}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderElim(){
+  return `
+    ${renderHeader("Match day heartbreak")}
+    <div class="panel elim-screen">
+      <div class="redcard"></div>
+      <h2 style="color:var(--red-card); font-size:32px;">ELIMINATED</h2>
+      <p style="color:var(--muted); margin:10px 0 20px;">${state.country.name} ${flagInlineTag(state.country.code,state.country.name)} crash out in the ${STAGES[state.stageIdx].label}. Time to regroup and go again from the Friendlies.</p>
+      <div class="explain-box">💡 ${state.currentQ.reason}</div>
+      <button class="btn" id="retryBtn">BACK TO THE FRIENDLIES</button>
+      <button class="btn secondary" id="changeCountryBtn" style="margin-top:10px;">CHOOSE A DIFFERENT COUNTRY</button>
+    </div>
+  `;
+}
+
+function renderWin(){
+  return `
+    ${renderHeader("")}
+    <div class="panel win-screen">
+      <img class="trophy-img" src="/WorldCup26/Cup.png" alt="World Cup Trophy">
+      <h2>${state.country.name} ${flagInlineTag(state.country.code,state.country.name)}<br>ARE CHAMPIONS!</h2>
+      <p style="color:var(--muted);">10 correct answers in a row. Perfect run through every round.</p>
+      <div class="win-stat">
+        <div><b>10/10</b><span>MATCHES WON</span></div>
+        <div><b>${state.varUsed?1:0}</b><span>VAR USED</span></div>
+        <div><b>${state.subUsed?1:0}</b><span>SUBS USED</span></div>
+      </div>
+      <button class="btn" id="playAgainBtn">DEFEND THE TITLE — PLAY AGAIN</button>
+      <button class="btn secondary" id="newCountryBtn" style="margin-top:10px;">PLAY AS ANOTHER COUNTRY</button>
+    </div>
+  `;
+}
+
+/* ============ HANDLERS ============ */
+function attachHandlers(){
+  if(state.screen==="start"){
+    document.querySelectorAll(".country-cell").forEach(el=>{
+      el.onclick = (evt)=>{
+        evt.preventDefault();
+        const gridEl = document.getElementById("grid");
+        const savedScroll = gridEl ? gridEl.scrollTop : 0;
+
+        state.country = COUNTRIES.find(c=>c.code===el.dataset.code);
+        // Update selection + kickoff button in place instead of calling render(),
+        // so the scrollable country list doesn't jump back to the top.
+        document.querySelectorAll(".country-cell.selected").forEach(sel=>sel.classList.remove("selected"));
+        el.classList.add("selected");
+        const kickoff = document.getElementById("kickoffBtn");
+        if(kickoff){
+          kickoff.disabled = false;
+          kickoff.innerHTML = "KICK OFF "+flagInlineTag(state.country.code,state.country.name);
+        }
+
+        // Belt-and-braces: force the scroll position back in case any reflow
+        // (e.g. mobile webview quirks) resets it, on this frame and the next.
+        if(gridEl){
+          gridEl.scrollTop = savedScroll;
+          requestAnimationFrame(()=>{ gridEl.scrollTop = savedScroll; });
+          setTimeout(()=>{ gridEl.scrollTop = savedScroll; }, 50);
+        }
+      };
+    });
+    const search = document.getElementById("search");
+    if(search){
+      search.oninput = ()=>{
+        const val = search.value.toLowerCase();
+        document.querySelectorAll(".country-cell").forEach(cell=>{
+          const name = cell.querySelector(".cname").textContent.toLowerCase();
+          cell.style.display = name.includes(val)?"flex":"none";
+        });
+      };
+    }
+    const timerToggle = document.getElementById("timerToggle");
+    if(timerToggle) timerToggle.onchange = ()=>{ state.timerEnabled = timerToggle.checked; };
+    const kickoff = document.getElementById("kickoffBtn");
+    if(kickoff) kickoff.onclick = ()=>{ if(state.country) startTournament(); };
+  }
+  if(state.screen==="play"){
+    const solBtn = document.getElementById("solBtn");
+    if(solBtn) solBtn.onclick = ()=>{ if(!state.answered) handleAnswer(true, false); };
+    const insolBtn = document.getElementById("insolBtn");
+    if(insolBtn) insolBtn.onclick = ()=>{ if(!state.answered) handleAnswer(false, false); };
+    const varBtn = document.getElementById("varBtn");
+    if(varBtn) varBtn.onclick = useVAR;
+    const subBtn = document.getElementById("subBtn");
+    if(subBtn) subBtn.onclick = useSub;
+  }
+  if(state.screen==="elim"){
+    document.getElementById("retryBtn").onclick = restartFromGroup;
+    document.getElementById("changeCountryBtn").onclick = goToStart;
+  }
+  if(state.screen==="win"){
+    document.getElementById("playAgainBtn").onclick = startTournament;
+    document.getElementById("newCountryBtn").onclick = goToStart;
+  }
+}
+
+render();
+</script>
+</body>
+</html>
