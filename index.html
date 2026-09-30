@@ -67,7 +67,8 @@
 
     /* Controls */
     .controls { display: flex; flex-direction: column; gap: 16px; padding-bottom: 24px; }
-    .search { position: relative; max-width: 420px; }
+    .row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+    .search { position: relative; flex: 1 1 260px; max-width: 420px; }
     .search svg { position: absolute; left: 14px; top: 50%; width: 16px; height: 16px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
     .search input {
       width: 100%;
@@ -81,6 +82,23 @@
     .search input::placeholder { color: var(--muted); }
     .search input:hover { border-color: var(--line-strong); }
     .search input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+
+    /* Sort toggle */
+    .sort { display: inline-flex; align-items: center; gap: 4px; padding: 3px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+    .sort-label { padding: 0 8px 0 10px; font-size: 13px; color: var(--muted); }
+    .sort button {
+      padding: 7px 12px;
+      font: inherit;
+      font-size: 13px;
+      color: var(--muted);
+      background: transparent;
+      border: 0;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: color .15s, background-color .15s;
+    }
+    .sort button:hover { color: var(--text); }
+    .sort button[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); font-weight: 500; }
 
     .filters { display: flex; flex-wrap: wrap; gap: 8px; }
     .chip {
@@ -100,12 +118,25 @@
     .count { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
 
     /* Grid */
+    .results { padding-bottom: 72px; }
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 16px;
-      padding-bottom: 72px;
     }
+    .group + .group { margin-top: 32px; }
+    .group-title {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin: 0 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .group-title span { font-weight: 400; letter-spacing: 0; text-transform: none; }
     .card {
       display: flex;
       flex-direction: column;
@@ -131,7 +162,7 @@
     .card-foot svg { width: 16px; height: 16px; transition: transform .15s, color .15s; }
     .card:hover .card-foot svg { color: var(--accent); transform: translate(2px, -2px); }
 
-    .empty { grid-column: 1 / -1; padding: 48px 0; text-align: center; color: var(--muted); }
+    .empty { padding: 48px 0; text-align: center; color: var(--muted); }
     .empty button { margin-top: 8px; padding: 0; font: inherit; color: var(--accent); background: none; border: 0; cursor: pointer; text-decoration: underline; }
 
     /* Footer */
@@ -157,14 +188,21 @@
 
   <main class="wrap">
     <div class="controls">
-      <label class="search">
-        <i data-lucide="search"></i>
-        <input id="search" type="search" placeholder="Search apps" aria-label="Search apps" autocomplete="off">
-      </label>
+      <div class="row">
+        <label class="search">
+          <i data-lucide="search"></i>
+          <input id="search" type="search" placeholder="Search apps" aria-label="Search apps" autocomplete="off">
+        </label>
+        <div class="sort" id="sort" role="group" aria-label="Sort apps">
+          <span class="sort-label">Sort</span>
+          <button type="button" data-sort="newest" aria-pressed="true">Newest first</button>
+          <button type="button" data-sort="topic" aria-pressed="false">By topic</button>
+        </div>
+      </div>
       <div class="filters" id="category-filters" role="group" aria-label="Filter by topic"></div>
     </div>
     <p class="count" id="count" aria-live="polite"></p>
-    <div class="grid" id="apps-grid"></div>
+    <div class="results" id="apps-grid"></div>
   </main>
 
   <footer>
@@ -172,8 +210,8 @@
   </footer>
 
   <script>
-    // To add an app: copy one block, give it a new id, name, description, category, icon, colour and link.
-    // Topic filters are built automatically from the categories used here.
+    // To add an app: copy one block, give it the next id (a higher id = newer), then set name, description, category, icon, colour and link.
+    // Apps are listed newest first (highest id first). Topic filters are built automatically from the categories used here.
     const learningApps = [
       { id: 1,  name: "Metal Displacement", description: "Game to revise the reactivity series", category: "reactivity series", icon: "atom", color: "#6366f1", link: "/bernardng/metaldisplacement.html" },
       { id: 2,  name: "Punch-kun | QA", description: "Game to revise qualitative analysis", category: "QA", icon: "test-tube", color: "#10b981", link: "/bernardng/punchkun-QA.html" },
@@ -187,7 +225,8 @@
       { id: 10, name: "Breathing for Calmness", description: "Visual guide for box breathing", category: "wellness", icon: "wind", color: "#7c3aed", link: "/bernardng/boxbreathing.html" },
       { id: 11, name: "Oxidation State Practice", description: "Practise calculating oxidation states", category: "redox", icon: "divide", color: "#0891b2", link: "/bernardng/OS-practice.html" },
       { id: 12, name: "Electrolysis", description: "Case studies", category: "electrochemistry", icon: "zap", color: "#3b5998", link: "/bernardng/electrolysis.html" },
-      { id: 13, name: "Structure & Properties", description: "Visualisation", category: "bonding", icon: "box", color: "#3b5998", link: "/bernardng/structure.html" }
+      { id: 13, name: "Structure & Properties", description: "Visualisation", category: "bonding", icon: "box", color: "#3b5998", link: "/bernardng/structure.html" },
+            { id: 14, name: "World Cup 2026 | Solubility", description: "Visualisation", category: "bonding", icon: "ball", color: "#3b5998", link: "/bernardng/structure.html" }
     ];
 
     // Display names for topics (falls back to the raw category if not listed)
@@ -202,11 +241,16 @@
     };
     const labelFor = c => categoryLabels[c] || c;
 
-    const grid = document.getElementById('apps-grid');
+    const results = document.getElementById('apps-grid');
     const filters = document.getElementById('category-filters');
+    const sortEl = document.getElementById('sort');
     const searchInput = document.getElementById('search');
     const countEl = document.getElementById('count');
     let activeCategory = 'all';
+    let sortMode = 'newest';
+
+    // Newest first: highest id at the top
+    const newestFirst = (a, b) => b.id - a.id;
 
     function buildFilters() {
       const categories = ['all', ...new Set(learningApps.map(a => a.category))];
@@ -229,15 +273,31 @@
 
     function render() {
       const q = searchInput.value.trim().toLowerCase();
-      const list = learningApps.filter(app =>
-        (activeCategory === 'all' || app.category === activeCategory) &&
-        (!q || `${app.name} ${app.description} ${labelFor(app.category)}`.toLowerCase().includes(q))
-      );
+      const list = learningApps
+        .filter(app =>
+          (activeCategory === 'all' || app.category === activeCategory) &&
+          (!q || `${app.name} ${app.description} ${labelFor(app.category)}`.toLowerCase().includes(q))
+        )
+        .sort(newestFirst);
 
       countEl.textContent = `${list.length} ${list.length === 1 ? 'app' : 'apps'}`;
-      grid.innerHTML = list.length
-        ? list.map(cardHTML).join('')
-        : `<div class="empty">No apps match your search.<br><button type="button" id="clear">Clear filters</button></div>`;
+
+      if (!list.length) {
+        results.innerHTML = `<div class="empty">No apps match your search.<br><button type="button" id="clear">Clear filters</button></div>`;
+      } else if (sortMode === 'topic') {
+        // Group by topic (A to Z); within each topic, newest first
+        const groups = {};
+        list.forEach(app => (groups[app.category] = groups[app.category] || []).push(app));
+        results.innerHTML = Object.keys(groups)
+          .sort((a, b) => labelFor(a).localeCompare(labelFor(b)))
+          .map(c => `
+            <section class="group">
+              <h3 class="group-title">${labelFor(c)} <span>${groups[c].length}</span></h3>
+              <div class="grid">${groups[c].map(cardHTML).join('')}</div>
+            </section>`).join('');
+      } else {
+        results.innerHTML = `<div class="grid">${list.map(cardHTML).join('')}</div>`;
+      }
       lucide.createIcons();
     }
 
@@ -249,9 +309,17 @@
       render();
     });
 
+    sortEl.addEventListener('click', e => {
+      const btn = e.target.closest('button[data-sort]');
+      if (!btn) return;
+      sortMode = btn.dataset.sort;
+      sortEl.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === btn));
+      render();
+    });
+
     searchInput.addEventListener('input', render);
 
-    grid.addEventListener('click', e => {
+    results.addEventListener('click', e => {
       if (e.target.id !== 'clear') return;
       searchInput.value = '';
       activeCategory = 'all';
