@@ -52,4 +52,70 @@ canvas{display:block;width:100%;height:420px;border-top:1px solid var(--border);
 </main>
 <script>
 (function(){
-var
+var HC='#e4572e',BH=42,HT=46;
+function Sim(cv,cfg){
+  var ctx=cv.getContext('2d'),W=0,H=0,ents=[],ionised=false;
+  function fit(){var d=window.devicePixelRatio||1;W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);
+    ents.forEach(function(e){e.x=Math.max(e.hw,Math.min(W-e.hw,e.x));e.y=Math.max(BH/2,Math.min(H-BH/2,e.y))})}
+  function mk(x,y,parts){var tot=0;parts.forEach(function(p){tot+=p.w});var off=-tot/2;
+    parts.forEach(function(p){p.dx=off+p.w/2;off+=p.w});
+    var a=Math.random()*6.28,s=30+Math.random()*30;
+    return{x:x,y:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,hw:tot/2,parts:parts}}
+  function unitParts(){var h={lab:'H',w:HT,c:HC,ion:0},x={lab:cfg.lab,w:cfg.w,c:cfg.c,ion:0};return cfg.hRight?[x,h]:[h,x]}
+  function reset(){
+    ionised=false;ents=[];
+    for(var i=0;i<10;i++){
+      var e,t=0;
+      do{e=mk(60+Math.random()*(W-120),25+Math.random()*(H-50),unitParts());t++;
+        var bad=ents.some(function(o){return Math.abs(o.x-e.x)<o.hw+e.hw+8&&Math.abs(o.y-e.y)<BH+8})}while(bad&&t<300);
+      ents.push(e)}
+    fit()}
+  function ionise(){
+    if(ionised)return;ionised=true;
+    var idx=ents.map(function(_,i){return i}).sort(function(){return Math.random()-.5}).slice(0,cfg.n);
+    var out=[],rm={};
+    idx.forEach(function(i){var u=ents[i];rm[i]=1;
+      var pp=unitParts(),pa=cfg.hRight?pp[1]:pp[0],pb=cfg.hRight?pp[0]:pp[1],sg=cfg.hRight?1:-1;pa.ion=1;pb.ion=-1;
+      var a=mk(u.x+sg*(u.hw-HT/2),u.y,[pa]),b=mk(u.x-sg*(u.hw-cfg.w/2),u.y,[pb]);
+      a.vx=sg*(70+Math.random()*30);b.vx=-sg*(70+Math.random()*30);a.vy=(Math.random()-.5)*60;b.vy=(Math.random()-.5)*60;
+      a.flash=b.flash=1;out.push(a,b)});
+    ents=ents.filter(function(_,i){return!rm[i]}).concat(out);fit()}
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
+  function draw(){
+    ctx.clearRect(0,0,W,H);ctx.font='700 13.6px "Manrope",system-ui,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ents.forEach(function(e){
+      e.parts.forEach(function(p){
+        var x=e.x+p.dx-p.w/2,y=e.y-BH/2,g=e.parts.length===2?0:2;
+        if(e.flash>0){ctx.save();ctx.shadowColor=p.c;ctx.shadowBlur=18*e.flash;}
+        rr(x+g,y,p.w-2*g-(e.parts.length===2?1:0),BH,6);ctx.fillStyle=p.c;ctx.fill();
+        if(e.flash>0)ctx.restore();
+        if(p.ion){ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;ctx.stroke()}
+        ctx.fillStyle='#fff';
+        var t=p.lab+(p.ion>0?'\u207A':p.ion<0?'\u207B':'');
+        t=t.replace('CH3COO','CH\u2083COO');ctx.fillText(t,x+p.w/2,e.y+1)})})}
+  var last=0;if(document.fonts)document.fonts.load('700 13.6px Manrope');
+  function step(t){
+    var dt=Math.min(.04,(t-last)/1000||0);last=t;
+    ents.forEach(function(e){
+      e.x+=e.vx*dt;e.y+=e.vy*dt;if(e.flash>0)e.flash=Math.max(0,e.flash-dt*1.5);
+      if(e.x<e.hw){e.x=e.hw;e.vx=Math.abs(e.vx)}if(e.x>W-e.hw){e.x=W-e.hw;e.vx=-Math.abs(e.vx)}
+      if(e.y<BH/2){e.y=BH/2;e.vy=Math.abs(e.vy)}if(e.y>H-BH/2){e.y=H-BH/2;e.vy=-Math.abs(e.vy)}});
+    for(var i=0;i<ents.length;i++)for(var j=i+1;j<ents.length;j++){
+      var a=ents[i],b=ents[j],dx=b.x-a.x,dy=b.y-a.y,ox=a.hw+b.hw-Math.abs(dx),oy=BH-Math.abs(dy);
+      if(ox>0&&oy>0){var tmp;
+        if(ox<oy){var s=dx<0?-1:1;a.x-=s*ox/2;b.x+=s*ox/2;tmp=a.vx;a.vx=b.vx;b.vx=tmp}
+        else{var s2=dy<0?-1:1;a.y-=s2*oy/2;b.y+=s2*oy/2;tmp=a.vy;a.vy=b.vy;b.vy=tmp}}}
+    draw();requestAnimationFrame(step)}
+  new ResizeObserver(fit).observe(cv);
+  fit();reset();requestAnimationFrame(step);
+  return{ionise:ionise,reset:reset}
+}
+var s1=Sim(document.getElementById('c1'),{id:1,lab:'Cl',w:62,c:'#2a9d6f',n:10});
+var s2=Sim(document.getElementById('c2'),{id:2,lab:'CH3COO',w:112,c:'#3b6fd4',n:1,hRight:true});
+var st=document.getElementById('state'),go=document.getElementById('go');
+go.onclick=function(){s1.ionise();s2.ionise();st.textContent='After ionisation';go.disabled=true};
+document.getElementById('reset').onclick=function(){s1.reset();s2.reset();st.textContent='Before ionisation';go.disabled=false};
+})();
+</script>
+</body>
+</html>
