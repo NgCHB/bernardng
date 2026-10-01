@@ -14,9 +14,9 @@ body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"
 .wrap{max-width:760px;margin:0 auto}
 h1{font-size:1.25rem;margin:4px 0 10px}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{flex:1;min-width:140px;padding:8px 10px;font-size:.9rem}
+.tabs button{flex:1;min-width:120px;padding:8px 10px;font-size:.9rem}
 .sub{color:var(--mute);font-size:.9rem;margin:10px 0 10px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;overflow-x:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
 svg{width:100%;height:auto;display:block}
 @keyframes f{from{opacity:0}to{opacity:1}}
 .bond{stroke:var(--ink);stroke-width:3;stroke-linecap:round;fill:none}
@@ -71,6 +71,7 @@ button:disabled{opacity:.35;cursor:default}
 </div>
 <script>
 const NS="http://www.w3.org/2000/svg",svg=document.getElementById("svg"),g=document.getElementById("g"),R=15,Y=210;
+let OY=0; // extra vertical room for examples with a longer side chain
 function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);p&&p.appendChild(e);return e}
 function build(A,B,extra){
   g.innerHTML="";
@@ -84,48 +85,57 @@ function build(A,B,extra){
   for(const k in A){const[l,x,y]=A[k];if(l){el("text",{x,y,class:"atom"},g).textContent=l}}
   g.style.animation="none";g.getBoundingClientRect();g.style.animation="f .45s";
 }
-// one repeat unit: left C (methyl up, H down) and right C (H up or methyl up, H down)
-function unit(A,B,t,xL,xR,off,order,cls,meR){
-  A[t+"L"]=["C",xL,Y];A[t+"R"]=["C",xR,Y];A[t+"m"]=["C",xL,125];
-  A[t+"a"]=["H",xL-off,125];A[t+"b"]=["H",xL+off,125];A[t+"c"]=["H",xL,40];A[t+"d"]=["H",xL,295];A[t+"f"]=["H",xR,295];
+// one repeat unit: left C carries a methyl (or ethyl), right C carries H (or a methyl)
+function unit(A,B,t,xL,xR,off,order,cls,meR,eth){
+  const y=Y+OY;
+  A[t+"L"]=["C",xL,y];A[t+"R"]=["C",xR,y];A[t+"m"]=["C",xL,y-85];
+  A[t+"a"]=["H",xL-off,y-85];A[t+"b"]=["H",xL+off,y-85];A[t+"d"]=["H",xL,y+85];A[t+"f"]=["H",xR,y+85];
   B.push([t+"L",t+"R",order,cls],[t+"L",t+"m",1],[t+"m",t+"a",1],[t+"m",t+"b",1],[t+"m",t+"c",1],[t+"L",t+"d",1],[t+"R",t+"f",1]);
+  if(eth){
+    A[t+"c"]=["C",xL,y-170];A[t+"c1"]=["H",xL-off,y-170];A[t+"c2"]=["H",xL+off,y-170];A[t+"c3"]=["H",xL,y-255];
+    B.push([t+"c",t+"c1",1],[t+"c",t+"c2",1],[t+"c",t+"c3",1]);
+  }else A[t+"c"]=["H",xL,y-170];
   if(meR){
-    A[t+"e"]=["C",xR,125];A[t+"g"]=["H",xR-off,125];A[t+"h"]=["H",xR+off,125];A[t+"i"]=["H",xR,40];
+    A[t+"e"]=["C",xR,y-85];A[t+"g"]=["H",xR-off,y-85];A[t+"h"]=["H",xR+off,y-85];A[t+"i"]=["H",xR,y-170];
     B.push([t+"R",t+"e",1],[t+"e",t+"g",1],[t+"e",t+"h",1],[t+"e",t+"i",1]);
-  }else{A[t+"e"]=["H",xR,125];B.push([t+"R",t+"e",1])}
+  }else{A[t+"e"]=["H",xR,y-85];B.push([t+"R",t+"e",1])}
 }
 const EX=[
 {tab:"Example 1: Propene",sub:"poly(propene) from propene, C<sub>3</sub>H<sub>6</sub>",frames:["f1","f2","f3"],
- xL:220,xR:360,off:65,meR:false,sp:120,soff:58,
+ xL:220,xR:360,off:65,meR:false,eth:false,oy:0,sp:120,soff:58,
  f1:()=>[{a:["C",170,Y],b:["C",290,Y],c:["C",410,Y],h1:["H",170,125],h2:["H",170,295],h3:["H",90,Y],h4:["H",290,125],h5:["H",465,140],h6:["H",465,280]},
   [["a","b",1],["b","c",2],["a","h1",1],["a","h2",1],["a","h3",1],["b","h4",1],["c","h5",1],["c","h6",1]]]},
 {tab:"Example 2: But-2-ene",sub:"poly(but-2-ene) from but-2-ene, C<sub>4</sub>H<sub>8</sub>",frames:["f1","f2","try","f3"],
- xL:200,xR:380,off:55,meR:true,sp:150,soff:55,
+ xL:200,xR:380,off:55,meR:true,eth:false,oy:0,sp:150,soff:55,
  f1:()=>[{a:["C",100,Y],b:["C",220,Y],c:["C",340,Y],d:["C",460,Y],h1:["H",100,125],h2:["H",100,295],h3:["H",40,Y],h4:["H",220,125],h5:["H",340,125],h6:["H",460,125],h7:["H",460,295],h8:["H",520,Y]},
-  [["a","b",1],["b","c",2],["c","d",1],["a","h1",1],["a","h2",1],["a","h3",1],["b","h4",1],["c","h5",1],["d","h6",1],["d","h7",1],["d","h8",1]]]}
+  [["a","b",1],["b","c",2],["c","d",1],["a","h1",1],["a","h2",1],["a","h3",1],["b","h4",1],["c","h5",1],["d","h6",1],["d","h7",1],["d","h8",1]]]},
+{tab:"Example 3: But-1-ene",sub:"poly(but-1-ene) from but-1-ene, C<sub>4</sub>H<sub>8</sub>",frames:["f1","f2","try","f3"],
+ xL:220,xR:360,off:65,meR:false,eth:true,oy:85,sp:120,soff:58,
+ f1:()=>{const c=Y+42;return[{a:["C",100,c],b:["C",220,c],c:["C",340,c],d:["C",460,c],h1:["H",45,c-70],h2:["H",45,c+70],h3:["H",220,c-85],h4:["H",340,c-85],h5:["H",340,c+85],h6:["H",460,c-85],h7:["H",460,c+85],h8:["H",520,c]},
+  [["a","b",2],["b","c",1],["c","d",1],["a","h1",1],["a","h2",1],["b","h3",1],["c","h4",1],["c","h5",1],["d","h6",1],["d","h7",1],["d","h8",1]]]}}
 ];
 function frame3(e,m){
-  const A={},B=[];let vb=580;
+  const A={},B=[];let vb=580;const y=Y+OY;
   if(m===0){
-    unit(A,B,"u",e.xL,e.xR,e.off,1,"",e.meR);
-    A.o1=["",e.xL-80,Y];A.o2=["",e.xR+80,Y];B.push(["o1","uL",1,"hl"],["uR","o2",1,"hl"]);
+    unit(A,B,"u",e.xL,e.xR,e.off,1,"",e.meR,e.eth);
+    A.o1=["",e.xL-80,y];A.o2=["",e.xR+80,y];B.push(["o1","uL",1,"hl"],["uR","o2",1,"hl"]);
     build(A,B);
   }else if(m===1){
     const x0=80,sp=e.sp;vb=x0+5*sp+80;
-    for(let k=0;k<3;k++)unit(A,B,"u"+k,x0+2*sp*k,x0+2*sp*k+sp,e.soff,1,"",e.meR);
-    A.o1=["",x0-50,Y];A.o2=["",x0+5*sp+50,Y];
+    for(let k=0;k<3;k++)unit(A,B,"u"+k,x0+2*sp*k,x0+2*sp*k+sp,e.soff,1,"",e.meR,e.eth);
+    A.o1=["",x0-50,y];A.o2=["",x0+5*sp+50,y];
     B.push(["o1","u0L",1],["u2R","o2",1],["u0R","u1L",1],["u1R","u2L",1]);
     build(A,B,()=>{for(let k=0;k<3;k++){
-      el("rect",{x:x0-sp/2+2*sp*k,y:18,width:2*sp,height:300,rx:10,class:"tint",opacity:k%2?.14:.06},g);
-      el("text",{x:x0+sp/2+2*sp*k+sp/2,y:336,class:"tag"},g).textContent="repeat unit";}});
+      el("rect",{x:x0-sp/2+2*sp*k,y:18,width:2*sp,height:300+OY,rx:10,class:"tint",opacity:k%2?.14:.06},g);
+      el("text",{x:x0+sp/2+2*sp*k+sp/2,y:336+OY,class:"tag"},g).textContent="repeat unit";}});
   }else{
-    unit(A,B,"u",e.xL,e.xR,e.off,1,"",e.meR);
+    unit(A,B,"u",e.xL,e.xR,e.off,1,"",e.meR,e.eth);
     const bl=e.xL-e.off-20,br=580-bl;
-    A.o1=["",bl-40,Y];A.o2=["",br+40,Y];B.push(["o1","uL",1],["uR","o2",1]);
+    A.o1=["",bl-40,y];A.o2=["",br+40,y];B.push(["o1","uL",1],["uR","o2",1]);
     build(A,B,()=>{
-      el("path",{d:`M${bl+12} 22H${bl}V318H${bl+12}`,class:"bond"},g);
-      el("path",{d:`M${br-12} 22H${br}V318H${br-12}`,class:"bond"},g);
-      el("text",{x:br+18,y:335,class:"n"},g).textContent="n";});
+      el("path",{d:`M${bl+12} 22H${bl}V${318+OY}H${bl+12}`,class:"bond"},g);
+      el("path",{d:`M${br-12} 22H${br}V${318+OY}H${br-12}`,class:"bond"},g);
+      el("text",{x:br+18,y:335+OY,class:"n"},g).textContent="n";});
   }
   return vb;
 }
@@ -137,20 +147,19 @@ const $=id=>document.getElementById(id);
 const tabs=$("tabs");
 EX.forEach((e,i)=>{const b=document.createElement("button");b.textContent=e.tab;b.onclick=()=>{x=i;s=0;m=0;show()};tabs.appendChild(b)});
 function show(){
-  const e=EX[x],fr=e.frames[s];let vb=580;
+  const e=EX[x],fr=e.frames[s];let vb=580;OY=e.oy;
   $("sub").innerHTML=e.sub;
   $("card").style.display=fr==="try"?"none":"block";
   $("try").style.display=fr==="try"?"block":"none";
   if(fr==="f1"){const[A,B]=e.f1();build(A,B)}
-  else if(fr==="f2"){const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR);build(A,B)}
+  else if(fr==="f2"){const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);build(A,B)}
   else if(fr==="f3")vb=frame3(e,m);
-  svg.setAttribute("viewBox",`0 0 ${vb} 345`);
-  svg.style.minWidth=vb>700?Math.round(vb*.78)+"px":"0";
+  svg.setAttribute("viewBox",`0 0 ${vb} ${345+OY}`);
   const d=fr==="f3"?MODES[m]:TXT[fr];
   $("desc").innerHTML="<b>"+d[0]+"</b>"+(d[1]?"<span>"+d[1]+"</span>":"");
   $("seg").classList.toggle("show",fr==="f3");
   document.querySelectorAll("#seg button").forEach(b=>{const on=+b.dataset.m===m;b.style.background=on?"var(--pri)":"transparent";b.style.color=on?"#fff":"var(--pri)"});
-  [...tabs.children].forEach((b,i)=>{const on=i===x;b.className=on?"":"sec"});
+  [...tabs.children].forEach((b,i)=>{b.className=i===x?"":"sec"});
   $("dots").innerHTML="";e.frames.forEach((_,k)=>{$("dots").appendChild(Object.assign(document.createElement("div"),{className:"dot"+(k===s?" on":"")}))});
   $("back").disabled=s===0;
   $("next").textContent=s===e.frames.length-1?"Restart":fr==="try"?"Check my answers":"Next";
