@@ -25,6 +25,7 @@ svg{width:100%;height:auto;display:block}
 .n{fill:var(--ink);font-size:26px;font-style:italic;font-family:Georgia,serif;text-anchor:middle}
 .tag{fill:var(--mute);font-size:13px;text-anchor:middle;font-family:system-ui,sans-serif}
 .tint{fill:var(--acc)}
+.glow{stroke:var(--acc);stroke-width:18;stroke-linecap:round;fill:none}
 .desc{margin-top:12px;padding:14px 16px;background:var(--card);border-radius:10px;border:1px solid var(--bd);border-left:5px solid var(--pri);min-height:60px}
 .desc b{display:block;font-size:1.05rem;margin-bottom:4px}
 .desc span{color:var(--mute)}
@@ -65,10 +66,12 @@ function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.set
 function build(A,B,extra,still){
   g.innerHTML="";
   extra&&extra();
-  B.forEach(([a,c,o,cls,stk,w])=>{
+  const G=el("g",{},g);
+  B.forEach(([a,c,o,cls,stk,w,gl])=>{
     const P=A[a],Q=A[c];let dx=Q[1]-P[1],dy=Q[2]-P[2];const L=Math.hypot(dx,dy);dx/=L;dy/=L;
     const sa=P[0]?R:0,sc=Q[0]?R:0;
     const x1=P[1]+dx*sa,y1=P[2]+dy*sa,x2=Q[1]-dx*sc,y2=Q[2]-dy*sc;
+    const gv=gl===true?1:+gl||0;if(gv>0)el("line",{x1,y1,x2,y2,class:"glow",style:"stroke-opacity:"+.14*gv},G);
     (o===2?[-(w==null?5:w),(w==null?5:w)]:[0]).forEach(k=>el("line",{x1:x1-dy*k,y1:y1+dx*k,x2:x2-dy*k,y2:y2+dx*k,class:"bond "+(cls||""),style:stk?"stroke:"+stk:""},g));
   });
   for(const k in A){const[l,x,y]=A[k];if(l){el("text",{x,y,class:"atom"},g).textContent=l}}
@@ -89,6 +92,7 @@ function unit(A,B,t,xL,xR,off,order,cls,meR,eth){
     B.push([t+"R",t+"e",1],[t+"e",t+"g",1],[t+"e",t+"h",1],[t+"e",t+"i",1]);
   }else{A[t+"e"]=["H",xR,y-85];B.push([t+"R",t+"e",1])}
 }
+function glowH(B){B.forEach(b=>{if(b[0]==="uL"||b[0]==="uR")b[6]=true});return B}
 const EX=[
 {tab:"Example 1: Propene",sub:"poly(propene) from propene, C<sub>3</sub>H<sub>6</sub>",frames:["f1","f2","f3"],
  xL:220,xR:360,off:65,meR:false,eth:false,oy:0,sp:120,soff:58,
@@ -138,7 +142,7 @@ let ANIM=false,raf=0;
 function morph(e){
   const [A1,B1]=e.f1(),A2={},B2=[];
   unit(A2,B2,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);
-  const root=Object.keys(e.mp).find(k=>e.mp[k]==="L"),par={},order=[root],seen=new Set([root]);
+  const rootR=Object.keys(e.mp).find(k=>e.mp[k]==="R"),root=Object.keys(e.mp).find(k=>e.mp[k]==="L"),par={},order=[root],seen=new Set([root]);
   for(let i=0;i<order.length;i++){const p=order[i];B1.forEach(([a,c])=>{const o=a===p?c:c===p?a:null;if(o&&!seen.has(o)){seen.add(o);par[o]=p;order.push(o)}})}
   const V=k=>A2["u"+e.mp[k]],info={};
   order.slice(1).forEach(k=>{const p=par[k],a=A1[k],b=A1[p],c=V(k),d=V(p);
@@ -152,7 +156,7 @@ function morph(e){
     A[root]=[A1[root][0],P[root][0],P[root][1]];
     order.slice(1).forEach(n=>{const i=info[n],an=i.a1+i.da*k,l=i.l1+(i.l2-i.l1)*k,q=P[par[n]];
       P[n]=[q[0]+Math.cos(an)*l,q[1]+Math.sin(an)*l];A[n]=[A1[n][0],P[n][0],P[n][1]]});
-    build(A,B1.map(([a,c,o])=>o===2?[a,c,o,"hl"]:[a,c,o]),null,true);
+    build(A,B1.map(([a,c,o])=>{const b=o===2?[a,c,o,"hl"]:[a,c,o];if(a===root||a===rootR||c===root||c===rootR)b[6]=k;return b}),null,true);
     if(t<1)raf=requestAnimationFrame(step);
   }
   raf=requestAnimationFrame(step);
@@ -181,7 +185,7 @@ function show(){
   const e=EX[x],fr=e.frames[s];let vb=580;OY=e.oy;
   $("sub").innerHTML=e.sub;
   if(fr==="f1"){const[A,B]=e.f1();build(A,B)}
-  else if(fr==="f2"){if(ANIM)morph(e);else{const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);build(A,B)}}
+  else if(fr==="f2"){if(ANIM)morph(e);else{const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);glowH(B);build(A,B)}}
   else if(fr==="f3"){if(ANIM&&m===0)morph3(e);else vb=frame3(e,m)}
   svg.setAttribute("viewBox",`0 0 ${vb} ${345+OY}`);
   const d=fr==="f3"?MODES[m]:TXT[fr];
