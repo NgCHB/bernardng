@@ -307,4 +307,199 @@ function drawCond(p,T){
     if(hl>.01)hlr(ax+C2X-24,T,y,true,hl);
     if(nm>.01){
       el("text",{x:ax+C2X/2,y:y+CG+46,class:"nm",opacity:nm},g).textContent="dicarboxylic acid";
-      el("text",{x:dx+C2X/2,y:y+CG+46,class:"nm",opacity:nm},g).
+      el("text",{x:dx+C2X/2,y:y+CG+46,class:"nm",opacity:nm},g).textContent=T.other;
+    }
+    if(j<.01&&lv<1)el("text",{x:AXF+C2X+2*CG+GAP/2,y,class:"op",opacity:1-lv},g).textContent="+";
+    if(bx>.01&&j<.01){
+      // one box round the -OH on the acid and the H on the alcohol; half boxes at the outer ends
+      const oR=AXF+C2X+CG,gL=AXF+DX0-CG,gR=AXF+DX0+C2X+CG;
+      el("rect",{x:oR-16,y:y-22,width:gL-oR+32,height:44,rx:8,class:"dbox",opacity:bx},g);
+      el("path",{d:`M${AXF-2*CG-22} ${y-22}H${AXF-CG+16}V${y+22}H${AXF-2*CG-22}`,class:"dbox",opacity:bx},g);
+      el("path",{d:`M${gR+22} ${y-22}H${gR-16}V${y+22}H${gR+22}`,class:"dbox",opacity:bx},g);
+    }
+    if(lv>.01)el("text",{x:L(AXF+(C2X+DX0)/2,AXP+O2X/2),y:L(y,WY),class:"atom",opacity:lv},g).textContent="H\u2082O";
+  },true);
+}
+function animC(a,b,T){
+  const t0=performance.now(),D=1300;
+  function step(now){const t=Math.min(1,(now-t0)/D),k=ease(t);drawCond(a.map((v,i)=>v+(b[i]-v)*k),T);if(t<1)raf=requestAnimationFrame(step)}
+  raf=requestAnimationFrame(step);
+}
+// section of polymer (2 repeat units) or polymer (brackets and n)
+function drawCsec(T,md){
+  const A={},B=[],N=md===1?2:1,X=md===1?70:AXP,y=YR;
+  for(let k=0;k<N;k++)cfrag(A,B,"u"+k,X+PER*k,y,X+PER*k+C2X+CG,y,1,T);
+  build(A,B,()=>{
+    for(let k=0;k<N;k++){
+      const ax=X+PER*k,dx=ax+C2X+CG;
+      crects(ax,y,dx,y);
+      hlr(ax+C2X-24,T,y,md===1,1);
+    }
+    if(md===1)hlr(X+O2X-24,T,y,true,1);
+    if(md===2){
+      const bl=X-28,br=X+O2X+28;
+      el("path",{d:`M${bl+10} ${TY}H${bl}V${TY+TH}H${bl+10}`,class:"bond"},g);
+      el("path",{d:`M${br-10} ${TY}H${br}V${TY+TH}H${br-10}`,class:"bond"},g);
+      el("text",{x:br+16,y:TY+TH+16,class:"n"},g).textContent="n";
+    }
+  },true);
+}
+/* ---------- Condensation polymerisation: polymer to monomer ---------- */
+const RX=70,RY=170,FA=190,FD=FA+DX0;
+const RIX=[RX,RX+C2X+CG,RX+PER,RX+PER+C2X+CG],RGX=[FA,FD,FA,FD];
+// [C-O bond fades, fragments move apart, OH and H added] at the start and end of each frame
+const RS=[[[0,0,0],[0,0,0]],[[0,0,0],[1,0,0]],[[1,0,0],[1,1,0]],[[1,1,0],[1,1,1]]];
+// fragments 0-3: acid, diol/diamine, acid, diol/diamine (2 repeat units)
+function drawR(p,T){
+  const f=p[0],mv=p[1],ad=p[2],ky=ease(Math.min(1,mv*2)),kx=ease(Math.max(0,mv*2-1));
+  const Lf=CG-R,Ls=R+(CG-2*R)*(.3+.7*ky),A={},B=[],X=[],Yv=[];
+  // the second pair of fragments fades out first, then the remaining pair moves apart
+  const fa=i=>i<2?1:1-ky;
+  for(let i=0;i<4;i++){
+    X[i]=RIX[i]+(RGX[i]-RIX[i])*kx;Yv[i]=RY;
+    const fo=fa(i);if(fo<=.001)continue;
+    const x=X[i],y=Yv[i],k="f"+i,acid=i%2===0;
+    A[k+"a"]=[acid?"C":T.N,x,y,0,fo];A[k+"b"]=[acid?"C":T.N,x+C2X,y,0,fo];
+    A[k+"r0"]=["",x+CG/2,y];A[k+"r1"]=["",x+CG/2+CW,y];
+    B.push([k+"a",k+"r0",1,"",null,null,0,fo],[k+"r1",k+"b",1,"",null,null,0,fo]);
+    if(acid){
+      A[k+"o1"]=["O",x,y-CG,0,fo];A[k+"o2"]=["O",x+C2X,y-CG,0,fo];
+      B.push([k+"a",k+"o1",2,"",null,null,0,fo],[k+"b",k+"o2",2,"",null,null,0,fo]);
+    }else if(T.ret){
+      A[k+"n1"]=["H",x,y+CG,0,fo];A[k+"n2"]=["H",x+C2X,y+CG,0,fo];
+      B.push([k+"a",k+"n1",1,"",null,null,0,fo],[k+"b",k+"n2",1,"",null,null,0,fo]);
+    }
+    // dangling bonds: the outer ends fade out with the linkage bonds,
+    // and every stub fades back in only when the -OH / -H atoms are added
+    const lo=Math.max(ad,i===0?1-f:0)*fo,ro=Math.max(ad,i===3?1-f:0)*fo,
+          ll=i===0?Lf:Ls,rl=i===3?Lf:Ls;
+    A[k+"sl"]=["",x-ll,y];A[k+"sr"]=["",x+C2X+rl,y];
+    B.push([k+"a",k+"sl",1,"",null,null,0,lo],[k+"b",k+"sr",1,"",null,null,0,ro]);
+    if(ad>.01){
+      A[k+"xl"]=[acid?"O":"H",x-CG,y,0,ad];A[k+"xr"]=[acid?"O":"H",x+C2X+CG,y,0,ad];
+      if(acid){
+        A[k+"hl"]=["H",x-2*CG,y,0,ad];A[k+"hr"]=["H",x+C2X+2*CG,y,0,ad];
+        B.push([k+"xl",k+"hl",1,"",null,null,0,ad],[k+"xr",k+"hr",1,"",null,null,0,ad]);
+      }
+    }
+  }
+  // the C-O / C-N bonds of the three linkages fade out
+  if(mv===0&&f<1)[["f0b","f1a"],["f1b","f2a"],["f2b","f3a"]].forEach(([a,c])=>B.push([a,c,1,"hl",null,null,0,1-f]));
+  build(A,B,()=>{
+    for(let i=0;i<4;i++){const fo=fa(i);if(fo>.001)el("rect",{x:X[i]+CG/2,y:Yv[i]-20,width:CW,height:40,rx:6,class:i%2?"rsh":"rbox",opacity:fo},g)}
+    if(mv===0&&f<1)[RIX[0],RIX[1],RIX[2]].forEach(x=>hlr(x+C2X-24,T,RY,true,1-f));
+    if(ad>.01){
+      for(let i=0;i<2;i++)el("text",{x:X[i]+C2X/2,y:Yv[i]+CG+46,class:"nm",opacity:ad},g).textContent=i%2?T.other:"dicarboxylic acid";
+      el("text",{x:FA+262,y:RY,class:"op",opacity:ad},g).textContent="+";
+    }
+  },true);
+}
+function animR(a,b,T){
+  const t0=performance.now(),D=1500;
+  function step(now){const t=Math.min(1,(now-t0)/D),k=ease(t);drawR(a.map((v,i)=>v+(b[i]-v)*k),T);if(t<1)raf=requestAnimationFrame(step)}
+  raf=requestAnimationFrame(step);
+}
+function showR(){
+  const T=CT[mode.slice(0,3)];OY=0;$("sub").innerHTML=T.rsub;
+  const st=RS[s];if(ANIM&&s>0)animR(st[0],st[1],T);else drawR(st[1],T);
+  svg.setAttribute("viewBox","0 0 804 300");
+  const H="Convert polymer to monomer",
+  t=[[H,"Step 1: Erase the "+T.bond+" single bond in the "+T.link+" linkage."]];
+  t[1]=t[0];
+  t[2]=[H,"Step 2: Add the -OH back to the acid fragment and -H back to the "+T.frag+" fragment."];
+  t[3]=[H,"Monomers: dicarboxylic acid + "+T.other];
+  return[t[s],s>0];
+}
+function showC(){
+  const T=CT[mode];OY=0;$("sub").innerHTML=T.sub;let vb="0 0 720 320";
+  if(s===3&&m>0){drawCsec(T,m);vb=m===1?"0 0 "+(70+2*PER+30)+" 280":"0 0 720 280"}
+  else{const st=CS[s];if(ANIM&&s>0)animC(st[0],st[1],T);else drawCond(st[1],T)}
+  svg.setAttribute("viewBox",vb);
+  const H="Convert monomers to polymer",
+  t=[[H,"Step 1: Place the monomers side by side."],
+  [H,"Step 2: Remove "+T.rm+" and the OH groups from the -COOH groups."],
+  [H,"Water is lost."],
+  [H,"Step 3: Connect the remaining fragments using a "+T.bond+" bond.\n\nThe resulting structure is the <b>repeat unit</b>."]];
+  const d=s<3?t[s]:m===0?t[3]:m===1?["Section of polymer","2 repeat units joined together. Each link between the units is an "+T.link+" linkage."]:MODES[2];
+  return[d,s>0&&(s<3||m===0)];
+}
+/* ---------- page logic ---------- */
+let mode="m2p",x=0,s=0,m=0;
+const $=id=>document.getElementById(id),tabs=$("tabs");
+const lastIdx=()=>mode==="m2p"?EX[x].frames.length-1:3;
+EX.forEach((e,i)=>{const b=document.createElement("button");b.className="chip";b.type="button";b.textContent=e.tab;b.onclick=()=>{x=i;s=0;m=0;show()};tabs.appendChild(b)});
+function showM(){
+  const e=EX[x],fr=e.frames[s];let vb=580;OY=e.oy;
+  $("sub").innerHTML=e.sub;
+  if(fr==="mono"){const[A,B]=e.f1();build(A,B,()=>lbl(1))}
+  else if(fr==="a12"||fr==="h"){if(fr==="a12"&&ANIM)morph(e);else{const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);glowH(B,A);build(A,B,()=>lbl(1))}}
+  else{if(ANIM&&m===0)morph3(e);else vb=frame3(e,m)}
+  svg.setAttribute("viewBox",`0 0 ${vb} ${345+OY}`);
+  return[fr==="f3"?MODES[m]:TXT[fr],fr==="a12"||(fr==="f3"&&m===0)];
+}
+function showP(){
+  OY=PE.oy;$("sub").innerHTML=PE.sub;
+  const st=PS[s];
+  if(ANIM&&s>0)animP(st[0],st[1]);else drawP(st[1]);
+  svg.setAttribute("viewBox","0 0 760 "+(345+OY));
+  return[PT[s],s>0];
+}
+function show(){
+  cancelAnimationFrame(raf);
+  const r=mode==="m2p"?showM():mode==="p2m"?showP():(mode==="estr"||mode==="amdr")?showR():showC(),d=r[0],rp=r[1];
+  $("dt").textContent=d[0];$("desc").innerHTML=d[1]||"";
+  $("seg").style.display=(mode==="m2p"&&EX[x].frames[s]==="f3")||((mode==="est"||mode==="amd")&&s===3)?"inline-flex":"none";
+  document.querySelectorAll("#seg button").forEach(b=>b.classList.toggle("on",+b.dataset.m===m));
+  [...tabs.children].forEach((b,i)=>b.classList.toggle("on",i===x));
+  $("stage").classList.toggle("replay",rp);$("replay").style.visibility=rp?"visible":"hidden";
+  $("count").textContent=(s+1)+" of "+(lastIdx()+1);
+  $("back").disabled=s===0;
+  $("next").textContent=s===lastIdx()?"Restart":"Next";
+}
+const MC={
+ home:{h1:"Polymers",lead:"Step-by-step animations for drawing polymers and working out their monomers.",foot:"Polymers: addition and condensation."},
+ m2p:{h1:"Drawing an addition polymer",lead:"Follow the steps to turn an alkene monomer into its repeat unit and polymer.",foot:"Addition polymers: a step-by-step drawing guide."},
+ p2m:{h1:"From addition polymer to monomer",lead:"Follow the steps to work out the alkene monomer from a section of poly(but-1-ene).",foot:"Work backwards from the repeat unit to the monomer."},
+ est:{h1:"Condensation polymerisation: polyester",lead:"Follow the steps to join a dicarboxylic acid and a diol, losing water to form an ester linkage.",foot:"Condensation polymerisation: monomers join and a small molecule, water, is lost."},
+ amd:{h1:"Condensation polymerisation: polyamide",lead:"Follow the steps to join a dicarboxylic acid and a diamine, losing water to form an amide linkage.",foot:"Condensation polymerisation: monomers join and a small molecule, water, is lost."},
+ estr:{h1:"Condensation polymerisation: polyester to monomers",lead:"Follow the steps to break the ester linkages and work out the dicarboxylic acid and diol that made a section of polyester.",foot:"Work backwards from the polymer by adding the atoms lost as water back to the fragments."},
+ amdr:{h1:"Condensation polymerisation: polyamide to monomers",lead:"Follow the steps to break the amide linkages and work out the dicarboxylic acid and diamine that made a section of polyamide.",foot:"Work backwards from the polymer by adding the atoms lost as water back to the fragments."}};
+const HOME=[["Addition polymerisation",[["m2p","Monomer to polymer","Alkene to poly(alkene)"],["p2m","Polymer to monomer","Poly(but-1-ene) to but-1-ene"]]],["Condensation polymerisation",[["est","Polyester","Monomer to polymer"],["amd","Polyamide","Monomer to polymer"],["estr","Polyester","Polymer to monomer"],["amdr","Polyamide","Polymer to monomer"]]]];
+$("home").innerHTML=HOME.map(([h,it])=>'<h2 class="hg">'+h+'</h2><div class="hl">'+it.map(([m,t,d])=>'<button class="hc" type="button" data-m="'+m+'"><div><b>'+t+'</b><small>'+d+'</small></div><span aria-hidden="true">\u2192</span></button>').join("")+'</div>').join("");
+document.querySelectorAll("#home .hc").forEach(b=>b.onclick=()=>{setMode(b.dataset.m);window.scrollTo(0,0)});
+function setMode(md){
+  mode=md;s=0;m=0;const c=MC[md];
+  const hm=md==="home";$("home").style.display=hm?"block":"none";$("panel").style.display=hm?"none":"";
+  tabs.style.display=md==="m2p"?"":"none";
+  $("h1").textContent=c.h1;$("lead").textContent=c.lead;$("foot").textContent=c.foot;
+  document.querySelectorAll("#side button").forEach(b=>b.classList.toggle("on",b.dataset.m===md));
+  if(!hm)show();
+}
+const go=n=>{s=n;m=0;ANIM=true;show();ANIM=false};
+$("next").onclick=()=>go(s===lastIdx()?0:s+1);
+$("back").onclick=()=>{if(s>0)go(s-1)};
+$("stage").onclick=()=>{const c=mode==="est"||mode==="amd",ok=mode==="m2p"?(EX[x].frames[s]==="a12"||(EX[x].frames[s]==="f3"&&m===0)):c?(s>0&&(s<3||m===0)):s>0;if(ok){ANIM=true;show();ANIM=false}};
+document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{m=+b.dataset.m;show()});
+function toggle(o){document.body.classList.toggle("open",o);$("menu").setAttribute("aria-expanded",o)}
+$("menu").onclick=()=>toggle(!document.body.classList.contains("open"));
+$("scrim").onclick=()=>toggle(false);
+document.querySelectorAll("#side button").forEach(b=>b.onclick=()=>{setMode(b.dataset.m);toggle(false)});
+document.addEventListener("keydown",e=>{
+  if(mode==="home"){if(e.key==="Escape")toggle(false);return}
+  if(e.key==="ArrowRight"&&s<lastIdx())go(s+1);
+  else if(e.key==="ArrowLeft"&&s>0)go(s-1);
+  else if(e.key==="Escape")toggle(false);
+});
+// swipe left = forward, swipe right = back (no wrap-around)
+let tx=0,ty=0,tt=0;
+$("view").addEventListener("touchstart",ev=>{const t=ev.changedTouches[0];tx=t.clientX;ty=t.clientY;tt=Date.now()},{passive:true});
+$("view").addEventListener("touchend",ev=>{
+  const t=ev.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+  if(mode==="home")return;
+  if(Date.now()-tt>800||Math.abs(dx)<50||Math.abs(dx)<1.5*Math.abs(dy))return;
+  if(dx<0&&s<lastIdx())go(s+1);else if(dx>0&&s>0)go(s-1);
+},{passive:true});
+setMode("home");
+</script>
+</body>
+  </html>
