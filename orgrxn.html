@@ -20,7 +20,9 @@ body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.6 'Sora',sy
 header{padding:48px 0 28px}
 h1{font-size:clamp(30px,5vw,44px);font-weight:600;letter-spacing:-.02em;line-height:1.15;margin:0 0 12px}
 .lead{color:var(--muted);font-size:14px;margin:0;max-width:60ch}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.hint{display:none}
+@media (pointer:coarse){.hint{display:inline}}
+.panel{touch-action:pan-y;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
 .chip{font:inherit;font-size:13px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 14px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .chip:hover{border-color:var(--line-strong)}
@@ -30,9 +32,7 @@ svg{display:block;width:100%;height:auto;margin:0 auto}
 .uvs,.uve{font-size:14px;font-weight:500;fill:var(--accent)}
 svg text.uvs{text-anchor:start}
 svg text.uve{text-anchor:end}
-.hlb{fill:#fff3a8}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hlb{fill:rgba(250,204,21,.3)}}
-:root[data-theme="dark"] .hlb{fill:rgba(250,204,21,.3)}
+.hlb{fill:var(--accent-soft)}
 .dbox{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:5 4}
 svg text{font-family:inherit;text-anchor:middle;dominant-baseline:central;fill:var(--text)}
 .at{font-size:22px;font-weight:500}
@@ -129,7 +129,7 @@ footer{margin-top:48px;border-top:1px solid var(--line);padding:20px 0 32px;font
 </div>
 <div class="cap" aria-live="polite"><p id="desc"></p><div class="eq" id="eq"></div><div class="notes" id="notes" style="display:none"><span>Only one product forms</span><span>Atoms add to adjacent carbons</span></div><div class="ben" id="ben" style="display:none"><h3>Why crack hydrocarbons?</h3><ul><li>Supply meets demand: short-chain fuels such as petrol are in higher demand than long-chain hydrocarbons.</li><li>Alkenes are made: ethene is the starting material for plastics such as poly(ethene).</li><li>Shorter alkanes are more volatile and easier to ignite, so they make better fuels.</li><li>Hydrogen, when produced, is used to make chemicals such as ammonia.</li></ul></div></div>
 <div class="bar">
-<span class="count" id="count"></span>
+<span class="count" id="count"></span><span class="count hint">Swipe to step</span>
 <div class="seg"><button id="back">Back</button><button id="next" class="on">Next</button></div>
 </div>
 </section>
@@ -170,6 +170,8 @@ e.push(T(isCl?'a'+j:'h'+j,cx+d[0]*ARM,cy+d[1]*ARM,isCl?'Cl':'H',isCl?'at cl':'at
 e.push(L('k'+k,cx+d[0]*13,cy+d[1]*13,cx+d[0]*(ARM-15),cy+d[1]*(ARM-15)));
 }
 var n=p?r+1:r;
+var kk=ORD[r],dd=DIR[kk],sx=cx+dd[0]*ARM,sy=cy+dd[1]*ARM,hc=p?[sx,sy]:G.A,hh=p?G.H:[sx,sy];
+e.push({id:'hlCl'+r,k:'r',x:hc[0]-16.5,y:hc[1]-16.5,w:33,h:33,rx:2,cls:'hlb'},{id:'hlH'+r,k:'r',x:hh[0]-16.5,y:hh[1]-16.5,w:33,h:33,rx:2,cls:'hlb'});
 e.push(T('n_'+NAMES[n],cx,cy+108,NAMES[n],'nm'));
 e.push(T('f_'+NAMES[n],cx,cy+128,FORM[n],'fm'));
 if(!p){
@@ -295,7 +297,7 @@ var DUR=reduce?0:1300;
 function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
 function node(g){
 var n=nodes[g.id];
-if(!n){n=document.createElementNS(NS,g.k==='t'?'text':g.k==='r'?'rect':'line');n.setAttribute('class',g.cls);if(g.k==='t')n.textContent=g.tx;if(g.k==='r'){n.setAttribute('rx',12);layer.insertBefore(n,layer.firstChild)}else layer.appendChild(n);nodes[g.id]=n}
+if(!n){n=document.createElementNS(NS,g.k==='t'?'text':g.k==='r'?'rect':'line');n.setAttribute('class',g.cls);if(g.k==='t')n.textContent=g.tx;if(g.k==='r'){n.setAttribute('rx',g.rx!==undefined?g.rx:12);layer.insertBefore(n,layer.firstChild)}else layer.appendChild(n);nodes[g.id]=n}
 return n}
 function draw(id,g){
 var n=node(g);
@@ -417,6 +419,11 @@ $('hgrid').innerHTML=out.length?out.map(function(r){return '<button class="card"
 ['All','Alkanes','Alkenes','Alcohols and acids'].forEach(function(t){var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=function(){HF=t;renderHome()};$('hchips').appendChild(b)});
 $('hgrid').onclick=function(e){var c=e.target.closest('.card');if(c)setMode(c.dataset.m)};
 $('crumb').onclick=function(){setMode('home')};
+var tx=0,ty=0,tt=0;
+$('view').addEventListener('touchstart',function(e){var t=e.changedTouches[0];tx=t.clientX;ty=t.clientY;tt=Date.now()},{passive:true});
+$('view').addEventListener('touchend',function(e){var t=e.changedTouches[0],dx=t.clientX-tx,dy=t.clientY-ty;
+if(mode==='home'||Math.abs(dx)<50||Math.abs(dx)<1.5*Math.abs(dy)||Date.now()-tt>800)return;
+if(dx<0){if(state<CFG[mode].last)go(state+1)}else if(state>0)go(state-1)},{passive:true});
 renderHome();setMode('home');
 })();
 </script>
