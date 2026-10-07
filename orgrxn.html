@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Substitution of methane by chlorine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fafaf9;--surface:#fff;--text:#1c1917;--muted:#6b6560;--line:#e7e5e4;--line-strong:#c9c5c1;--accent:#0f766e;--accent-soft:#e6f4f2;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131211;--surface:#1b1a19;--text:#f3f1ee;--muted:#a39d97;--line:#2b2927;--line-strong:#47433f;--accent:#5eead4;--accent-soft:#16302d}}
+:root[data-theme="dark"]{--bg:#131211;--surface:#1b1a19;--text:#f3f1ee;--muted:#a39d97;--line:#2b2927;--line-strong:#47433f;--accent:#5eead4;--accent-soft:#16302d}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:400 15px/1.6 'Sora',system-ui,-apple-system,'Segoe UI',sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px}
+@media(min-width:600px){.wrap{padding:0 24px}}
+header{padding:48px 0 28px}
+h1{font-size:clamp(30px,5vw,44px);font-weight:600;letter-spacing:-.02em;line-height:1.15;margin:0 0 12px}
+.lead{color:var(--muted);font-size:14px;margin:0;max-width:60ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.chip{font:inherit;font-size:13px;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:999px;padding:4px 14px;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.chip:hover{border-color:var(--line-strong)}
+.chip.on{background:var(--accent-soft);color:var(--accent);font-weight:500;border-color:transparent}
+.stage{overflow-x:auto}
+svg{display:block;width:100%;height:auto;margin:0 auto}
+.uvs,.uve{font-size:14px;font-weight:500;fill:var(--accent)}
+svg text.uvs{text-anchor:start}
+svg text.uve{text-anchor:end}
+.hlb{fill:#fff3a8}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hlb{fill:rgba(250,204,21,.3)}}
+:root[data-theme="dark"] .hlb{fill:rgba(250,204,21,.3)}
+.dbox{fill:none;stroke:var(--accent);stroke-width:1.6;stroke-dasharray:5 4}
+svg text{font-family:inherit;text-anchor:middle;dominant-baseline:central;fill:var(--text)}
+.at{font-size:22px;font-weight:500}
+.at.cl{fill:var(--accent)}
+.at.c{font-weight:600}
+.nm{font-size:14px;font-weight:500}
+.fm{font-size:13px;fill:var(--muted)}
+.op{font-size:22px;fill:var(--muted)}
+.bond{stroke:var(--muted);stroke-width:1.8;stroke-linecap:round}
+.arrow{stroke:var(--text);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.uv{font-size:14px;font-weight:500;fill:var(--accent)}
+.cap{border-top:1px solid var(--line);margin-top:8px;padding-top:16px;min-height:96px}
+.cap p{margin:0 0 6px}
+.ben{margin-top:12px;background:var(--accent-soft);border-radius:12px;padding:14px 16px;font-size:14px}
+.ben h3{font-size:14px;font-weight:600;color:var(--accent);margin:0 0 6px}
+.ben ul{margin:0;padding-left:18px}
+.ben li{margin:3px 0}
+.hrow{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.hrow .menu{margin-bottom:0}
+.crumb{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;padding:6px 4px;cursor:pointer;transition:color .15s}
+.crumb:hover{color:var(--accent)}
+.ext{margin-left:auto;text-decoration:none}
+.tools{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
+.tools .chips{margin:0}
+.tools input{font:inherit;font-size:14px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 14px;flex:1 1 220px;min-width:0;transition:border-color .15s}
+.tools input:hover{border-color:var(--line-strong)}
+button.card{font:inherit;color:inherit;text-align:left;cursor:pointer;width:100%;display:block;margin:0}
+.card .tag{font-size:13px;color:var(--accent);margin-bottom:6px}
+.card h2:last-child{margin:0}
+.none{color:var(--muted);font-size:14px;margin:8px 0}
+.def{display:block;margin-top:6px;font-size:14px;color:var(--muted)}
+.def b{font-weight:600;color:var(--text)}
+.eq{font-size:13px;color:var(--muted)}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+.count{font-size:13px;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{font:inherit;font-size:13px;color:var(--muted);background:transparent;border:0;padding:7px 18px;cursor:pointer;transition:color .15s,background .15s}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
+.seg button:disabled{opacity:.45;cursor:default}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;transition:border-color .15s}
+.card h2{font-size:16px;font-weight:600;margin:0 0 6px}
+.card p{font-size:14px;color:var(--muted);margin:0 0 14px}
+.card .foot{font-size:13px;color:var(--muted);transition:color .15s}
+.card:hover{border-color:var(--accent)}
+.card:hover .foot{color:var(--accent)}
+header{padding-top:24px}
+.menu{width:40px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;margin-bottom:24px;transition:border-color .15s}
+.menu:hover{border-color:var(--accent)}
+.menu span{display:block;width:18px;height:2px;border-radius:2px;background:var(--text)}
+.scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:10}
+.side{display:none;position:fixed;top:0;bottom:0;left:0;width:280px;max-width:85vw;background:var(--surface);border-right:1px solid var(--line);z-index:11;padding:calc(20px + env(safe-area-inset-top,0px)) 16px 20px}
+body.open .scrim,body.open .side{display:block}
+.side h2{font-size:13px;font-weight:500;color:var(--muted);margin:4px 8px 12px}
+.side button{display:block;width:100%;text-align:left;font:inherit;font-size:14px;color:var(--text);background:transparent;border:0;border-radius:10px;padding:10px 12px;margin-bottom:4px;cursor:pointer;transition:color .15s,background .15s}
+.side button small{display:block;font-size:13px;color:var(--muted)}
+.side button.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
+.side button.on small{color:var(--accent)}
+.notes span.dim{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.hl{fill:var(--accent-soft)}
+.notes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.notes span{background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:500;border-radius:999px;padding:4px 14px}
+footer{margin-top:48px;border-top:1px solid var(--line);padding:20px 0 32px;font-size:13px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="scrim" id="scrim"></div>
+<nav class="side" id="side" aria-label="Reactions"><h2>Reactions</h2><button data-m="home">All reactions<small>Choose a reaction</small></button><button data-m="sub">Substitution<small>Methane + chlorine</small></button><button data-m="crack">Cracking<small>Octane</small></button><button data-m="br">Addition of bromine<small>Propene + bromine</small></button><button data-m="h2">Addition of hydrogen<small>Propene + hydrogen</small></button><button data-m="h2o">Addition of water<small>Propene + steam</small></button><button data-m="ox">Oxidation of ethanol<small>Ethanol + [O]</small></button><button data-m="est">Esterification<small>Ethanoic acid + methanol</small></button></nav>
+<div class="wrap">
+<header><div class="hrow"><button class="menu" id="menu" aria-label="Choose reaction" aria-expanded="false" aria-controls="side"><span></span><span></span><span></span></button><button class="crumb" id="crumb" style="display:none">All reactions</button><a class="crumb ext" href="https://ngchb.github.io/bernardng/" target="_top" rel="noopener">Back to home</a></div><h1 id="h1"></h1><p class="lead" id="lead"></p></header>
+<section id="homeview" aria-label="All reactions"><div class="tools"><div class="chips" id="hchips"></div></div><div class="grid" id="hgrid"></div></section>
+<main id="view" style="display:none">
+<section class="panel" aria-label="Reaction animation">
+<div class="chips" id="chips" role="group" aria-label="Jump to reaction"></div>
+<div class="seg" id="vseg" style="display:none;margin-bottom:12px"><button data-v="a" class="on">C₄H₁₀ + 2 C₂H₄</button><button data-v="b">4 C₂H₄ + H₂</button></div>
+<div class="stage">
+<svg id="svg" viewBox="0 0 800 270" role="img" aria-label="Displayed formulae of the substitution reaction">
+<defs></defs>
+<g id="stat"></g>
+<g id="layer"></g>
+</svg>
+</div>
+<div class="cap" aria-live="polite"><p id="desc"></p><div class="eq" id="eq"></div><div class="notes" id="notes" style="display:none"><span>Only one product forms</span><span>Atoms add to adjacent carbons</span></div><div class="ben" id="ben" style="display:none"><h3>Why crack hydrocarbons?</h3><ul><li>Supply meets demand: short-chain fuels such as petrol are in higher demand than long-chain hydrocarbons.</li><li>Alkenes are made: ethene is the starting material for plastics such as poly(ethene).</li><li>Shorter alkanes are more volatile and easier to ignite, so they make better fuels.</li><li>Hydrogen, when produced, is used to make chemicals such as ammonia.</li></ul></div></div>
+<div class="bar">
+<span class="count" id="count"></span>
+<div class="seg"><button id="back">Back</button><button id="next" class="on">Next</button></div>
+</div>
+</section>
+<section class="grid" id="grid" aria-label="Key ideas"></section>
+</main>
+<footer id="foot"></footer>
+</div>
+<script>
+(function(){
+var NS='http://www.w3.org/2000/svg',ARM=58;
+var LAYS={
+d:{vb:'0 0 800 285',L:[120,120],P:[560,120],A:[255,120],B:[325,120],pl1:[212,120],H:[695,120],C:[745,120],pl2:[648,120],nm1:[290,228],nm2:[720,228],
+arrow:'<line class="arrow" x1="376" y1="120" x2="458" y2="120"/><polyline class="arrow" points="450,113 458,120 450,127"/><text class="uv" x="417" y="92">UV light</text>'},
+m:{vb:'0 0 360 540',L:[95,90],P:[95,390],A:[240,90],B:[300,90],pl1:[190,90],H:[240,390],C:[300,390],pl2:[190,390],nm1:[270,198],nm2:[270,498],
+arrow:'<line class="arrow" x1="180" y1="150" x2="180" y2="330"/><polyline class="arrow" points="173,322 180,330 187,322"/><text class="uv" x="196" y="240" style="text-anchor:start">UV light</text>'}};
+var mq=window.matchMedia('(max-width: 640px)'),G=mq.matches?LAYS.m:LAYS.d;
+var ORD=[1,0,2,3],DIR=[[0,-1],[1,0],[0,1],[-1,0]];
+var NAMES=['methane','chloromethane','dichloromethane','trichloromethane','tetrachloromethane'];
+var FORM=['CH₄','CH₃Cl','CH₂Cl₂','CHCl₃','CCl₄'];
+var EQ=[0,1,2,3].map(function(i){return FORM[i]+' + Cl₂ → '+FORM[i+1]+' + HCl'});
+var DESC=[
+'Methane and chlorine. Under UV light, the Cl–Cl bond breaks and chlorine atoms attack methane.',
+'One H atom is substituted by a Cl atom, forming chloromethane and hydrogen chloride.',
+'Chloromethane meets a second chlorine molecule. UV light drives the next substitution.',
+'Another H atom is replaced, forming dichloromethane and hydrogen chloride.',
+'Dichloromethane meets a third chlorine molecule.',
+'A third H atom is replaced, forming trichloromethane and hydrogen chloride.',
+'Trichloromethane meets a fourth chlorine molecule.',
+'The last H atom is replaced. All four hydrogens are now substituted, giving tetrachloromethane, CCl₄.'];
+function T(id,x,y,tx,cls){return{id:id,k:'t',x:x,y:y,tx:tx,cls:cls}}
+function L(id,x1,y1,x2,y2,cls){return{id:id,k:'l',x1:x1,y1:y1,x2:x2,y2:y2,cls:cls||'bond'}}
+function sceneSub(s){
+var r=s>>1,p=s&1,cp=p?G.P:G.L,cx=cp[0],cy=cp[1],e=[];
+e.push(T('C',cx,cy,'C','at c'));
+for(var k=0;k<4;k++){
+var j=ORD.indexOf(k),isCl=p?j<=r:j<r,d=DIR[k];
+e.push(T(isCl?'a'+j:'h'+j,cx+d[0]*ARM,cy+d[1]*ARM,isCl?'Cl':'H',isCl?'at cl':'at'));
+e.push(L('k'+k,cx+d[0]*13,cy+d[1]*13,cx+d[0]*(ARM-15),cy+d[1]*(ARM-15)));
+}
+var n=p?r+1:r;
+e.push(T('n_'+NAMES[n],cx,cy+108,NAMES[n],'nm'));
+e.push(T('f_'+NAMES[n],cx,cy+128,FORM[n],'fm'));
+if(!p){
+e.push(T('a'+r,G.A[0],G.A[1],'Cl','at cl'),T('b'+r,G.B[0],G.B[1],'Cl','at cl'),L('cc'+r,G.A[0]+13,G.A[1],G.B[0]-13,G.B[1]));
+e.push(T('pl1',G.pl1[0],G.pl1[1],'+','op'),T('nCl2',G.nm1[0],G.nm1[1],'chlorine','nm'),T('fCl2',G.nm1[0],G.nm1[1]+20,'Cl₂','fm'));
+}else{
+e.push(T('h'+r,G.H[0],G.H[1],'H','at'),T('b'+r,G.C[0],G.C[1],'Cl','at cl'),L('hh'+r,G.H[0]+13,G.H[1],G.C[0]-13,G.C[1]));
+e.push(T('pl2',G.pl2[0],G.pl2[1],'+','op'),T('nHCl',G.nm2[0],G.nm2[1],'hydrogen chloride','nm'),T('fHCl',G.nm2[0],G.nm2[1]+20,'HCl','fm'));
+}
+return e;
+}
+var LAYA={
+d:{vb:'0 0 800 270',L:[125,110],P:[655,110],A:[315,110],B:[385,110],pl1:[268,110],nm1:[350,205],no:95,arrow:'<line class="arrow" x1="430" y1="110" x2="510" y2="110"/><polyline class="arrow" points="502,103 510,110 502,117"/>'},
+m:{vb:'0 0 360 665',L:[180,80],P:[180,500],A:[150,262],B:[210,262],pl1:[180,222],nm1:[180,300],no:85,arrow:'<line class="arrow" x1="180" y1="350" x2="180" y2="420"/><polyline class="arrow" points="173,412 180,420 187,412"/>'}};
+var mode='sub';
+var ADDS={
+br:{x:['Br','Br'],xn:'bromine',xf:'Br₂',cond:[],eq:'CH₃CH=CH₂ + Br₂ → CH₃CHBrCH₂Br',prods:[['1,2-dibromopropane','CH₃CHBrCH₂Br',['Br','Br']]]},
+h2:{x:['H','H'],xn:'hydrogen',xf:'H₂',cond:['nickel catalyst','200 °C'],eq:'CH₃CH=CH₂ + H₂ → CH₃CH₂CH₃',prods:[['propane','CH₃CH₂CH₃',['H','H']]]},
+h2o:{x:['H','O'],xh:1,xn:'water',xf:'H₂O',cond:['steam','H₃PO₄ catalyst','300 °C, 60 atm'],eq:'CH₃CH=CH₂ + H₂O → CH₃CH(OH)CH₃ or CH₃CH₂CH₂OH',prods:[['propan-2-ol','CH₃CH(OH)CH₃',['H','O']],['propan-1-ol','CH₃CH₂CH₂OH',['O','H']]]}};
+var LAYX={
+d:{vb:'0 0 800 230',E:[62,110],P:[470,110],LB:[303,110],W:[[680,110],[720,110],[760,110]],pl1:[240,110],pl2:[648,110],nmO:[303,185],nmW:[720,185],no:75,arrow:'<line class="arrow" x1="378" y1="110" x2="442" y2="110"/><polyline class="arrow" points="434,103 442,110 434,117"/>'},
+m:{vb:'0 0 360 700',E:[130,70],P:[130,450],LB:[180,235],W:[[140,620],[180,620],[220,620]],pl1:[180,195],pl2:[180,580],nmO:[180,270],nmW:[180,660],no:75,arrow:'<line class="arrow" x1="180" y1="315" x2="180" y2="375"/><polyline class="arrow" points="173,367 180,375 187,367"/>'}};
+var LAYE={d:{vb:'0 0 460 410',mw:'600px'},m:{vb:'0 0 460 410',mw:'600px'}};
+var LAYC={d:{vb:'0 0 560 470',mw:'640px'},m:{vb:'0 0 560 470',mw:'640px'}},CRV='a';
+function getG(){return (mode==='crack'?LAYC:mode==='est'?LAYE:mode==='ox'?LAYX:ADDS[mode]?LAYA:LAYS)[mq.matches?'m':'d']}
+function bnd(id,x1,y1,x2,y2,r){r=r||14;var dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy),ux=dx/l,uy=dy/l;return L(id,x1+ux*r,y1+uy*r,x2-ux*r,y2-uy*r)}
+function sceneOx(s){
+var p=s===2,q=s>=1,cp=p?G.P:G.E,x1=cp[0],cy=cp[1],x2=x1+50,xo=x1+100,W=G.W,e=[];
+function A(id,x,y,t){return T(id,x,y,t,'at')}
+e.push(T('C1',x1,cy,'C','at c'),T('C2',x2,cy,'C','at c'),A('Ox',xo,cy,'O'),A('hO',xo+44,cy,'H'),A('hA',x1-44,cy,'H'),A('hB',x1,cy-44,'H'),A('hC',x1,cy+44,'H'));
+e.push(bnd('kA',x1-44,cy,x1,cy),bnd('kB',x1,cy-44,x1,cy),bnd('kC',x1,cy+44,x1,cy),bnd('k12',x1,cy,x2,cy),bnd('k2o',x2,cy,xo,cy),bnd('koh',xo,cy,xo+44,cy));
+e.push(A('hU',q?W[0][0]:x2,q?W[0][1]:cy-44,'H'),A('hD',q?W[2][0]:x2,q?W[2][1]:cy+44,'H'));
+if(!q)e.push(bnd('kU',x2,cy-44,x2,cy),bnd('kD',x2,cy+44,x2,cy));
+else e.push(bnd('w1',W[0][0],W[0][1],W[1][0],W[1][1],16),bnd('w2',W[1][0],W[1][1],W[2][0],W[2][1],16));
+if(q){var g=A('o1',W[1][0],W[1][1],'O');g.fx=G.LB[0];g.fy=G.LB[1];e.push(g)}
+if(p){var h=A('o2',x2,cy-44,'O');h.fx=G.LB[0];h.fy=G.LB[1];e.push(h,bnd('kd1',x2-3.5,cy,x2-3.5,cy-44),bnd('kd2',x2+3.5,cy,x2+3.5,cy-44))}
+else e.push(A('lb'+(q?1:2),G.LB[0],G.LB[1],q?'[O]':'2[O]'));
+var nx=x1+50,ny=cy+G.no;
+if(p)e.push(T('n_ea',nx,ny,'ethanoic acid','nm'),T('f_ea',nx,ny+20,'CH₃COOH','fm'),T('pl2',G.pl2[0],G.pl2[1],'+','op'));
+else e.push(T('n_et',nx,ny,'ethanol','nm'),T('f_et',nx,ny+20,'CH₃CH₂OH','fm'),T('pl1',G.pl1[0],G.pl1[1],'+','op'),T('nO',G.nmO[0],G.nmO[1],'oxidising agent','nm'));
+if(q)e.push(T('nW',G.nmW[0],G.nmW[1],'water','nm'),T('fW',G.nmW[0],G.nmW[1]+20,'H₂O','fm'));
+return e}
+function sceneAdd(s){
+var C=ADDS[mode],p=s>=2,k=s-2,cp=p?G.P:G.L,cx=cp[0],cy=cp[1],e=[],xa=cx-56,xb=cx,xc=cx+56,no=G.no,HW={H:9,Br:15,O:9},RA=G.A,RB=G.B,RH=null;
+if(mode==='h2o'){if(mq.matches){RA=[120,262];RB=[180,262];RH=[240,262]}else{RA=[300,110];RB=[352,110];RH=[404,110]}}
+function bd(id,x1,y1,x2,y2){var dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy),ux=dx/l,uy=dy/l;return L(id,x1+ux*14,y1+uy*14,x2-ux*14,y2-uy*14)}
+function at(id,x,y,t){return T(id,x,y,t,t==='Br'?'at cl':'at')}
+if(p)e.push(C.xh?{id:'hl',k:'r',x:xa-30,y:cy-22,w:116,h:142,cls:'hl'}:{id:'hl',k:'r',x:xa-30,y:cy-22,w:116,h:92,cls:'hl'});
+e.push(T('Ca',xa,cy,'C','at c'),T('Cb',xb,cy,'C','at c'),T('Cc',xc,cy,'C','at c'));
+e.push(bd('kab1',xa,cy+(s?0:-3.5),xb,cy+(s?0:-3.5)),bd('kbc',xb,cy,xc,cy));
+if(!s)e.push(bd('kab2',xa,cy+3.5,xb,cy+3.5));
+[['hA1',xa,cy-50,xa],['hA2',xa-50,cy,xa],['hB',xb,cy-50,xb],['hC1',xc,cy-50,xc],['hC2',xc,cy+50,xc],['hC3',xc+50,cy,xc]].forEach(function(h){
+e.push(at(h[0],h[1],h[2],'H'),bd('k'+h[0],h[3],cy,h[1],h[2]))});
+if(!p){
+e.push(at('rA',RA[0],RA[1],C.x[0]),at('rB',RB[0],RB[1],C.x[1]));
+if(!s)e.push(L('cc',RA[0]+HW[C.x[0]]+4,RA[1],RB[0]-HW[C.x[1]]-4,RB[1]));
+if(C.xh)e.push(at('rH',RH[0],RH[1],'H'),L('roh',RB[0]+13,RB[1],RH[0]-13,RH[1]));
+e.push(T('n_pr',cx,cy+no,'propene','nm'),T('f_pr',cx,cy+no+20,'CH₃CH=CH₂','fm'),T('pl1',G.pl1[0],G.pl1[1],'+','op'),T('nX',G.nm1[0],G.nm1[1],C.xn,'nm'),T('fX',G.nm1[0],G.nm1[1]+20,C.xf,'fm'));
+}else{
+var P=C.prods[k],pre=k?'s':'r';
+e.push(at(pre+'A',xa,cy+50,P[2][0]),at(pre+'B',xb,cy+50,P[2][1]),bd('kBrA',xa,cy,xa,cy+50),bd('kBrB',xb,cy,xb,cy+50));
+if(C.xh){var oi=P[2].indexOf('O'),ox=oi?xb:xa;e.push(at(pre+'H',ox,cy+100,'H'),bd(pre+'oh',ox,cy+50,ox,cy+100));no+=38}
+e.push(T('n_p'+k,cx,cy+no,P[0],'nm'),T('f_p'+k,cx,cy+no+20,P[1],'fm'));
+}
+return e}
+function sceneEs(s){
+var e=[],cy=65,Y=300,f=s>=1,w=s>=3,z=s===4;
+var ax=z?12:0,ay=z?Y-cy:0,mx=z?-106:0,my=z?Y-cy:0;
+function P(id,p,t,c){return T(id,p[0],p[1],t,c||'at')}
+function B(id,p,q,r){return bnd(id,p[0],p[1],q[0],q[1],r)}
+var a={C1:[58+ax,cy+ay],C2:[108+ax,cy+ay],Hl:[14+ax,cy+ay],Hu:[58+ax,cy-44+ay],Hd:[58+ax,cy+44+ay],CO:[108+ax,cy-44+ay]};
+var aO=w?[366,Y]:[158,cy],aH=w?[322,Y]:[202,cy];
+var m=f?{C:[326,cy],O:[276,cy],Hl:[370,cy],Hu:[326,cy-44],Hd:[326,cy+44]}:{C:[300,cy],O:[350,cy],Hl:[256,cy],Hu:[300,cy-44],Hd:[300,cy+44]};
+for(var k in m)m[k]=[m[k][0]+mx,m[k][1]+my];
+var mH=w?[410,Y]:f?[232,cy]:[394,cy];
+if(s===2)e.push({id:'bx',k:'r',x:142,y:cy-22,w:104,h:44,cls:'dbox'});
+e.push(P('aC1',a.C1,'C','at c'),P('aC2',a.C2,'C','at c'),P('aHl',a.Hl,'H'),P('aHu',a.Hu,'H'),P('aHd',a.Hd,'H'),P('aCO',a.CO,'O'),P('aO',aO,'O'),P('aOH',aH,'H'));
+e.push(P('mC',m.C,'C','at c'),P('mO',m.O,'O'),P('mH',mH,'H'),P('mHl',m.Hl,'H'),P('mHu',m.Hu,'H'),P('mHd',m.Hd,'H'));
+e.push(B('kaHl',a.Hl,a.C1),B('kaHu',a.Hu,a.C1),B('kaHd',a.Hd,a.C1),B('ka12',a.C1,a.C2),
+bnd('kc1',a.C2[0]-3.5,a.C2[1],a.CO[0]-3.5,a.CO[1]),bnd('kc2',a.C2[0]+3.5,a.C2[1],a.CO[0]+3.5,a.CO[1]),
+B('kmHl',m.Hl,m.C),B('kmHu',m.Hu,m.C),B('kmHd',m.Hd,m.C),B('kmCO',m.C,m.O));
+if(!w)e.push(B('ka2o',a.C2,aO),B('kaOH',aO,aH),B('kmH',m.O,mH));
+else e.push(B('w1',aH,aO),B('w2',aO,mH));
+if(z)e.push({id:'hlb',k:'r',x:128,y:Y-14,w:34,h:28,cls:'hlb'},B('kest',a.C2,m.O));
+if(!f)e.push(T('pl1',229,cy,'+','op'));
+if(z)e.push(T('pl2',293,Y,'+','op'));
+e.push(L('af0',214,175,214,230,'arrow'),L('af1',214,230,208,222,'arrow'),L('af2',214,230,220,222,'arrow'));
+if(z)e.push(L('ar0',246,175,246,230,'arrow'),L('ar1',246,175,240,183,'arrow'),L('ar2',246,175,252,183,'arrow'),T('lbE',204,203,'esterification','uve'),T('hy',262,203,'hydrolysis','uvs'));
+else e.push(T('cat',262,203,'acid catalyst','uvs'));
+if(!w)e.push(T('n_aa',108,cy+66,'ethanoic acid','nm'),T('f_aa',108,cy+86,'CH₃COOH','fm'),T('n_me',f?301:325,cy+66,'methanol','nm'),T('f_me',f?301:325,cy+86,'CH₃OH','fm'));
+else e.push(T('n_w',366,Y+66,'water','nm'),T('f_w',366,Y+86,'H₂O','fm'));
+if(z)e.push(T('n_es',145,Y+66,'methyl ethanoate','nm'),T('f_es',145,Y+86,'CH₃COOCH₃','fm'));
+return e}
+function sceneCr(s){
+var f=s===1,A=CRV==='a',y1=70,y2=340,Y=f?y2:y1,e=[],i,xs0=[],P={};
+for(i=0;i<8;i++)xs0.push(110+48*i);
+var sh=A?0:125,xs=f?(A?[100,148,100,148,302,350,398,446]:[100+sh,148+sh,100+sh,148+sh,100+sh,148+sh,100+sh,148+sh]):xs0;
+var BR=f?(A?[1,3]:[1,3,5]):[],D=f?(A?[0,2]:[0,2,4,6]):[];
+function Q(id,p,t,c){return T(id,p[0],p[1],t,c||'at')}
+function B(id,p,q,r){return bnd(id,p[0],p[1],q[0],q[1],r)}
+for(i=0;i<8;i++){P['c'+i]=[xs[i],Y];P['u'+i]=[xs[i],Y-44];P['d'+i]=[xs[i],Y+44];
+e.push(Q('c'+i,P['c'+i],'C','at c'),Q('u'+i,P['u'+i],'H'),Q('d'+i,P['d'+i],'H'),B('ku'+i,P['u'+i],P['c'+i]),B('kd'+i,P['d'+i],P['c'+i]))}
+var hl=f?(A?[262,Y]:[250+sh,Y]):[xs0[0]-40,Y],hr=f&&!A?[294+sh,Y]:[xs[7]+40,Y];
+e.push(Q('hL',hl,'H'),Q('hR',hr,'H'));
+for(i=0;i<7;i++){if(BR.indexOf(i)>=0)continue;
+if(D.indexOf(i)>=0)e.push(bnd('b'+i,xs[i],Y-3.5,xs[i+1],Y-3.5),bnd('bd'+i,xs[i],Y+3.5,xs[i+1],Y+3.5));
+else e.push(B('b'+i,P['c'+i],P['c'+(i+1)]))}
+if(!f)e.push(B('kL1',hl,P.c0));
+if(f&&A)e.push(B('kL5',hl,P.c4));
+if(!f||A)e.push(B('kR8',hr,P.c7));
+if(f&&!A)e.push(B('h2b',hl,hr,11));
+e.push(L('af0',280,205,280,265,'arrow'),L('af1',280,265,274,257,'arrow'),L('af2',280,265,286,257,'arrow'),T('cd1',296,222,'high temperature','uvs'),T('cd2',296,240,'catalyst','uvs'));
+function N(k,x,nm,fm,tg){e.push(T('n'+k,x,Y+68,nm,'nm'),T('f'+k,x,Y+88,fm,'fm'));if(tg)e.push(T('t'+k,x,Y+110,tg,'uv'))}
+if(!f)N(0,278,'octane','C₈H₁₈','alkane');
+else{e.push(T('coef',62+sh,Y,A?'2':'4','at c'),T('pl0',206+sh,Y,'+','op'));N(1,124+sh,'ethene','C₂H₄','alkene');
+if(A)N(3,374,'butane','C₄H₁₀','alkane');else N(5,272+sh,'hydrogen','H₂','')}
+return e}
+function scene(s){return mode==='crack'?sceneCr(s):mode==='est'?sceneEs(s):mode==='ox'?sceneOx(s):ADDS[mode]?sceneAdd(s):sceneSub(s)}
+var layer=document.getElementById('layer'),nodes={},cur={},from,to,t0,raf=0;
+var KEYS=['x','y','x1','y1','x2','y2','w','h','o'];
+var reduce=window.matchMedia('(prefers-color-scheme: x)')&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+var DUR=reduce?0:1300;
+function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2}
+function node(g){
+var n=nodes[g.id];
+if(!n){n=document.createElementNS(NS,g.k==='t'?'text':g.k==='r'?'rect':'line');n.setAttribute('class',g.cls);if(g.k==='t')n.textContent=g.tx;if(g.k==='r'){n.setAttribute('rx',12);layer.insertBefore(n,layer.firstChild)}else layer.appendChild(n);nodes[g.id]=n}
+return n}
+function draw(id,g){
+var n=node(g);
+if(g.k==='r'){n.setAttribute('x',g.x);n.setAttribute('y',g.y);n.setAttribute('width',g.w);n.setAttribute('height',g.h)}
+else if(g.k==='t'){n.setAttribute('x',g.x);n.setAttribute('y',g.y)}
+else{n.setAttribute('x1',g.x1);n.setAttribute('y1',g.y1);n.setAttribute('x2',g.x2);n.setAttribute('y2',g.y2)}
+n.setAttribute('opacity',g.o)}
+var state=0,target={};
+function go(s){
+state=s;
+var m={};scene(s).forEach(function(g){g.o=1;m[g.id]=g});
+target=m;
+Object.keys(m).forEach(function(id){if(!cur[id]){var c={};for(var q in m[id])c[q]=m[id][q];c.o=0;if(m[id].fx!==undefined){c.x=m[id].fx;c.y=m[id].fy}cur[id]=c}});
+from={};to={};
+Object.keys(cur).forEach(function(id){
+var f={};for(var q in cur[id])f[q]=cur[id][q];from[id]=f;
+if(m[id])to[id]=m[id];else{var g={};for(var q2 in cur[id])g[q2]=cur[id][q2];g.o=0;to[id]=g}
+});
+t0=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);ui();
+}
+function frame(now){
+var t=DUR?Math.min(1,(now-t0)/DUR):1,p=ease(t);
+Object.keys(to).forEach(function(id){
+var f=from[id],g=to[id],c={};
+for(var q in g)c[q]=g[q];
+KEYS.forEach(function(k){if(g[k]!==undefined)c[k]=f[k]+(g[k]-f[k])*p});
+cur[id]=c;draw(id,c);
+});
+if(t<1){raf=requestAnimationFrame(frame);return}
+Object.keys(cur).forEach(function(id){if(!target[id]){nodes[id].remove();delete nodes[id];delete cur[id]}});
+}
+var chips=document.getElementById('chips'),back=document.getElementById('back'),next=document.getElementById('next'),$=function(i){return document.getElementById(i)};
+var CFG={
+sub:{last:7,h1:'Substitution of methane by chlorine',lead:'Step through the reaction and watch each hydrogen atom be replaced by chlorine.',chips:NAMES.slice(1),desc:DESC,
+eq:function(s){return EQ[s>>1]},count:function(s){return 'Reaction '+((s>>1)+1)+' of 4'},act:function(s){return s>>1},jump:function(i){return 2*i},
+foot:'Each step also produces one molecule of hydrogen chloride, HCl.',
+cards:[['Substitution','An atom in a molecule is replaced by a different atom. Here, one Cl atom takes the place of one H atom at a time.','One H replaced per step'],['A mixture of products','The reaction can continue until all four hydrogens are replaced, so several chlorinated products are made together.','Up to CCl₄']]}
+};
+var CH3=['Reactants','Bonds break','Product forms'];
+function mkAdd(key,h1,lead,foot,desc,chips,cards){var C=ADDS[key];return{last:1+C.prods.length,h1:h1,lead:lead,chips:chips,desc:desc,eq:function(){return C.eq},count:function(s){return 'Step '+(s+1)+' of '+(2+C.prods.length)},act:function(s){return s},jump:function(i){return i},foot:foot,cards:cards}}
+CFG.br=mkAdd('br','Addition of bromine to propene','Step through the reaction and watch bromine add across the C=C double bond.','All the atoms in the reactants end up in the single product.',
+['Propene (C₃H₆) meets bromine (Br₂). The C=C double bond is the reactive site.','One of the two C=C bonds breaks, and so does the Br–Br bond.','Each Br atom bonds to one of the two carbons that were joined by the double bond, forming 1,2-dibromopropane.'],CH3,
+[['Addition','Two molecules join to make one. Br₂ adds across the C=C double bond, so nothing else is formed.','One product only'],['Adjacent carbons','One Br atom bonds to each carbon that was in the double bond, giving 1,2-dibromopropane.','Br on C1 and C2'],['Test for C=C','Orange bromine water turns colourless when shaken with an alkene such as propene.','Test for unsaturation']]);
+CFG.h2=mkAdd('h2','Addition of hydrogen to propene','Step through the reaction and watch hydrogen add across the C=C double bond.','All the atoms in the reactants end up in propane, the only product.',
+['Propene meets hydrogen. The C=C double bond is the reactive site.','One of the two C=C bonds breaks, and so does the H–H bond.','Each H atom bonds to one of the two carbons that were joined by the double bond, forming propane. The C–C bond is now a single bond.'],CH3,
+[['Hydrogenation','Adding H₂ across a C=C bond turns an alkene into an alkane. Propene becomes propane.','Alkene to alkane'],['Catalyst needed','The reaction needs a nickel catalyst and heat to go at a useful rate.','Nickel, 200 °C'],['Used in industry','Hydrogenation turns liquid vegetable oils into solid fats for margarine.','Margarine']]);
+CFG.h2o=mkAdd('h2o','Addition of water to propene','Step through the reaction and see why two different alcohols can form.','Hydration of propene can give two alcohols, which are isomers of each other.',
+['Propene meets steam. The C=C double bond is the reactive site.','One of the two C=C bonds breaks, and so does one O–H bond in water.','H adds to one carbon and OH to the other. With OH on the middle carbon, propan-2-ol forms.','Or OH adds to an end carbon instead, giving propan-1-ol. Both alcohols are possible products.'],['Reactants','Bonds break','Propan-2-ol','Propan-1-ol'],
+[['Hydration','Water adds across the C=C bond, turning an alkene into an alcohol.','Alkene to alcohol'],['Two possible alcohols','Propene is not symmetrical, so OH can bond to either carbon, giving propan-1-ol or propan-2-ol.','Isomers'],['Conditions','Steam with a phosphoric acid catalyst at 300 °C and 60 atm.','High temperature and pressure']]);
+CFG.ox={last:2,h1:'Oxidation of ethanol',lead:'Step through the reaction and watch ethanol be oxidised to ethanoic acid.',chips:['Reactants','H atoms removed','Ethanoic acid forms'],
+desc:['Ethanol meets an oxidising agent that supplies two oxygen atoms, written 2[O].','The two H atoms on the carbon bonded to the OH group are removed. They join one O atom to form water, leaving one [O].','The second O atom bonds to the same carbon with a double bond, forming ethanoic acid.'],
+eq:function(){return 'CH₃CH₂OH + 2[O] → CH₃COOH + H₂O'},count:function(s){return 'Step '+(s+1)+' of 3'},act:function(s){return s},jump:function(i){return i},
+foot:'Water forms alongside ethanoic acid, so this reaction has two products.',
+cards:[['Oxidation','Ethanol loses two H atoms and gains an O atom. [O] stands for oxygen supplied by an oxidising agent.','Alcohol to carboxylic acid'],['Oxidising agent','Acidified potassium manganate(VII), with heating, supplies the [O].','Acidified KMnO₄, heat'],['Everyday example','Ethanoic acid is the acid in vinegar. Wine left open to the air turns sour this way.','Wine to vinegar']]};
+CFG.est={last:4,h1:'Esterification of ethanoic acid with methanol',lead:'Step through the reaction and watch the functional groups join as water is lost.',chips:['Reactants','Groups face','Atoms marked','Water forms','Ester forms'],
+desc:['Make the functional groups (-COOH and -OH) face each other.','Remove H from -OH and OH from -COOH.','Remove H from -OH and OH from -COOH.','Water is formed.<span class="def">A reaction where two molecules combine to form a single molecule with the loss of a small molecule (e.g. H₂O) is called a <b>condensation reaction</b>.</span>','Connect the remaining fragments with a C-O single bond.'],
+eq:function(){return 'CH₃COOH + CH₃OH ⇌ CH₃COOCH₃ + H₂O'},count:function(s){return 'Step '+(s+1)+' of 5'},act:function(s){return s},jump:function(i){return i},
+foot:'The ester is named from the alcohol (methyl) and the acid (ethanoate).',
+cards:[['Esterification','A carboxylic acid and an alcohol join to form an ester. A water molecule is lost, so this is a condensation reaction.','Acid + alcohol → ester + water'],['Acid catalyst','A few drops of concentrated sulfuric acid, with heating, speed up the reaction.','Conc. H₂SO₄, heat'],['Hydrolysis','The reverse reaction: the ester reacts with water to form the carboxylic acid and the alcohol again.','Ester + water → acid + alcohol']]};
+CFG.crack={last:1,h1:'Cracking of octane',lead:'Step through the reaction and watch a long alkane break into shorter molecules.',chips:['Octane','Cracked products'],
+desc:['Octane, C₈H₁₈, is a long-chain alkane.',function(){return CRV==='a'?'Octane is cracked into one alkane and two alkenes: C₈H₁₈ → C₄H₁₀ + 2C₂H₄.':'Octane is cracked into four alkenes and hydrogen: C₈H₁₈ → 4C₂H₄ + H₂.'}],
+eq:function(){return CRV==='a'?'C₈H₁₈ → C₄H₁₀ + 2C₂H₄':'C₈H₁₈ → 4C₂H₄ + H₂'},count:function(s){return 'Step '+(s+1)+' of 2'},act:function(s){return s},jump:function(i){return i},
+foot:'The numbers of C and H atoms are the same before and after cracking.',
+cards:[['Cracking','Long-chain alkanes are broken into shorter, more useful molecules using heat and a catalyst.','Long chains to short chains'],['Alkane and alkene','Cracking always makes at least one alkene. Alkenes are unsaturated and turn bromine water colourless.','Test: bromine water'],['Conditions','High temperature and a catalyst such as zeolite or aluminium oxide.','Heat and catalyst']]};
+function ui(){
+var c=CFG[mode],a=c.act(state);
+[].forEach.call(chips.children,function(b,i){b.className='chip'+(i===a?' on':'')});
+var d=c.desc[state];if(typeof d==='function')d=d();$('desc').innerHTML=d;$('eq').textContent=c.eq(state);$('count').textContent=c.count(state);
+back.disabled=state===0;next.textContent=state===c.last?'Start over':'Next';
+var n=$('notes'),bn=$('ben');bn.style.display='none';
+if(mode==='crack'){if(state===1){n.style.display='flex';n.innerHTML='<span>Cracking products</span><span class="'+(CRV==='a'?'':'dim')+'">Alkane + alkene</span><span class="'+(CRV==='b'?'':'dim')+'">Alkene + H₂</span>';bn.style.display='block'}else n.style.display='none'}
+else if(mode==='sub'||mode==='ox'||state<2||(mode==='est'&&state<4))n.style.display='none';
+else{n.style.display='flex';
+n.innerHTML=mode==='est'?'<span>Reversible reaction</span><span>Hydrolysis is the reverse: ester + water → acid + alcohol</span>':mode==='h2o'?'<span>Two possible alcohols</span><span class="'+(state===2?'':'dim')+'">Propan-2-ol</span><span class="'+(state===3?'':'dim')+'">Propan-1-ol</span>':'<span>Only one product forms</span><span>Atoms add to adjacent carbons</span>'}
+}
+function applyLay(){$('svg').setAttribute('viewBox',G.vb);$('svg').style.maxWidth=G.mw||'';
+var c=ADDS[mode]?ADDS[mode].cond:[],m=mq.matches,t='';
+c.forEach(function(l,i){t+=m?'<text class="uv" x="196" y="'+(385+18*(i-(c.length-1)/2))+'" style="text-anchor:start">'+l+'</text>':'<text class="uv" x="470" y="'+(90-18*(c.length-1-i))+'">'+l+'</text>'});
+$('stat').innerHTML=(G.arrow||'')+t}
+function setMode(m){
+var hm=m==='home';
+$('view').style.display=hm?'none':'';$('homeview').style.display=hm?'':'none';$('crumb').style.display=hm?'none':'';window.scrollTo(0,0);
+[].forEach.call($('side').querySelectorAll('button'),function(b){b.className=b.dataset.m===m?'on':''});
+if(hm){mode='home';$('h1').textContent='Organic chemistry reactions';$('lead').textContent='Choose a reaction to step through its animation.';$('foot').textContent='Select a reaction to begin.';return}
+mode=m;state=0;G=getG();applyLay();layer.innerHTML='';nodes={};cur={};
+var c=CFG[m];$('h1').textContent=c.h1;$('lead').textContent=c.lead;$('foot').textContent=c.foot;
+chips.innerHTML='';c.chips.forEach(function(t,i){var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=function(){go(c.jump(i))};chips.appendChild(b)});
+$('grid').innerHTML=c.cards.map(function(d){return '<article class="card"><h2>'+d[0]+'</h2><p>'+d[1]+'</p><div class="foot">'+d[2]+'</div></article>'}).join('');
+[].forEach.call($('side').querySelectorAll('button'),function(b){b.className=b.dataset.m===m?'on':''});
+$('vseg').style.display=m==='crack'?'inline-flex':'none';CRV='a';[].forEach.call($('vseg').children,function(b){b.className=b.dataset.v==='a'?'on':''});
+go(0);
+}
+back.onclick=function(){if(state>0)go(state-1)};
+next.onclick=function(){go(state===CFG[mode].last?0:state+1)};
+document.addEventListener('keydown',function(e){
+if(mode==='home'&&e.key!=='Escape')return;
+if(e.key==='ArrowRight')next.onclick();
+else if(e.key==='ArrowLeft')back.onclick();
+else if(e.key==='Escape')toggle(false);
+});
+function toggle(o){document.body.classList.toggle('open',o);$('menu').setAttribute('aria-expanded',o)}
+$('menu').onclick=function(){toggle(!document.body.classList.contains('open'))};
+$('scrim').onclick=function(){toggle(false)};
+[].forEach.call($('side').querySelectorAll('button'),function(b){b.onclick=function(){setMode(b.dataset.m);toggle(false)}});
+mq.addEventListener('change',function(){if(mode==='home')return;G=getG();applyLay();layer.innerHTML='';nodes={};cur={};go(state)});
+[].forEach.call($('vseg').children,function(b){b.onclick=function(){CRV=b.dataset.v;[].forEach.call($('vseg').children,function(x){x.className=x===b?'on':''});layer.innerHTML='';nodes={};cur={};go(0)}});
+var RX=[['sub','Substitution of methane','CH₄ + Cl₂ → CH₃Cl + HCl','Alkanes','Substitution'],
+['crack','Cracking of octane','C₈H₁₈ → C₄H₁₀ + 2C₂H₄','Alkanes','Cracking'],
+['br','Addition of bromine to propene','CH₃CH=CH₂ + Br₂ → CH₃CHBrCH₂Br','Alkenes','Addition'],
+['h2','Addition of hydrogen to propene','CH₃CH=CH₂ + H₂ → CH₃CH₂CH₃','Alkenes','Addition'],
+['h2o','Addition of water to propene','CH₃CH=CH₂ + H₂O → propan-1-ol or propan-2-ol','Alkenes','Addition'],
+['ox','Oxidation of ethanol','CH₃CH₂OH + 2[O] → CH₃COOH + H₂O','Alcohols and acids','Oxidation'],
+['est','Esterification of ethanoic acid','CH₃COOH + CH₃OH ⇌ CH₃COOCH₃ + H₂O','Alcohols and acids','Condensation']];
+var HF='All';
+function renderHome(){
+var out=RX.filter(function(r){return HF==='All'||r[3]===HF});
+$('hgrid').innerHTML=out.length?out.map(function(r){return '<button class="card" data-m="'+r[0]+'"><div class="tag">'+r[4]+'</div><h2>'+r[1]+'</h2></button>'}).join(''):'<p class="none">No reactions match your search.</p>';
+[].forEach.call($('hchips').children,function(b){b.className='chip'+(b.textContent===HF?' on':'')})}
+['All','Alkanes','Alkenes','Alcohols and acids'].forEach(function(t){var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=t;b.onclick=function(){HF=t;renderHome()};$('hchips').appendChild(b)});
+$('hgrid').onclick=function(e){var c=e.target.closest('.card');if(c)setMode(c.dataset.m)};
+$('crumb').onclick=function(){setMode('home')};
+renderHome();setMode('home');
+})();
+</script>
+</body>
+</html>
