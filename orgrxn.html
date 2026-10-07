@@ -97,6 +97,16 @@ body.open .scrim,body.open .side{display:block}
 .hl{fill:var(--accent-soft)}
 .notes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .notes span{background:var(--accent-soft);color:var(--accent);font-size:13px;font-weight:500;border-radius:999px;padding:4px 14px}
+body.anim header{padding:12px 0 14px}
+body.anim h1{font-size:clamp(22px,3.4vw,30px);margin-bottom:6px}
+body.anim .lead{font-size:13px}
+body.anim .hrow{margin-bottom:12px}
+body.anim .panel{padding:16px}
+body.anim .chips{margin-bottom:8px}
+body.anim svg{max-height:clamp(360px,calc(100vh - 240px),680px)}
+@media(max-width:640px){body.anim svg{max-height:none}}
+body.anim .cap{min-height:64px;margin-top:4px;padding-top:12px}
+body.anim .bar{margin-top:8px}
 footer{margin-top:48px;border-top:1px solid var(--line);padding:20px 0 32px;font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -180,7 +190,7 @@ br:{x:['Br','Br'],xn:'bromine',xf:'Br₂',cond:[],eq:'CH₃CH=CH₂ + Br₂ → 
 h2:{x:['H','H'],xn:'hydrogen',xf:'H₂',cond:['nickel catalyst','200 °C'],eq:'CH₃CH=CH₂ + H₂ → CH₃CH₂CH₃',prods:[['propane','CH₃CH₂CH₃',['H','H']]]},
 h2o:{x:['H','O'],xh:1,xn:'water',xf:'H₂O',cond:['steam','H₃PO₄ catalyst','300 °C, 60 atm'],eq:'CH₃CH=CH₂ + H₂O → CH₃CH(OH)CH₃ or CH₃CH₂CH₂OH',prods:[['propan-2-ol','CH₃CH(OH)CH₃',['H','O']],['propan-1-ol','CH₃CH₂CH₂OH',['O','H']]]}};
 var LAYX={
-d:{vb:'0 0 800 230',E:[62,110],P:[470,110],LB:[303,110],W:[[680,110],[720,110],[760,110]],pl1:[240,110],pl2:[648,110],nmO:[303,185],nmW:[720,185],no:75,arrow:'<line class="arrow" x1="378" y1="110" x2="442" y2="110"/><polyline class="arrow" points="434,103 442,110 434,117"/>'},
+d:{vb:'0 0 830 230',E:[62,110],P:[500,110],LB:[303,110],W:[[716,110],[756,110],[796,110]],pl1:[240,110],pl2:[682,110],nmO:[303,185],nmW:[756,185],no:75,arrow:'<line class="arrow" x1="364" y1="110" x2="426" y2="110"/><polyline class="arrow" points="418,103 426,110 418,117"/>'},
 m:{vb:'0 0 360 700',E:[130,70],P:[130,450],LB:[180,235],W:[[140,620],[180,620],[220,620]],pl1:[180,195],pl2:[180,580],nmO:[180,270],nmW:[180,660],no:75,arrow:'<line class="arrow" x1="180" y1="315" x2="180" y2="375"/><polyline class="arrow" points="173,367 180,375 187,367"/>'}};
 var LAYE={d:{vb:'0 0 460 410',mw:'600px'},m:{vb:'0 0 460 410',mw:'600px'}};
 var LAYC={d:{vb:'0 0 560 470',mw:'640px'},m:{vb:'0 0 560 470',mw:'640px'}},CRV='a';
@@ -366,7 +376,7 @@ var c=ADDS[mode]?ADDS[mode].cond:[],m=mq.matches,t='';
 c.forEach(function(l,i){t+=m?'<text class="uv" x="196" y="'+(385+18*(i-(c.length-1)/2))+'" style="text-anchor:start">'+l+'</text>':'<text class="uv" x="470" y="'+(90-18*(c.length-1-i))+'">'+l+'</text>'});
 $('stat').innerHTML=(G.arrow||'')+t}
 function setMode(m){
-var hm=m==='home';
+var hm=m==='home';document.body.classList.toggle('anim',!hm);
 $('view').style.display=hm?'none':'';$('homeview').style.display=hm?'':'none';$('crumb').style.display=hm?'none':'';window.scrollTo(0,0);
 [].forEach.call($('side').querySelectorAll('button'),function(b){b.className=b.dataset.m===m?'on':''});
 if(hm){mode='home';$('h1').textContent='Organic chemistry reactions';$('lead').textContent='Choose a reaction to step through its animation.';$('foot').textContent='Select a reaction to begin.';return}
