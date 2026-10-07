@@ -4,60 +4,90 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Drawing an Addition Polymer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#f6f7f9;--card:#fff;--ink:#1c2430;--mute:#5d6878;--acc:#d9480f;--pri:#1864ab;--bd:#dde1e7;
+:root{--bg:#fafaf9;--surface:#ffffff;--text:#1c1917;--muted:#6b6560;--line:#e7e5e4;--line-strong:#c9c5c1;--accent:#0f766e;--accent-soft:#e6f4f2;--on-accent:#ffffff;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12161c;--card:#1b212a;--ink:#e8ecf1;--mute:#9aa6b6;--acc:#ff922b;--pri:#4dabf7;--bd:#2c3542}}
-:root[data-theme="dark"]{--bg:#12161c;--card:#1b212a;--ink:#e8ecf1;--mute:#9aa6b6;--acc:#ff922b;--pri:#4dabf7;--bd:#2c3542}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#131211;--surface:#1b1a19;--text:#f3f1ee;--muted:#a39d97;--line:#2b2927;--line-strong:#47433f;--accent:#5eead4;--accent-soft:#16302d;--on-accent:#131211}}
+:root[data-theme="dark"]{--bg:#131211;--surface:#1b1a19;--text:#f3f1ee;--muted:#a39d97;--line:#2b2927;--line-strong:#47433f;--accent:#5eead4;--accent-soft:#16302d;--on-accent:#131211}
+*,*::before,*::after{box-sizing:border-box}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;padding:16px}
-.wrap{max-width:760px;margin:0 auto}
-h1{font-size:1.25rem;margin:4px 0 10px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap}
-.tabs button{flex:1;min-width:120px;padding:8px 10px;font-size:.9rem}
-.sub{color:var(--mute);font-size:.9rem;margin:10px 0 10px}
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
-svg{width:100%;height:auto;display:block}
-@keyframes f{from{opacity:0}to{opacity:1}}
-.bond{stroke:var(--ink);stroke-width:3;stroke-linecap:round;fill:none}
-.bond.hl{stroke:var(--acc)}
-.atom{fill:var(--ink);font-size:24px;font-weight:600;text-anchor:middle;dominant-baseline:central;font-family:system-ui,sans-serif}
-.n{fill:var(--ink);font-size:26px;font-style:italic;font-family:Georgia,serif;text-anchor:middle}
-.tag{fill:var(--mute);font-size:13px;text-anchor:middle;font-family:system-ui,sans-serif}
-.tint{fill:var(--acc)}
-.glow{stroke:var(--acc);stroke-width:18;stroke-linecap:round;fill:none}
-.desc{margin-top:12px;padding:14px 16px;background:var(--card);border-radius:10px;border:1px solid var(--bd);border-left:5px solid var(--pri);min-height:60px}
-.desc b{display:block;font-size:1.05rem;margin-bottom:4px}
-.desc span{color:var(--mute)}
-.seg{display:none;gap:8px;margin-top:12px;flex-wrap:wrap}
-.seg.show{display:flex}
-.seg button{flex:1;min-width:130px;padding:9px 10px;font-size:.9rem}
-.bar{display:flex;align-items:center;gap:10px;margin-top:12px}
-.dots{flex:1;display:flex;gap:8px;justify-content:center}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--bd)}
-.dot.on{background:var(--pri)}
-button{font:inherit;font-weight:600;padding:10px 20px;border-radius:10px;border:1px solid var(--pri);background:var(--pri);color:#fff;cursor:pointer}
-button.sec{background:transparent;color:var(--pri)}
-button:disabled{opacity:.35;cursor:default}
+body{background:var(--bg);color:var(--text);font-family:"Sora",system-ui,-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 18px 32px}
+@media (min-width:600px){.wrap{padding:56px 24px 40px}}
+.home{display:inline-flex;align-items:center;gap:6px;margin-bottom:28px;padding:6px 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--muted);font-size:13px;text-decoration:none;transition:color .15s,border-color .15s,background .15s}
+.home:hover{color:var(--accent);border-color:var(--accent)}
+h1{font-size:clamp(30px,5vw,44px);font-weight:600;letter-spacing:-.02em;line-height:1.15;margin:0 0 12px}
+.lead{color:var(--muted);font-size:14px;margin:0 0 28px;max-width:60ch}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{font:inherit;font-size:13px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.chip:hover{border-color:var(--line-strong)}
+.chip.on{background:var(--accent-soft);color:var(--accent);font-weight:500;border-color:transparent}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.full{grid-column:1/-1}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px;transition:color .15s,border-color .15s,background .15s}
+.card:hover{border-color:var(--accent)}
+.card:hover .foot{color:var(--accent)}
+.t{font-size:16px;font-weight:600;margin:0}
+.sub{font-size:14px;color:var(--muted);margin:2px 0 0}
+#dd{white-space:pre-line}
+.foot{font-size:13px;color:var(--muted);margin:12px 0 0;transition:color .15s}
+#stage{cursor:default}
+#stage.replay{cursor:pointer}
+svg{width:100%;height:auto;display:block;margin-top:8px}
+.bond{stroke:var(--text);stroke-width:3;stroke-linecap:round;fill:none}
+.bond.hl{stroke:var(--accent)}
+.atom{fill:var(--text);font-size:24px;font-weight:500;text-anchor:middle;dominant-baseline:central;font-family:inherit}
+.n{fill:var(--text);font-size:26px;font-style:italic;font-family:inherit;text-anchor:middle}
+.tag{fill:var(--muted);font-size:13px;text-anchor:middle;font-family:inherit}
+.lbl{fill:var(--muted);font-size:15px;font-weight:500;text-anchor:middle;font-family:inherit}
+.tint{fill:var(--accent)}
+.glow{stroke:var(--accent);stroke-width:40;stroke-linecap:butt;fill:none}
+.glowc{fill:var(--accent)}
+.seg{display:none;margin-top:14px;padding:3px;gap:2px;border:1px solid var(--line);border-radius:10px;flex-wrap:wrap}
+.seg.show{display:inline-flex}
+.seg button{font:inherit;font-size:13px;padding:6px 12px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer;transition:color .15s,background .15s}
+.seg button.on{background:var(--accent-soft);color:var(--accent);font-weight:500}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:20px}
+.count{font-size:13px;color:var(--muted)}
+.btn{font:inherit;font-size:14px;font-weight:500;padding:8px 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.btn:hover{border-color:var(--line-strong)}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn:disabled{opacity:.4;cursor:default}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
 <div class="wrap">
+<a class="home" href="https://ngchb.github.io/bernardng/" target="_top" rel="noopener">&larr; Back to home</a>
 <h1>Drawing an addition polymer</h1>
-<div class="tabs" id="tabs"></div>
-<p class="sub" id="sub"></p>
-<div class="card" id="card"><svg id="svg" viewBox="0 0 580 345" role="img" aria-label="Structural formula at the current step"><g id="g"></g></svg></div>
-<div class="seg" id="seg">
-<button class="sec" data-m="0">Repeat unit</button>
-<button class="sec" data-m="1">Section of polymer</button>
-<button class="sec" data-m="2">Polymer</button>
+<p class="lead">Follow the three steps to turn an alkene monomer into its repeat unit and polymer.</p>
+<div class="chips" id="tabs"></div>
+<div class="grid">
+  <div class="card full" id="stage">
+    <p class="sub" id="sub" style="margin:0"></p>
+    <svg id="svg" viewBox="0 0 580 345" role="img" aria-label="Structural formula at the current step"><g id="g"></g></svg>
+    <p class="foot" id="replay">Click the structure to replay the animation.</p>
+  </div>
+  <div class="card full">
+    <h2 class="t" id="dt"></h2>
+    <p class="sub" id="dd"></p>
+    <div class="seg" id="seg">
+      <button data-m="0">Repeat unit</button>
+      <button data-m="1">Section of polymer</button>
+      <button data-m="2">Polymer</button>
+    </div>
+    <div class="bar">
+      <button class="btn" id="back">Back</button>
+      <span class="count" id="count"></span>
+      <button class="btn pri" id="next">Next</button>
+    </div>
+  </div>
 </div>
-<div class="desc" id="desc"></div>
-<div class="bar">
-<button class="sec" id="back">Back</button>
-<div class="dots" id="dots"></div>
-<button id="next">Next</button>
-</div>
+<footer>Addition polymers: a step-by-step drawing guide.</footer>
 </div>
 <script>
 const NS="http://www.w3.org/2000/svg",svg=document.getElementById("svg"),g=document.getElementById("g"),R=15,Y=210;
@@ -66,15 +96,16 @@ function el(t,a,p){const e=document.createElementNS(NS,t);for(const k in a)e.set
 function build(A,B,extra,still){
   g.innerHTML="";
   extra&&extra();
-  const G=el("g",{},g);
+  const G=el("g",{},g);let gm=0;
   B.forEach(([a,c,o,cls,stk,w,gl])=>{
     const P=A[a],Q=A[c];let dx=Q[1]-P[1],dy=Q[2]-P[2];const L=Math.hypot(dx,dy);dx/=L;dy/=L;
     const sa=P[0]?R:0,sc=Q[0]?R:0;
     const x1=P[1]+dx*sa,y1=P[2]+dy*sa,x2=Q[1]-dx*sc,y2=Q[2]-dy*sc;
-    const gv=gl===true?1:+gl||0;if(gv>0)el("line",{x1,y1,x2,y2,class:"glow",style:"stroke-opacity:"+.14*gv},G);
+    const gv=gl===true?1:+gl||0;if(gv>0){el("line",{x1,y1,x2,y2,class:"glow"},G);gm=Math.max(gm,gv)}
     (o===2?[-(w==null?5:w),(w==null?5:w)]:[0]).forEach(k=>el("line",{x1:x1-dy*k,y1:y1+dx*k,x2:x2-dy*k,y2:y2+dx*k,class:"bond "+(cls||""),style:stk?"stroke:"+stk:""},g));
   });
-  for(const k in A){const[l,x,y]=A[k];if(l){el("text",{x,y,class:"atom"},g).textContent=l}}
+  for(const k in A){const[l,x,y,ag]=A[k];const av=ag===true?1:+ag||0;if(l&&av>0){el("rect",{x:x-20,y:y-20,width:40,height:40,class:"glowc"},G);gm=Math.max(gm,av)}if(l){el("text",{x,y,class:"atom"},g).textContent=l}}
+  G.setAttribute("opacity",.14*gm);
   if(!still){g.style.animation="none";g.getBoundingClientRect();g.style.animation="f .45s"}
 }
 // one repeat unit: left C carries a methyl (or ethyl), right C carries H (or a methyl)
@@ -92,19 +123,19 @@ function unit(A,B,t,xL,xR,off,order,cls,meR,eth){
     B.push([t+"R",t+"e",1],[t+"e",t+"g",1],[t+"e",t+"h",1],[t+"e",t+"i",1]);
   }else{A[t+"e"]=["H",xR,y-85];B.push([t+"R",t+"e",1])}
 }
-function glowH(B){B.forEach(b=>{if(b[0]==="uL"||b[0]==="uR")b[6]=true});return B}
+function glowH(B,A){B.forEach(b=>{if(b[0]==="uL"||b[0]==="uR")b[6]=true});A.uL[3]=A.uR[3]=true;return B}
 const EX=[
-{tab:"Example 1: Propene",sub:"poly(propene) from propene, C<sub>3</sub>H<sub>6</sub>",frames:["f1","f2","f3"],
+{tab:"Example 1: Propene",sub:"poly(propene) from propene, C<sub>3</sub>H<sub>6</sub>",frames:["mono","a12","h","f3"],
  xL:220,xR:360,off:65,meR:false,eth:false,oy:0,sp:120,soff:58,
  mp:{b:"L",c:"R",a:"m",h1:"a",h2:"b",h3:"c",h4:"d",h5:"e",h6:"f"},
  f1:()=>[{a:["C",170,Y],b:["C",290,Y],c:["C",410,Y],h1:["H",170,125],h2:["H",170,295],h3:["H",90,Y],h4:["H",290,295],h5:["H",465,140],h6:["H",465,280]},
   [["a","b",1],["b","c",2,"hl"],["a","h1",1],["a","h2",1],["a","h3",1],["b","h4",1],["c","h5",1],["c","h6",1]]]},
-{tab:"Example 2: But-2-ene",sub:"poly(but-2-ene) from but-2-ene, C<sub>4</sub>H<sub>8</sub>",frames:["f1","f2","f3"],
+{tab:"Example 2: But-2-ene",sub:"poly(but-2-ene) from but-2-ene, C<sub>4</sub>H<sub>8</sub>",frames:["mono","a12","h","f3"],
  xL:200,xR:380,off:55,meR:true,eth:false,oy:0,sp:150,soff:55,
  mp:{b:"L",c:"R",a:"m",d:"e",h1:"a",h2:"b",h3:"c",h4:"d",h5:"f",h6:"g",h7:"h",h8:"i"},
  f1:()=>[{a:["C",100,Y],b:["C",220,Y],c:["C",340,Y],d:["C",460,Y],h1:["H",100,125],h2:["H",100,295],h3:["H",40,Y],h4:["H",220,295],h5:["H",340,295],h6:["H",460,125],h7:["H",460,295],h8:["H",520,Y]},
   [["a","b",1],["b","c",2,"hl"],["c","d",1],["a","h1",1],["a","h2",1],["a","h3",1],["b","h4",1],["c","h5",1],["d","h6",1],["d","h7",1],["d","h8",1]]]},
-{tab:"Example 3: But-1-ene",sub:"poly(but-1-ene) from but-1-ene, C<sub>4</sub>H<sub>8</sub>",frames:["f1","f2","f3"],
+{tab:"Example 3: But-1-ene",sub:"poly(but-1-ene) from but-1-ene, C<sub>4</sub>H<sub>8</sub>",frames:["mono","a12","h","f3"],
  xL:220,xR:360,off:65,meR:false,eth:true,oy:85,sp:120,soff:58,
  mp:{b:"L",a:"R",c:"m",d:"c",h3:"d",h1:"e",h2:"f",h4:"a",h5:"b",h6:"c1",h7:"c2",h8:"c3"},
  f1:()=>{const c=Y+42;return[{a:["C",480,c],b:["C",360,c],c:["C",240,c],d:["C",120,c],h1:["H",535,c-70],h2:["H",535,c+70],h3:["H",360,c+85],h4:["H",240,c-85],h5:["H",240,c+85],h6:["H",120,c-85],h7:["H",120,c+85],h8:["H",60,c]},
@@ -122,7 +153,7 @@ function frame3(e,m){
     A.o1=["",x0-50,y];A.o2=["",x0+5*sp+50,y];
     B.push(["o1","u0L",1],["u2R","o2",1],["u0R","u1L",1],["u1R","u2L",1]);
     build(A,B,()=>{for(let k=0;k<3;k++){
-      el("rect",{x:x0-sp/2+2*sp*k,y:18,width:2*sp,height:300+OY,rx:10,class:"tint",opacity:k%2?.14:.06},g);
+      el("rect",{x:x0-sp/2+2*sp*k,y:18,width:2*sp,height:300+OY,rx:10,class:"tint",opacity:k%2?.12:.05},g);
       el("text",{x:x0+sp/2+2*sp*k+sp/2,y:336+OY,class:"tag"},g).textContent="repeat unit";}});
   }else{
     unit(A,B,"u",e.xL,e.xR,e.off,1,"",e.meR,e.eth);
@@ -135,8 +166,9 @@ function frame3(e,m){
   }
   return vb;
 }
-const MODES=[["Repeat unit",""],["Section of polymer","3 repeat units joined together."],["Polymer","The repeat unit goes in square brackets, with n (a large number) in the lower right corner."]];
-const TXT={f1:["Step 1","Redraw the alkene in the form of a 'H' with the C=C in the middle."],f2:["Step 2","Erase one bond in the C=C and add one bond to each C atom extending outwards."]};
+const MODES=[["Repeat unit","The structure obtained is the repeat unit.\n\nClick the buttons to toggle between repeat unit, section and polymer."],["Section of polymer","3 repeat units joined together."],["Polymer","The repeat unit goes in square brackets, with n (a large number) in the lower right corner."]];
+const TXT={mono:["Convert monomer to polymer","Step 1: Redraw the alkene in the form of a 'H' with the C=C in the middle."],h:["Convert monomer to polymer","Step 2: Erase one bond in the C=C and add one bond to each C atom extending outwards."]};TXT.a12=TXT.mono;
+function lbl(op){if(op>0)el("text",{x:290,y:336+OY,class:"lbl",opacity:op},g).textContent="monomer"}
 let ANIM=false,raf=0;
 // rotate the bonds of the step-1 alkene into the "H" layout of step 2
 function morph(e){
@@ -156,7 +188,8 @@ function morph(e){
     A[root]=[A1[root][0],P[root][0],P[root][1]];
     order.slice(1).forEach(n=>{const i=info[n],an=i.a1+i.da*k,l=i.l1+(i.l2-i.l1)*k,q=P[par[n]];
       P[n]=[q[0]+Math.cos(an)*l,q[1]+Math.sin(an)*l];A[n]=[A1[n][0],P[n][0],P[n][1]]});
-    build(A,B1.map(([a,c,o])=>{const b=o===2?[a,c,o,"hl"]:[a,c,o];if(a===root||a===rootR||c===root||c===rootR)b[6]=k;return b}),null,true);
+    A[root][3]=k;A[rootR][3]=k;
+    build(A,B1.map(([a,c,o])=>{const b=o===2?[a,c,o,"hl"]:[a,c,o];if(a===root||a===rootR||c===root||c===rootR)b[6]=k;return b}),()=>lbl(1),true);
     if(t<1)raf=requestAnimationFrame(step);
   }
   raf=requestAnimationFrame(step);
@@ -169,9 +202,9 @@ function morph3(e){
   function step(now){
     const t=Math.min(1,(now-t0)/D),k=t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,A2=Object.assign({},A);
     A2.o1=["",e.xL-R-(80-R)*k,y];A2.o2=["",e.xR+R+(80-R)*k,y];
-    const bonds=B.map((b,i)=>i===0?(t<1?[b[0],b[1],2,"","color-mix(in srgb,var(--ink) "+k*100+"%,var(--acc))",5*(1-k)]:[b[0],b[1],1]):b);
+    const bonds=B.map((b,i)=>i===0?(t<1?[b[0],b[1],2,"","color-mix(in srgb,var(--text) "+k*100+"%,var(--accent))",5*(1-k)]:[b[0],b[1],1]):b);
     if(k>.02)bonds.push(["o1","uL",1,"hl"],["uR","o2",1,"hl"]);
-    build(A2,bonds,null,true);
+    build(A2,bonds,()=>lbl(1-k),true);
     if(t<1)raf=requestAnimationFrame(step);
   }
   raf=requestAnimationFrame(step);
@@ -179,27 +212,29 @@ function morph3(e){
 let x=0,s=0,m=0;
 const $=id=>document.getElementById(id);
 const tabs=$("tabs");
-EX.forEach((e,i)=>{const b=document.createElement("button");b.textContent=e.tab;b.onclick=()=>{x=i;s=0;m=0;show()};tabs.appendChild(b)});
+EX.forEach((e,i)=>{const b=document.createElement("button");b.className="chip";b.textContent=e.tab;b.onclick=()=>{x=i;s=0;m=0;show()};tabs.appendChild(b)});
 function show(){
   cancelAnimationFrame(raf);
   const e=EX[x],fr=e.frames[s];let vb=580;OY=e.oy;
   $("sub").innerHTML=e.sub;
-  if(fr==="f1"){const[A,B]=e.f1();build(A,B)}
-  else if(fr==="f2"){if(ANIM)morph(e);else{const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);glowH(B);build(A,B)}}
-  else if(fr==="f3"){if(ANIM&&m===0)morph3(e);else vb=frame3(e,m)}
+  if(fr==="mono"){const[A,B]=e.f1();build(A,B,()=>lbl(1))}
+  else if(fr==="a12"||fr==="h"){if(fr==="a12"&&ANIM)morph(e);else{const A={},B=[];unit(A,B,"u",e.xL,e.xR,e.off,2,"hl",e.meR,e.eth);glowH(B,A);build(A,B,()=>lbl(1))}}
+  else{if(ANIM&&m===0)morph3(e);else vb=frame3(e,m)}
   svg.setAttribute("viewBox",`0 0 ${vb} ${345+OY}`);
   const d=fr==="f3"?MODES[m]:TXT[fr];
-  $("desc").innerHTML="<b>"+d[0]+"</b>"+(d[1]?"<span>"+d[1]+"</span>":"");
+  $("dt").textContent=d[0];$("dd").textContent=d[1]||"";
   $("seg").classList.toggle("show",fr==="f3");
-  document.querySelectorAll("#seg button").forEach(b=>{const on=+b.dataset.m===m;b.style.background=on?"var(--pri)":"transparent";b.style.color=on?"#fff":"var(--pri)"});
-  [...tabs.children].forEach((b,i)=>{b.className=i===x?"":"sec"});
-  $("dots").innerHTML="";e.frames.forEach((_,k)=>{$("dots").appendChild(Object.assign(document.createElement("div"),{className:"dot"+(k===s?" on":"")}))});
+  document.querySelectorAll("#seg button").forEach(b=>b.classList.toggle("on",+b.dataset.m===m));
+  [...tabs.children].forEach((b,i)=>b.classList.toggle("on",i===x));
+  const rp=fr==="a12"||(fr==="f3"&&m===0);
+  $("stage").classList.toggle("replay",rp);$("replay").style.visibility=rp?"visible":"hidden";
+  $("count").textContent=(s+1)+" of "+e.frames.length;
   $("back").disabled=s===0;
   $("next").textContent=s===e.frames.length-1?"Restart":"Next";
 }
-$("next").onclick=()=>{s=s===EX[x].frames.length-1?0:s+1;m=0;ANIM=EX[x].frames[s]==="f2"||EX[x].frames[s]==="f3";show();ANIM=false};
-$("card").onclick=()=>{const f=EX[x].frames[s];if(f==="f2"||(f==="f3"&&m===0)){ANIM=true;show();ANIM=false}};
-$("back").onclick=()=>{if(s>0){s--;m=0;show()}};
+$("next").onclick=()=>{s=s===EX[x].frames.length-1?0:s+1;m=0;ANIM=true;show();ANIM=false};
+$("stage").onclick=()=>{const f=EX[x].frames[s];if(f==="a12"||(f==="f3"&&m===0)){ANIM=true;show();ANIM=false}};
+$("back").onclick=()=>{if(s>0){s--;m=0;ANIM=true;show();ANIM=false}};
 document.querySelectorAll("#seg button").forEach(b=>b.onclick=()=>{m=+b.dataset.m;show()});
 show();
 </script>
