@@ -38,6 +38,9 @@ svg text{font-family:inherit;text-anchor:middle;dominant-baseline:central;fill:v
 .at{font-size:22px;font-weight:500}
 .at.cl{fill:var(--accent)}
 .at.c{font-weight:600}
+.at.fg{fill:#15803d}
+:root[data-theme="dark"] .at.fg{fill:#4ade80}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .at.fg{fill:#4ade80}}
 .nm{font-size:14px;font-weight:500}
 .fm{font-size:13px;fill:var(--muted)}
 .op{font-size:22px;fill:var(--muted)}
@@ -200,14 +203,14 @@ function getG(){return (mode==='crack'?LAYC:mode==='est'?LAYE:mode==='ox'?LAYX:A
 function bnd(id,x1,y1,x2,y2,r){r=r||14;var dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy),ux=dx/l,uy=dy/l;return L(id,x1+ux*r,y1+uy*r,x2-ux*r,y2-uy*r)}
 function sceneOx(s){
 var p=s===2,q=s>=1,cp=p?G.P:G.E,x1=cp[0],cy=cp[1],x2=x1+50,xo=x1+100,W=G.W,e=[];
-function A(id,x,y,t){return T(id,x,y,t,'at')}
-e.push(T('C1',x1,cy,'C','at c'),T('C2',x2,cy,'C','at c'),A('Ox',xo,cy,'O'),A('hO',xo+44,cy,'H'),A('hA',x1-44,cy,'H'),A('hB',x1,cy-44,'H'),A('hC',x1,cy+44,'H'));
+function A(id,x,y,t,f){return T(id,x,y,t,f?'at fg':'at')}
+e.push(T('C1',x1,cy,'C','at c'),T('C2',x2,cy,'C',p?'at c fg':'at c'),A('Ox',xo,cy,'O',1),A('hO',xo+44,cy,'H',1),A('hA',x1-44,cy,'H'),A('hB',x1,cy-44,'H'),A('hC',x1,cy+44,'H'));
 e.push(bnd('kA',x1-44,cy,x1,cy),bnd('kB',x1,cy-44,x1,cy),bnd('kC',x1,cy+44,x1,cy),bnd('k12',x1,cy,x2,cy),bnd('k2o',x2,cy,xo,cy),bnd('koh',xo,cy,xo+44,cy));
 e.push(A('hU',q?W[0][0]:x2,q?W[0][1]:cy-44,'H'),A('hD',q?W[2][0]:x2,q?W[2][1]:cy+44,'H'));
 if(!q)e.push(bnd('kU',x2,cy-44,x2,cy),bnd('kD',x2,cy+44,x2,cy));
 else e.push(bnd('w1',W[0][0],W[0][1],W[1][0],W[1][1],16),bnd('w2',W[1][0],W[1][1],W[2][0],W[2][1],16));
 if(q){var g=A('o1',W[1][0],W[1][1],'O');g.fx=G.LB[0];g.fy=G.LB[1];e.push(g)}
-if(p){var h=A('o2',x2,cy-44,'O');h.fx=G.LB[0];h.fy=G.LB[1];e.push(h,bnd('kd1',x2-3.5,cy,x2-3.5,cy-44),bnd('kd2',x2+3.5,cy,x2+3.5,cy-44))}
+if(p){var h=A('o2',x2,cy-44,'O',1);h.fx=G.LB[0];h.fy=G.LB[1];e.push(h,bnd('kd1',x2-3.5,cy,x2-3.5,cy-44),bnd('kd2',x2+3.5,cy,x2+3.5,cy-44))}
 else e.push(A('lb'+(q?1:2),G.LB[0],G.LB[1],q?'[O]':'2[O]'));
 var nx=x1+50,ny=cy+G.no;
 if(p)e.push(T('n_ea',nx,ny,'ethanoic acid','nm'),T('f_ea',nx,ny+20,'CH₃COOH','fm'),T('pl2',G.pl2[0],G.pl2[1],'+','op'));
@@ -218,9 +221,9 @@ function sceneAdd(s){
 var C=ADDS[mode],p=s>=2,k=s-2,cp=p?G.P:G.L,cx=cp[0],cy=cp[1],e=[],xa=cx-56,xb=cx,xc=cx+56,no=G.no,HW={H:9,Br:15,O:9},RA=G.A,RB=G.B,RH=null;
 if(mode==='h2o'){if(mq.matches){RA=[120,262];RB=[180,262];RH=[240,262]}else{RA=[300,110];RB=[352,110];RH=[404,110]}}
 function bd(id,x1,y1,x2,y2){var dx=x2-x1,dy=y2-y1,l=Math.sqrt(dx*dx+dy*dy),ux=dx/l,uy=dy/l;return L(id,x1+ux*14,y1+uy*14,x2-ux*14,y2-uy*14)}
-function at(id,x,y,t){return T(id,x,y,t,t==='Br'?'at cl':'at')}
+function at(id,x,y,t,f){return T(id,x,y,t,(t==='Br'?'at cl':'at')+(f?' fg':''))}
 if(p)e.push(C.xh?{id:'hl',k:'r',x:xa-30,y:cy-22,w:116,h:142,cls:'hl'}:{id:'hl',k:'r',x:xa-30,y:cy-22,w:116,h:92,cls:'hl'});
-e.push(T('Ca',xa,cy,'C','at c'),T('Cb',xb,cy,'C','at c'),T('Cc',xc,cy,'C','at c'));
+e.push(T('Ca',xa,cy,'C',s>1?'at c':'at c fg'),T('Cb',xb,cy,'C',s>1?'at c':'at c fg'),T('Cc',xc,cy,'C','at c'));
 e.push(bd('kab1',xa,cy+(s?0:-3.5),xb,cy+(s?0:-3.5)),bd('kbc',xb,cy,xc,cy));
 if(!s)e.push(bd('kab2',xa,cy+3.5,xb,cy+3.5));
 [['hA1',xa,cy-50,xa],['hA2',xa-50,cy,xa],['hB',xb,cy-50,xb],['hC1',xc,cy-50,xc],['hC2',xc,cy+50,xc],['hC3',xc+50,cy,xc]].forEach(function(h){
@@ -232,13 +235,13 @@ if(C.xh)e.push(at('rH',RH[0],RH[1],'H'),L('roh',RB[0]+13,RB[1],RH[0]-13,RH[1]));
 e.push(T('n_pr',cx,cy+no,'propene','nm'),T('f_pr',cx,cy+no+20,'CH₃CH=CH₂','fm'),T('pl1',G.pl1[0],G.pl1[1],'+','op'),T('nX',G.nm1[0],G.nm1[1],C.xn,'nm'),T('fX',G.nm1[0],G.nm1[1]+20,C.xf,'fm'));
 }else{
 var P=C.prods[k],pre=k?'s':'r';
-e.push(at(pre+'A',xa,cy+50,P[2][0]),at(pre+'B',xb,cy+50,P[2][1]),bd('kBrA',xa,cy,xa,cy+50),bd('kBrB',xb,cy,xb,cy+50));
-if(C.xh){var oi=P[2].indexOf('O'),ox=oi?xb:xa;e.push(at(pre+'H',ox,cy+100,'H'),bd(pre+'oh',ox,cy+50,ox,cy+100));no+=38}
+e.push(at(pre+'A',xa,cy+50,P[2][0],C.xh&&P[2][0]==='O'),at(pre+'B',xb,cy+50,P[2][1],C.xh&&P[2][1]==='O'),bd('kBrA',xa,cy,xa,cy+50),bd('kBrB',xb,cy,xb,cy+50));
+if(C.xh){var oi=P[2].indexOf('O'),ox=oi?xb:xa;e.push(at(pre+'H',ox,cy+100,'H',1),bd(pre+'oh',ox,cy+50,ox,cy+100));no+=38}
 e.push(T('n_p'+k,cx,cy+no,P[0],'nm'),T('f_p'+k,cx,cy+no+20,P[1],'fm'));
 }
 return e}
 function sceneEs(s){
-var e=[],cy=65,Y=300,f=s>=1,w=s>=3,z=s===4;
+var e=[],g=s<3,gc=g?'at fg':'at',cy=65,Y=300,f=s>=1,w=s>=3,z=s===4;
 var ax=z?12:0,ay=z?Y-cy:0,mx=z?-106:0,my=z?Y-cy:0;
 function P(id,p,t,c){return T(id,p[0],p[1],t,c||'at')}
 function B(id,p,q,r){return bnd(id,p[0],p[1],q[0],q[1],r)}
@@ -248,8 +251,8 @@ var m=f?{C:[326,cy],O:[276,cy],Hl:[370,cy],Hu:[326,cy-44],Hd:[326,cy+44]}:{C:[30
 for(var k in m)m[k]=[m[k][0]+mx,m[k][1]+my];
 var mH=w?[410,Y]:f?[232,cy]:[394,cy];
 if(s===2)e.push({id:'bx',k:'r',x:142,y:cy-22,w:104,h:44,cls:'dbox'});
-e.push(P('aC1',a.C1,'C','at c'),P('aC2',a.C2,'C','at c'),P('aHl',a.Hl,'H'),P('aHu',a.Hu,'H'),P('aHd',a.Hd,'H'),P('aCO',a.CO,'O'),P('aO',aO,'O'),P('aOH',aH,'H'));
-e.push(P('mC',m.C,'C','at c'),P('mO',m.O,'O'),P('mH',mH,'H'),P('mHl',m.Hl,'H'),P('mHu',m.Hu,'H'),P('mHd',m.Hd,'H'));
+e.push(P('aC1',a.C1,'C','at c'),P('aC2',a.C2,'C',g?'at c fg':'at c'),P('aHl',a.Hl,'H'),P('aHu',a.Hu,'H'),P('aHd',a.Hd,'H'),P('aCO',a.CO,'O',gc),P('aO',aO,'O',gc),P('aOH',aH,'H',gc));
+e.push(P('mC',m.C,'C','at c'),P('mO',m.O,'O',gc),P('mH',mH,'H',gc),P('mHl',m.Hl,'H'),P('mHu',m.Hu,'H'),P('mHd',m.Hd,'H'));
 e.push(B('kaHl',a.Hl,a.C1),B('kaHu',a.Hu,a.C1),B('kaHd',a.Hd,a.C1),B('ka12',a.C1,a.C2),
 bnd('kc1',a.C2[0]-3.5,a.C2[1],a.CO[0]-3.5,a.CO[1]),bnd('kc2',a.C2[0]+3.5,a.C2[1],a.CO[0]+3.5,a.CO[1]),
 B('kmHl',m.Hl,m.C),B('kmHu',m.Hu,m.C),B('kmHd',m.Hd,m.C),B('kmCO',m.C,m.O));
@@ -273,7 +276,7 @@ var BR=f?(A?[1,3]:[1,3,5]):[],D=f?(A?[0,2]:[0,2,4,6]):[];
 function Q(id,p,t,c){return T(id,p[0],p[1],t,c||'at')}
 function B(id,p,q,r){return bnd(id,p[0],p[1],q[0],q[1],r)}
 for(i=0;i<8;i++){P['c'+i]=[xs[i],Y];P['u'+i]=[xs[i],Y-44];P['d'+i]=[xs[i],Y+44];
-e.push(Q('c'+i,P['c'+i],'C','at c'),Q('u'+i,P['u'+i],'H'),Q('d'+i,P['d'+i],'H'),B('ku'+i,P['u'+i],P['c'+i]),B('kd'+i,P['d'+i],P['c'+i]))}
+e.push(Q('c'+i,P['c'+i],'C','at c'+(f&&(D.indexOf(i)>=0||D.indexOf(i-1)>=0)?' fg':'')),Q('u'+i,P['u'+i],'H'),Q('d'+i,P['d'+i],'H'),B('ku'+i,P['u'+i],P['c'+i]),B('kd'+i,P['d'+i],P['c'+i]))}
 var hl=f?(A?[262,Y]:[250+sh,Y]):[xs0[0]-40,Y],hr=f&&!A?[294+sh,Y]:[xs[7]+40,Y];
 e.push(Q('hL',hl,'H'),Q('hR',hr,'H'));
 for(i=0;i<7;i++){if(BR.indexOf(i)>=0)continue;
@@ -300,7 +303,7 @@ var n=nodes[g.id];
 if(!n){n=document.createElementNS(NS,g.k==='t'?'text':g.k==='r'?'rect':'line');n.setAttribute('class',g.cls);if(g.k==='t')n.textContent=g.tx;if(g.k==='r'){n.setAttribute('rx',g.rx!==undefined?g.rx:12);layer.insertBefore(n,layer.firstChild)}else layer.appendChild(n);nodes[g.id]=n}
 return n}
 function draw(id,g){
-var n=node(g);
+var n=node(g);n.setAttribute('class',g.cls);
 if(g.k==='r'){n.setAttribute('x',g.x);n.setAttribute('y',g.y);n.setAttribute('width',g.w);n.setAttribute('height',g.h)}
 else if(g.k==='t'){n.setAttribute('x',g.x);n.setAttribute('y',g.y)}
 else{n.setAttribute('x1',g.x1);n.setAttribute('y1',g.y1);n.setAttribute('x2',g.x2);n.setAttribute('y2',g.y2)}
