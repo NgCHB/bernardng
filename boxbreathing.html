@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Box breathing</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=Newsreader:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef3f0;--surface:#fff;--line:#c9d6d0;--text:#14262f;--soft:#4f656f;
+  --in:#1b8573;--hold:#4a5fc4;--out:#c0502f;--c:var(--soft);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#0f1b24;--surface:#172833;--line:#2a4150;--text:#e8efe9;--soft:#93a9b3;--in:#7fd1c1;--hold:#a3b4ff;--out:#f4a58b}
+}
+:root[data-theme="dark"]{--bg:#0f1b24;--surface:#172833;--line:#2a4150;--text:#e8efe9;--soft:#93a9b3;--in:#7fd1c1;--hold:#a3b4ff;--out:#f4a58b}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:"Hanken Grotesk",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:20px 16px 28px;overflow-y:auto}
+main{width:100%;max-width:440px;margin:auto;text-align:center}
+h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:1.6rem;margin:0 0 4px}
+.sub{color:var(--soft);margin:0 0 14px;font-size:.95rem}
+svg{width:100%;max-width:380px;height:auto;display:block;margin:0 auto}
+.base{stroke:var(--line);stroke-width:3;fill:none}
+.trail{stroke:var(--c);stroke-width:4;fill:none;stroke-dasharray:220;stroke-dashoffset:221}
+#dot{fill:var(--c);filter:drop-shadow(0 0 7px var(--c))}
+#orb{fill:var(--c);fill-opacity:.16;stroke:var(--c);stroke-width:2}
+#num{fill:var(--text);font-family:Newsreader,Georgia,serif;font-size:46px;text-anchor:middle;dominant-baseline:central}
+#label{font-family:Newsreader,Georgia,serif;font-style:italic;font-size:2.1rem;margin:10px 0 2px;color:var(--c);min-height:2.6rem}
+#hint{color:var(--soft);margin:0 0 10px;min-height:1.4em}
+.stats{display:flex;justify-content:center;gap:22px;color:var(--soft);font-size:.9rem;margin-bottom:16px}
+.row{display:flex;gap:10px;justify-content:center;margin-bottom:16px}
+button{font:inherit;font-weight:600;border-radius:999px;padding:12px 28px;border:2px solid var(--text);background:var(--text);color:var(--bg);cursor:pointer;min-width:120px}
+button.alt{background:transparent;color:var(--text);border-color:var(--line)}
+:focus-visible{outline:3px solid var(--hold);outline-offset:2px}
+fieldset{border:0;margin:0 0 12px;padding:0}
+legend{color:var(--soft);font-size:.9rem;margin:0 auto 6px}
+.seg{display:inline-flex;border:2px solid var(--line);border-radius:999px;overflow:hidden}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{padding:8px 16px;cursor:pointer;color:var(--soft)}
+.seg input:checked+label{background:var(--surface);color:var(--text);font-weight:600;box-shadow:inset 0 -3px 0 var(--c)}
+.seg input:focus-visible+label{outline:3px solid var(--hold);outline-offset:-3px}
+.tog{display:flex;justify-content:center;gap:20px;color:var(--soft)}
+.tog label{display:flex;gap:8px;align-items:center;cursor:pointer}
+.tog input{width:18px;height:18px;accent-color:var(--hold)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Box breathing</h1>
+  <p class="sub">Four equal counts: in, hold, out, hold.</p>
+
+  <svg viewBox="0 0 300 300" role="img" aria-label="A square that traces each breath phase along one side">
+    <g class="base">
+      <line x1="40" y1="260" x2="40" y2="40"/><line x1="40" y1="40" x2="260" y2="40"/>
+      <line x1="260" y1="40" x2="260" y2="260"/><line x1="260" y1="260" x2="40" y2="260"/>
+    </g>
+    <line class="trail" id="s0" x1="40" y1="260" x2="40" y2="40"/>
+    <line class="trail" id="s1" x1="40" y1="40" x2="260" y2="40"/>
+    <line class="trail" id="s2" x1="260" y1="40" x2="260" y2="260"/>
+    <line class="trail" id="s3" x1="260" y1="260" x2="40" y2="260"/>
+    <circle id="orb" cx="150" cy="150" r="42"/>
+    <text id="num" x="150" y="150"></text>
+    <circle id="dot" cx="40" cy="260" r="9"/>
+  </svg>
+
+  <div id="label" aria-live="polite">Ready</div>
+  <p id="hint">Sit comfortably, then press Start.</p>
+  <div class="stats"><span id="round">Round 1</span><span id="time">0:00</span></div>
+
+  <div class="row">
+    <button id="go">Start</button>
+    <button id="reset" class="alt">Reset</button>
+  </div>
+
+  <fieldset>
+    <legend>Seconds per side</legend>
+    <div class="seg">
+      <input type="radio" name="sec" id="r3" value="3"><label for="r3">3</label>
+      <input type="radio" name="sec" id="r4" value="4" checked><label for="r4">4</label>
+      <input type="radio" name="sec" id="r5" value="5"><label for="r5">5</label>
+      <input type="radio" name="sec" id="r6" value="6"><label for="r6">6</label>
+    </div>
+  </fieldset>
+
+  <div class="tog">
+    <label><input type="checkbox" id="snd" checked> Tones</label>
+    <label><input type="checkbox" id="vox"> Voice</label>
+  </div>
+  <p id="vnote" class="sub" style="margin-top:10px" aria-live="polite"></p>
+</main>
+
+<script>
+const P=[
+  {k:'in',t:'Breathe in',h:'Slowly through your nose',v:'Breathe in'},
+  {k:'hold',t:'Hold',h:'Keep your lungs full',v:'Hold'},
+  {k:'out',t:'Breathe out',h:'Slowly through your mouth',v:'Breathe out'},
+  {k:'hold',t:'Hold',h:'Keep your lungs empty',v:'Hold'}
+];
+const R0=42,R1=84;
+const $=id=>document.getElementById(id);
+const root=document.documentElement;
+let sec=4,idx=0,acc=0,last=performance.now(),running=false,started=false,round=1,total=0,sc=0,ac=null;
+
+const ease=x=>.5-.5*Math.cos(Math.PI*x);
+function radius(i,p){return i==0?R0+(R1-R0)*ease(p):i==1?R1:i==2?R1-(R1-R0)*ease(p):R0}
+function dotPos(i,p){
+  return [[40,260-220*p],[40+220*p,40],[260,40+220*p],[260-220*p,260]][i];
+}
+
+function render(){
+  const p=Math.min(acc/(sec*1000),1);
+  const [x,y]=dotPos(idx,p);
+  $('dot').setAttribute('cx',x);$('dot').setAttribute('cy',y);
+  $('orb').setAttribute('r',started?radius(idx,p):R0);
+  for(let i=0;i<4;i++){
+    const f=!started?1:i<idx?0:i==idx?1-p:1;
+    $('s'+i).style.strokeDashoffset=f*220+(f==1?1:0);
+  }
+  $('num').textContent=started?Math.max(1,Math.ceil(sec-acc/1000)):'';
+  $('time').textContent=Math.floor(total/60000)+':'+String(Math.floor(total/1000)%60).padStart(2,'0');
+  $('round').textContent='Round '+round;
+}
+
+function setPhaseUI(){
+  const ph=P[idx];
+  root.style.setProperty('--c','var(--'+ph.k+')');
+  $('label').textContent=ph.t;
+  $('hint').textContent=ph.h;
+}
+
+function tone(f0,f1,dur,vol){
+  if(!ac||!$('snd').checked)return;
+  const t=ac.currentTime;
+  [[1,1],[1.5,.35]].forEach(([m,g])=>{
+    const o=ac.createOscillator(),n=ac.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(f0*m,t);
+    o.frequency.linearRampToValueAtTime(f1*m,t+dur);
+    n.gain.setValueAtTime(.0001,t);
+    n.gain.linearRampToValueAtTime(vol*g,t+Math.min(.6,dur*.25));
+    n.gain.linearRampToValueAtTime(.0001,t+dur);
+    o.connect(n);n.connect(ac.destination);
+    o.start(t);o.stop(t+dur+.05);
+  });
+}
+
+let voice=null,keep=null;
+function pickVoice(){
+  if(!('speechSynthesis' in window))return;
+  const vs=speechSynthesis.getVoices();
+  voice=vs.find(v=>/^en/i.test(v.lang)&&v.localService)||vs.find(v=>/^en/i.test(v.lang))||vs[0]||null;
+}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function say(text){
+  if(!('speechSynthesis' in window)){$('vnote').textContent='Voice is not supported in this browser.';return;}
+  speechSynthesis.resume();
+  const u=new SpeechSynthesisUtterance(text);
+  if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-US';
+  u.rate=.85;u.volume=1;
+  u.onstart=()=>{$('vnote').textContent='';};
+  u.onerror=e=>{$('vnote').textContent='Your browser blocked the voice ('+e.error+'). Check that your device is not muted.';};
+  keep=u;
+  speechSynthesis.speak(u);
+}
+function onPhase(){
+  sc=0;setPhaseUI();
+  const d=sec;
+  if(idx==0)tone(196,294,d,.16);
+  else if(idx==2)tone(294,196,d,.16);
+  else if(idx==1)tone(330,330,Math.min(d,1.6),.1);
+  else tone(220,220,Math.min(d,1.6),.1);
+  if($('vox').checked)say(P[idx].v);
+}
+
+function frame(now){
+  const dt=Math.min(now-last,100);last=now;
+  if(running){
+    acc+=dt;total+=dt;
+    while(acc>=sec*1000){acc-=sec*1000;idx=(idx+1)%4;if(idx==0)round++;onPhase();}
+    const s=Math.floor(acc/1000);
+    if(s>sc){sc=s;tone(880,880,.09,.03);}
+  }
+  render();
+  requestAnimationFrame(frame);
+}
+
+function start(){
+  if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}
+  if(ac&&ac.state==='suspended')ac.resume();
+  running=true;$('go').textContent='Pause';
+  if(!started){started=true;onPhase();}
+}
+function pause(){
+  running=false;$('go').textContent='Resume';
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  if(ac)ac.suspend();
+}
+function reset(){
+  running=false;started=false;idx=0;acc=0;round=1;total=0;sc=0;
+  if('speechSynthesis' in window)speechSynthesis.cancel();
+  if(ac&&ac.state==='suspended')ac.resume();
+  root.style.setProperty('--c','var(--soft)');
+  $('label').textContent='Ready';
+  $('hint').textContent='Sit comfortably, then press Start.';
+  $('go').textContent='Start';
+}
+
+$('go').onclick=()=>running?pause():start();
+$('reset').onclick=reset;
+$('vox').onchange=()=>{if($('vox').checked)say('Voice on');else{$('vnote').textContent='';if('speechSynthesis' in window)speechSynthesis.cancel();}};
+document.querySelectorAll('input[name=sec]').forEach(r=>r.onchange=()=>{sec=+r.value;reset();});
+document.addEventListener('keydown',e=>{
+  if(e.code==='Space'&&!/BUTTON|INPUT/.test(e.target.tagName)){e.preventDefault();running?pause():start();}
+});
+render();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
